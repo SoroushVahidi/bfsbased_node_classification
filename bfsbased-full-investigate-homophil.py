@@ -9,6 +9,7 @@ import random
 import itertools
 import heapq
 from collections import Counter, defaultdict
+import json
 
 import numpy as np
 import torch
@@ -317,6 +318,21 @@ def robust_random_search(
 # BLOCK 3: PredictClass (Updated with Weighted Centroids)
 # =====================================================
 
+def _update_D_weighted(D_matrix, c_insts, all_lbls, dev, conf_vec, x_z):
+    with torch.no_grad():
+        conf_t = torch.from_numpy(conf_vec).to(dev).float()
+        for c_idx, lbl in enumerate(all_lbls):
+            if not c_insts[lbl]:
+                continue
+            idx_t = torch.tensor(list(c_insts[lbl]), device=dev)
+            w = conf_t[idx_t]
+            w_sum = w.sum()
+            if w_sum < 1e-9:
+                continue
+            cent = (x_z[idx_t] * w[:, None]).sum(0, keepdim=True) / w_sum
+            D_matrix[:, c_idx] = ((F.cosine_similarity(x_z, cent) + 1) / 2).cpu().numpy()
+
+
 def predictclass(
     data, train_indices, test_indices,
     a1, a2, a3, a4, a5, a6, a7, a8,
@@ -421,29 +437,7 @@ def predictclass(
 
     # Sim Matrix D
     D = np.zeros((N, C))
-    
-    # Updated: Centroids Weighted by Certainty
-    def update_D_weighted(D_matrix, c_insts, all_lbls, dev, conf_vec, x_z):
-        with torch.no_grad():
-            conf_t = torch.from_numpy(conf_vec).to(dev).float()
-            
-            for c_idx, lbl in enumerate(all_lbls):
-                if not c_insts[lbl]: continue
-                # Indices of nodes currently assigned to class lbl
-                idx_t = torch.tensor(list(c_insts[lbl]), device=dev)
-                
-                # Weights: Use the tracking confidence vector
-                w = conf_t[idx_t]
-                w_sum = w.sum()
-                if w_sum < 1e-9: continue
-                
-                # Weighted Centroid
-                cent = (x_z[idx_t] * w[:,None]).sum(0, keepdim=True) / w_sum
-                
-                # Cosine Similarity
-                D_matrix[:, c_idx] = ((F.cosine_similarity(x_z, cent) + 1)/2).cpu().numpy()
-                
-    update_D_weighted(D, class_insts, lbl_arr, device, node_state_conf, xz)
+    _update_D_weighted(D, class_insts, lbl_arr, device, node_state_conf, xz)
 
     # Logging: Feature Similarity Stats
     if log_file:
@@ -540,7 +534,7 @@ def predictclass(
 
         if labeled_new % max(N//5, 1) == 0:
             # Recompute weighted centroids using updated node_state_conf
-            update_D_weighted(D, class_insts, lbl_arr, device, node_state_conf, xz)
+            _update_D_weighted(D, class_insts, lbl_arr, device, node_state_conf, xz)
             pq = [] 
             for x in range(N):
                 if y_pred[x] == -1: heapq.heappush(pq, calc_prio(x))
@@ -554,6 +548,589 @@ def predictclass(
 
     test_acc = _simple_accuracy(y_true[test_indices], y_pred[test_indices])
     return torch.tensor(y_pred[test_indices], device=device), test_acc
+
+
+def priority_bfs_predictclass(
+    data,
+    train_indices,
+    test_indices,
+    a1,
+    a2,
+    a3,
+    a4,
+    a5,
+    a6,
+    a7,
+    a8,
+    *,
+    seed: int = 1337,
+    log_prefix: str = "priority_bfs",
+    log_file: str | None = None,
+    enable_prior: bool = True,
+    enable_neighbor: bool = True,
+    enable_compat: bool = True,
+    enable_similarity: bool = True,
+    enable_path_reliability: bool = False,
+    enable_deferral: bool = True,
+    margin_threshold: float = 0.05,
+    refinement_margin_threshold: float = 0.02,
+    max_deferrals_per_node: int = 5,
+    record_diagnostics: bool = True,
+    diagnostics_only_test_nodes: bool = True,
+    diagnostics_run_id: str | None = None,
+    min_labeled_neighbors_for_full_weight: int = 2,
+    refresh_fraction: float = 0.2,
+):
+    """
+    Priority-frontier BFS-style propagation with interpretable scoring, deferral, and refinement.
+
+    Component semantics are kept consistent with the existing `predictclass`:
+      - a1: prior term,
+      - a2: neighbor support,
+      - a3: feature similarity support,
+      - a8: compatibility support.
+
+    The score formula is:
+        final_scores = a1 * prior_component
+                     + a2 * neighbor_component
+                     + a3 * similarity_component
+                     + a8 * compatibility_component
+    with inactive components forced to zero.
+
+    Path reliability is present only as a placeholder (currently zero).
+    """
+    rng = np.random.default_rng(seed)
+    device = data.x.device
+    N = int(data.num_nodes)
+
+    train_indices = np.asarray(train_indices, dtype=np.int64)
+    test_indices = np.asarray(test_indices, dtype=np.int64)
+    y_true = data.y.detach().cpu().numpy().astype(np.int64)
+
+    C = int(y_true.max()) + 1
+    lbl2i = {i: i for i in range(C)}
+    lbl_arr = np.arange(C, dtype=np.int64)
+
+    # Graph
+    edge_index = torch.cat([data.edge_index, data.edge_index.flip(0)], dim=1)
+    edge_index = torch.unique(edge_index, dim=1)
+    ei = edge_index.detach().cpu().numpy()
+    src, dst = ei[0], ei[1]
+
+    neighbors = [[] for _ in range(N)]
+    for u, v in zip(src, dst):
+        neighbors[u].append(v)
+    deg = np.array([len(nbrs) for nbrs in neighbors], dtype=np.int32)
+
+    # Initial labels
+    y_pred = np.full(N, -1, dtype=np.int64)
+    y_pred[train_indices] = y_true[train_indices]
+
+    train_mask_t = torch.zeros(N, device=device, dtype=torch.bool)
+    train_mask_t[train_indices] = True
+
+    # Feature standardization
+    with torch.no_grad():
+        x_tr = data.x[train_mask_t]
+        if x_tr.size(0) > 1:
+            mu, sigma = x_tr.mean(0, keepdim=True), x_tr.std(0, keepdim=True).clamp_min(1e-6)
+            xz = (data.x - mu) / sigma
+        else:
+            xz = data.x
+
+    class_insts = defaultdict(set)
+    for i in train_indices:
+        class_insts[y_pred[i]].add(int(i))
+
+    # Priors
+    counts = np.bincount([lbl2i[y_pred[i]] for i in train_indices], minlength=C)
+    prior = (counts + 1.0) / (len(train_indices) + C)
+
+    # Compatibility from train-train edges
+    compat_cts = np.ones((C, C)) * 2.0
+    tr_src = src[np.isin(src, train_indices)]
+    tr_dst = dst[np.isin(src, train_indices)]
+    mask = np.isin(tr_dst, train_indices)
+    if mask.any():
+        u_tr, v_tr = tr_src[mask], tr_dst[mask]
+        np.add.at(
+            compat_cts,
+            ([lbl2i[y_pred[i]] for i in v_tr], [lbl2i[y_pred[i]] for i in u_tr]),
+            1,
+        )
+    compat = compat_cts / compat_cts.sum(axis=0, keepdims=True)
+
+    # Soft neighbor evidence via node state vectors
+    nbr_dist = np.zeros((N, C), dtype=np.float64)
+    nbr_conf_sum = np.zeros(N, dtype=np.float64)
+
+    node_state_vec = np.zeros((N, C), dtype=np.float64)
+    node_state_conf = np.zeros(N, dtype=np.float64)
+
+    for u in range(N):
+        if y_pred[u] != -1:
+            lbl_idx = lbl2i[y_pred[u]]
+            node_state_vec[u, lbl_idx] = 1.0
+            node_state_conf[u] = 1.0
+
+    for u in range(N):
+        if node_state_conf[u] > 0:
+            for v in neighbors[u]:
+                nbr_dist[v] += node_state_vec[u]
+                nbr_conf_sum[v] += node_state_conf[u]
+
+    # Feature similarity matrix
+    D = np.zeros((N, C), dtype=np.float64)
+    _update_D_weighted(D, class_insts, lbl_arr, device, node_state_conf, xz)
+
+    # Diagnostics
+    record_mask = np.zeros(N, dtype=bool)
+    if diagnostics_only_test_nodes:
+        record_mask[test_indices] = True
+    else:
+        record_mask[:] = True
+    diagnostics = {}
+    commit_margin = np.zeros(N, dtype=np.float64)
+    first_pass_label = np.full(N, -1, dtype=np.int64)
+    active_components = [
+        name
+        for name, enabled in [
+            ("prior", enable_prior),
+            ("neighbor", enable_neighbor),
+            ("compat", enable_compat),
+            ("similarity", enable_similarity),
+        ]
+        if enabled
+    ]
+
+    refresh_every = max(int(N * float(refresh_fraction)), 1)
+
+    # Initial frontier priority (before margins are known)
+    def initial_priority(u: int) -> float:
+        if deg[u] == 0:
+            return 0.0
+        w = 0.0
+        if nbr_conf_sum[u] > 0:
+            w = nbr_conf_sum[u] / float(deg[u])
+        s = D[u].max()
+        return -(a4 * w + s)
+
+    pq = []
+    deferrals = np.zeros(N, dtype=np.int32)
+
+    for u in range(N):
+        if y_pred[u] == -1:
+            heapq.heappush(pq, (initial_priority(u), u))
+
+    labeled_new = 0
+    deferred_any = np.zeros(N, dtype=bool)
+    forced_commits = 0
+
+    while pq:
+        prio, u = heapq.heappop(pq)
+        if y_pred[u] != -1:
+            continue
+
+        # Components
+        if enable_prior:
+            s_prior = a1 * prior
+        else:
+            s_prior = np.zeros(C, dtype=np.float64)
+
+        if enable_neighbor and deg[u] > 0:
+            dist_vec = nbr_dist[u] / float(deg[u])
+            r = min(
+                nbr_conf_sum[u] / float(max(min_labeled_neighbors_for_full_weight, 1)),
+                1.0,
+            )
+            s_neigh = (a2 * r) * dist_vec
+        else:
+            s_neigh = np.zeros(C, dtype=np.float64)
+
+        total_mass = nbr_dist[u].sum()
+        if enable_compat:
+            if total_mass > 1e-6:
+                norm_dist = nbr_dist[u] / total_mass
+                s_compat = (a8 * 1.0) * (norm_dist @ compat)
+            else:
+                s_compat = np.full(C, (a8 * 1.0) / C, dtype=np.float64)
+        else:
+            s_compat = np.zeros(C, dtype=np.float64)
+
+        if enable_similarity:
+            s_sim = a3 * D[u]
+        else:
+            s_sim = np.zeros(C, dtype=np.float64)
+
+        # Path reliability placeholder (currently zero)
+        if enable_path_reliability:
+            s_path = np.zeros(C, dtype=np.float64)
+        else:
+            s_path = np.zeros(C, dtype=np.float64)
+
+        final_scores = s_prior + s_neigh + s_compat + s_sim + s_path
+
+        best_idx = int(np.argmax(final_scores))
+        best_score = float(final_scores[best_idx])
+        tmp = final_scores.copy()
+        tmp[best_idx] = -1e100
+        second_score = float(tmp.max())
+        margin = best_score - second_score
+
+        # Deferral for low-confidence nodes
+        if enable_deferral and margin < margin_threshold:
+            if deferrals[u] < max_deferrals_per_node:
+                deferrals[u] += 1
+                deferred_any[u] = True
+                heapq.heappush(pq, (-margin, u))
+                continue
+            else:
+                forced_commits += 1  # fall through to forced commit with current scores
+
+        chosen_lbl = int(lbl_arr[best_idx])
+        y_pred[u] = chosen_lbl
+        class_insts[chosen_lbl].add(int(u))
+        labeled_new += 1
+        commit_margin[u] = margin
+        first_pass_label[u] = chosen_lbl
+
+        # Update neighbor soft counts
+        old_vec = node_state_vec[u]
+        old_conf = node_state_conf[u]
+
+        new_vec = np.zeros(C, dtype=np.float64)
+        new_vec[best_idx] = 1.0
+        new_conf = float(a7)
+
+        node_state_vec[u] = new_vec
+        node_state_conf[u] = new_conf
+
+        delta_vec = new_vec - old_vec
+        delta_conf = new_conf - old_conf
+
+        for v in neighbors[u]:
+            nbr_dist[v] += delta_vec
+            nbr_conf_sum[v] += delta_conf
+
+        # Diagnostics at commit time
+        if record_diagnostics and record_mask[u]:
+            diagnostics[int(u)] = {
+                "node_id": int(u),
+                "pred_label": int(chosen_lbl),
+                "top_score": float(best_score),
+                "second_score": float(second_score),
+                "margin": float(margin),
+                "frontier_priority_at_commit": float(prio),
+                "first_pass_label": int(chosen_lbl),
+                "first_pass_margin": float(margin),
+                "final_label_after_refinement": int(chosen_lbl),  # may be updated later
+                "changed_in_refinement": False,
+                "active_components": active_components,
+                "components": {
+                    "prior": float(s_prior[best_idx]) if enable_prior else 0.0,
+                    "neighbor": float(s_neigh[best_idx]) if enable_neighbor else 0.0,
+                    "compat": float(s_compat[best_idx]) if enable_compat else 0.0,
+                    "similarity": float(s_sim[best_idx]) if enable_similarity else 0.0,
+                    "path_reliability": 0.0,
+                },
+            }
+
+        # Periodic refresh of similarity and frontier
+        if labeled_new % refresh_every == 0:
+            _update_D_weighted(D, class_insts, lbl_arr, device, node_state_conf, xz)
+            pq = []
+            for x in range(N):
+                if y_pred[x] == -1:
+                    heapq.heappush(pq, (initial_priority(x), x))
+
+    # Refinement: relabel only low-margin, non-train nodes in a single static pass
+    low_conf_mask = (commit_margin < refinement_margin_threshold)
+    for idx in train_indices:
+        low_conf_mask[int(idx)] = False
+
+    reconsidered_refinement = int(low_conf_mask.sum())
+    changed_refinement = 0
+
+    # Neighbor support based on first-pass labels
+    nbr_dist_ref = np.zeros((N, C), dtype=np.float64)
+    for u in range(N):
+        if y_pred[u] != -1:
+            vec = np.zeros(C, dtype=np.float64)
+            vec[lbl2i[y_pred[u]]] = 1.0
+            for v in neighbors[u]:
+                nbr_dist_ref[v] += vec
+
+    for u in range(N):
+        if not low_conf_mask[u]:
+            continue
+
+        if enable_prior:
+            s_prior = a1 * prior
+        else:
+            s_prior = np.zeros(C, dtype=np.float64)
+
+        if enable_neighbor and deg[u] > 0:
+            dist_vec = nbr_dist_ref[u] / float(deg[u])
+            s_neigh = a2 * dist_vec
+        else:
+            s_neigh = np.zeros(C, dtype=np.float64)
+
+        total_mass = nbr_dist_ref[u].sum()
+        if enable_compat:
+            if total_mass > 1e-6:
+                norm_dist = nbr_dist_ref[u] / total_mass
+                s_compat = (a8 * 1.0) * (norm_dist @ compat)
+            else:
+                s_compat = np.full(C, (a8 * 1.0) / C, dtype=np.float64)
+        else:
+            s_compat = np.zeros(C, dtype=np.float64)
+
+        if enable_similarity:
+            s_sim = a3 * D[u]
+        else:
+            s_sim = np.zeros(C, dtype=np.float64)
+
+        final_scores = s_prior + s_neigh + s_compat + s_sim
+        best_idx = int(np.argmax(final_scores))
+        new_lbl = int(lbl_arr[best_idx])
+
+        if new_lbl != y_pred[u]:
+            changed_refinement += 1
+            y_pred[u] = new_lbl
+
+        if record_diagnostics and record_mask[u]:
+            entry = diagnostics.get(int(u))
+            if entry is None:
+                entry = {
+                    "node_id": int(u),
+                    "pred_label": int(new_lbl),
+                    "top_score": float(final_scores[best_idx]),
+                    "second_score": float(
+                        np.max(np.where(
+                            np.arange(C) != best_idx,
+                            final_scores,
+                            -1e100
+                        ))
+                    ),
+                    "margin": float(commit_margin[u]),
+                    "frontier_priority_at_commit": None,
+                    "first_pass_label": int(first_pass_label[u]),
+                    "first_pass_margin": float(commit_margin[u]),
+                    "final_label_after_refinement": int(new_lbl),
+                    "changed_in_refinement": new_lbl != first_pass_label[u],
+                    "active_components": active_components,
+                    "components": {},
+                }
+            else:
+                entry["final_label_after_refinement"] = int(new_lbl)
+                entry["changed_in_refinement"] = bool(new_lbl != first_pass_label[u])
+            diagnostics[int(u)] = entry
+
+    # Diagnostics JSON
+    if record_diagnostics and diagnostics:
+        try:
+            run_id = diagnostics_run_id or f"{log_prefix}_{int(time.time())}"
+            if "LOG_DIR" in globals():
+                diag_path = os.path.join(
+                    LOG_DIR, f"{DATASET_KEY.lower()}_priority_bfs_{run_id}.json"
+                )
+            else:
+                diag_path = f"priority_bfs_{run_id}.json"
+            with open(diag_path, "w", encoding="utf-8") as f:
+                json.dump(
+                    {
+                        "dataset": DATASET_KEY,
+                        "seed": seed,
+                        "num_nodes": N,
+                        "num_classes": C,
+                        "summary": {
+                            "committed_nodes": int((y_pred != -1).sum()),
+                            "deferred_at_least_once": int(deferred_any.sum()),
+                            "forced_commits_after_max_deferrals": int(forced_commits),
+                            "refinement_reconsidered": int(reconsidered_refinement),
+                            "refinement_label_changes": int(changed_refinement),
+                            "active_components": active_components,
+                        },
+                        "diagnostics": diagnostics,
+                    },
+                    f,
+                )
+            if log_file:
+                write_log(
+                    f"Priority-BFS diagnostics written to {diag_path}",
+                    log_file,
+                    tag=f"{log_prefix}:DIAG",
+                )
+        except Exception as e:
+            if log_file:
+                write_log(
+                    f"Failed to write diagnostics JSON: {e}",
+                    log_file,
+                    tag=f"{log_prefix}:DIAG_ERR",
+                )
+
+    test_acc = _simple_accuracy(y_true[test_indices], y_pred[test_indices])
+    return torch.tensor(y_pred[test_indices], device=device), test_acc
+
+
+def multi_source_priority_bfs_predictclass(
+    data,
+    train_indices,
+    test_indices,
+    a1,
+    a2,
+    a3,
+    a4,
+    a5,
+    a6,
+    a7,
+    a8,
+    *,
+    seed: int = 1337,
+    log_prefix: str = "multi_source_bfs",
+    log_file: str | None = None,
+    seed_mode: str = "all_train",
+    seeds_per_class: int | None = None,
+    enable_deferral: bool = True,
+    margin_threshold: float = 0.05,
+    refinement_margin_threshold: float = 0.02,
+    max_deferrals_per_node: int = 5,
+    record_diagnostics: bool = True,
+    diagnostics_only_test_nodes: bool = True,
+):
+    """
+    Seed-configurable wrapper around priority_bfs_predictclass.
+
+    v1:
+      - seed_mode == "all_train" uses all train_indices as seeds.
+      - Other modes are reserved for future extensions.
+    """
+    rng = np.random.default_rng(seed)
+
+    train_indices = np.asarray(train_indices, dtype=np.int64)
+
+    # Seed selection hook (v1: all_train only).
+    if seed_mode == "all_train":
+        seed_indices = train_indices
+    else:
+        # Future: topk_per_class, random_subset_per_class, etc.
+        seed_indices = train_indices
+
+    return priority_bfs_predictclass(
+        data,
+        seed_indices,
+        test_indices,
+        a1,
+        a2,
+        a3,
+        a4,
+        a5,
+        a6,
+        a7,
+        a8,
+        seed=seed,
+        log_prefix=log_prefix,
+        log_file=log_file,
+        enable_prior=True,
+        enable_neighbor=True,
+        enable_compat=True,
+        enable_similarity=True,
+        enable_path_reliability=False,
+        enable_deferral=enable_deferral,
+        margin_threshold=margin_threshold,
+        refinement_margin_threshold=refinement_margin_threshold,
+        max_deferrals_per_node=max_deferrals_per_node,
+        record_diagnostics=record_diagnostics,
+        diagnostics_only_test_nodes=diagnostics_only_test_nodes,
+    )
+
+
+def ensemble_multi_source_bfs_predictclass(
+    data,
+    train_indices,
+    test_indices,
+    a1,
+    a2,
+    a3,
+    a4,
+    a5,
+    a6,
+    a7,
+    a8,
+    *,
+    num_restarts: int = 5,
+    base_seed: int = 1337,
+    seed_mode: str = "all_train",
+    seeds_per_class: int | None = None,
+    margin_threshold: float = 0.05,
+    refinement_margin_threshold: float = 0.02,
+    max_deferrals_per_node: int = 5,
+    log_prefix: str = "ensemble_multi_source_bfs",
+    log_file: str | None = None,
+):
+    """
+    Ensemble wrapper over multi_source_priority_bfs_predictclass.
+
+    v1:
+      - Runs multi_source_priority_bfs_predictclass num_restarts times.
+      - Aggregates labels on test_indices via majority vote.
+    """
+    device = data.x.device
+    train_indices = np.asarray(train_indices, dtype=np.int64)
+    test_indices = np.asarray(test_indices, dtype=np.int64)
+
+    all_preds = []
+    y_true = data.y.detach().cpu().numpy().astype(np.int64)
+
+    for r in range(num_restarts):
+        seed = base_seed + r
+        preds_test, _ = multi_source_priority_bfs_predictclass(
+            data,
+            train_indices,
+            test_indices,
+            a1,
+            a2,
+            a3,
+            a4,
+            a5,
+            a6,
+            a7,
+            a8,
+            seed=seed,
+            log_prefix=f"{log_prefix}_run{r}",
+            log_file=log_file,
+            seed_mode=seed_mode,
+            seeds_per_class=seeds_per_class,
+            enable_deferral=True,
+            margin_threshold=margin_threshold,
+            refinement_margin_threshold=refinement_margin_threshold,
+            max_deferrals_per_node=max_deferrals_per_node,
+            record_diagnostics=False,
+        )
+        all_preds.append(preds_test.detach().cpu().numpy().astype(np.int64))
+
+    if not all_preds:
+        return torch.tensor(y_true[test_indices], device=device), 0.0
+
+    preds_stack = np.stack(all_preds, axis=0)  # [R, T]
+    T = preds_stack.shape[1]
+    final_preds = np.zeros(T, dtype=np.int64)
+
+    for j in range(T):
+        labels, counts = np.unique(preds_stack[:, j], return_counts=True)
+        best_lbl = labels[np.argmax(counts)]
+        final_preds[j] = best_lbl
+
+    test_acc = _simple_accuracy(y_true[test_indices], final_preds)
+
+    if log_file:
+        write_log(
+            f"Ensemble multi-source BFS: num_restarts={num_restarts} | test_acc={test_acc:.4f}",
+            log_file,
+            tag=f"{log_prefix}:SUMMARY",
+        )
+
+    return torch.tensor(final_preds, device=device), float(test_acc)
 
 # =====================================================
 # BLOCK 4: MLP Model
@@ -639,11 +1216,23 @@ RS_NUM_SAMPLES = 50
 RS_SPLITS = 3
 RS_REPEATS = 1
 
+# Optional priority-frontier BFS experiment (disabled by default).
+ENABLE_PRIORITY_BFS_EXPERIMENT = False
+PRIORITY_BFS_MARGIN_THRESHOLD = 0.05
+PRIORITY_BFS_REFINEMENT_MARGIN_THRESHOLD = 0.02
+
+# Optional multi-source and ensemble experiments (disabled by default).
+ENABLE_MULTI_SOURCE_BFS_EXPERIMENT = False
+ENABLE_ENSEMBLE_MULTI_SOURCE_BFS = False
+
 results = {
     'mlp_only': [],
     'prop_only': [],
     'mlp_refined': [],
     'prop_mlp_selected': [],
+    'priority_bfs': [],
+    'multi_source_bfs': [],
+    'ensemble_multi_source_bfs': [],
     'refined_chosen_count': 0,
     'prop_mlp_switched_to_mlp': 0, 
     'total_runs': 0
@@ -776,6 +1365,65 @@ for run in range(num_iterations):
         decision_s4 = "MLP" if use_mlp_s4 else "PROP"
         write_log(f"  [4] Prop+MLP(Select): Val(Prop)={acc_val_prop:.4f} vs Val(MLP)={acc_val_mlp:.4f} -> Chosen: {decision_s4}. Test={final_acc_s4:.4f}", LOG_FILE)
 
+        # 5. Optional: Priority-BFS propagation (side-by-side, non-disruptive)
+        if ENABLE_PRIORITY_BFS_EXPERIMENT:
+            _, acc_test_priority = priority_bfs_predictclass(
+                data,
+                train_np,
+                test_np,
+                **dict_params_prop,
+                seed=current_seed,
+                log_prefix=f"{DATASET_KEY}:TEST-PRIORITY run={run} rep={repeat}",
+                log_file=LOG_FILE,
+                margin_threshold=PRIORITY_BFS_MARGIN_THRESHOLD,
+                refinement_margin_threshold=PRIORITY_BFS_REFINEMENT_MARGIN_THRESHOLD,
+                diagnostics_run_id=f"run{run}_rep{repeat}",
+            )
+            results['priority_bfs'].append(float(acc_test_priority))
+            write_log(f"  [5] Priority-BFS: Test={acc_test_priority:.4f}", LOG_FILE)
+
+        # 6. Optional: Multi-source priority BFS (single run, all_train seeds)
+        if ENABLE_MULTI_SOURCE_BFS_EXPERIMENT:
+            _, acc_test_ms = multi_source_priority_bfs_predictclass(
+                data,
+                train_np,
+                test_np,
+                **dict_params_prop,
+                seed=current_seed,
+                log_prefix=f"{DATASET_KEY}:TEST-MULTI-SOURCE run={run} rep={repeat}",
+                log_file=LOG_FILE,
+                seed_mode="all_train",
+                seeds_per_class=None,
+                enable_deferral=True,
+                margin_threshold=PRIORITY_BFS_MARGIN_THRESHOLD,
+                refinement_margin_threshold=PRIORITY_BFS_REFINEMENT_MARGIN_THRESHOLD,
+                max_deferrals_per_node=5,
+                record_diagnostics=True,
+                diagnostics_only_test_nodes=True,
+            )
+            results['multi_source_bfs'].append(float(acc_test_ms))
+            write_log(f"  [6] Multi-Source BFS: Test={acc_test_ms:.4f}", LOG_FILE)
+
+        # 7. Optional: Ensemble multi-source BFS
+        if ENABLE_ENSEMBLE_MULTI_SOURCE_BFS:
+            _, acc_test_ens = ensemble_multi_source_bfs_predictclass(
+                data,
+                train_np,
+                test_np,
+                **dict_params_prop,
+                num_restarts=5,
+                base_seed=current_seed,
+                seed_mode="all_train",
+                seeds_per_class=None,
+                margin_threshold=PRIORITY_BFS_MARGIN_THRESHOLD,
+                refinement_margin_threshold=PRIORITY_BFS_REFINEMENT_MARGIN_THRESHOLD,
+                max_deferrals_per_node=5,
+                log_prefix=f"{DATASET_KEY}:TEST-ENS-MULTI-SOURCE run={run} rep={repeat}",
+                log_file=LOG_FILE,
+            )
+            results['ensemble_multi_source_bfs'].append(float(acc_test_ens))
+            write_log(f"  [7] Ensemble Multi-Source BFS: Test={acc_test_ens:.4f}", LOG_FILE)
+
 
 msg = "\n" + "="*50 + f"\n FINAL SUMMARY ({DATASET_KEY})\n" + "="*50 + "\n"
 
@@ -789,6 +1437,12 @@ msg += f"[3] MLP + Refined:     {get_stats(results['mlp_refined'])}\n"
 msg += f"    -> Refinement Chosen: {results['refined_chosen_count']}/{results['total_runs']} ({(results['refined_chosen_count']/results['total_runs'])*100:.1f}%)\n"
 msg += f"[4] Prop + MLP(Select):{get_stats(results['prop_mlp_selected'])}\n"
 msg += f"    -> Switched to MLP:   {results['prop_mlp_switched_to_mlp']}/{results['total_runs']} ({(results['prop_mlp_switched_to_mlp']/results['total_runs'])*100:.1f}%)\n"
+if results['priority_bfs']:
+    msg += f"[5] Priority-BFS:       {get_stats(results['priority_bfs'])}\n"
+if results['multi_source_bfs']:
+    msg += f"[6] Multi-Source BFS:   {get_stats(results['multi_source_bfs'])}\n"
+if results['ensemble_multi_source_bfs']:
+    msg += f"[7] Ensemble Multi-Source BFS: {get_stats(results['ensemble_multi_source_bfs'])}\n"
 
 write_log(msg, LOG_FILE, tag="SUMMARY")
 print(f"Logs written to {LOG_FILE}")
