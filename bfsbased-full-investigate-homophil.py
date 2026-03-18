@@ -1751,6 +1751,8 @@ def selective_graph_correction_predictclass(
             "selected_threshold_high": float(selected_threshold_high),
             "selected_weights": {k: float(v) for k, v in selected_weights.items()},
             "mode": "feature_first_selective_weighted_correction_v1",
+            "feature_knn_used": bool(enable_feature_knn),
+            "feature_knn_k": int(feature_knn_k),
             "runtime_sec": {
                 "mlp_training_runtime_sec": float(mlp_train_runtime_sec),
                 "evidence_runtime_sec": float(evidence_runtime_sec),
@@ -1794,6 +1796,8 @@ def selective_graph_correction_predictclass(
         "selected_threshold_high": float(selected_threshold_high),
         "selected_weights": {k: float(v) for k, v in selected_weights.items()},
         "mode": "feature_first_selective_weighted_correction_v1",
+        "feature_knn_used": bool(enable_feature_knn),
+        "feature_knn_k": int(feature_knn_k),
         "val_acc_selective": float(val_acc),
         "test_acc_mlp": float(test_acc_mlp),
         "test_acc_selective": float(test_acc),

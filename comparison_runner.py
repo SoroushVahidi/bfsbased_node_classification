@@ -99,6 +99,7 @@ def validate_required_splits(
     split_ids: List[int],
     *,
     split_dir: Optional[str] = None,
+    output_tag: str = "stage2",
 ) -> Dict[Tuple[str, int], Optional[str]]:
     """
     Resolve and validate split files for the requested datasets/split_ids.
@@ -111,8 +112,8 @@ def validate_required_splits(
             mapping[(ds, sid)] = p
 
     os.makedirs("logs", exist_ok=True)
-    report_json = os.path.join("logs", "comparison_split_check_stage2.json")
-    report_md = os.path.join("logs", "comparison_split_check_stage2.md")
+    report_json = os.path.join("logs", f"comparison_split_check_{output_tag}.json")
+    report_md = os.path.join("logs", f"comparison_split_check_{output_tag}.md")
 
     # JSON report
     js_payload = []
@@ -130,7 +131,7 @@ def validate_required_splits(
 
     # Markdown report
     with open(report_md, "w", encoding="utf-8") as f:
-        f.write("# Split Check – Stage 2\n\n")
+        f.write(f"# Split Check – {output_tag}\n\n")
         f.write("| Dataset | Split ID | Found | Path |\n")
         f.write("|---------|----------|-------|------|\n")
         for (ds, sid), path in mapping.items():
@@ -249,39 +250,51 @@ def _record_common_info(mod, dataset_key: str, dataset, data, split_path: str, s
     return record
 
 
-def run_stage2_internal(split_dir: Optional[str] = None):
+def run_stage2_internal(
+    split_dir: Optional[str] = None,
+    *,
+    datasets: Optional[List[str]] = None,
+    split_ids: Optional[List[int]] = None,
+    repeats: int = 1,
+    methods_to_run: Optional[List[str]] = None,
+    output_tag: str = "stage2",
+):
     """
-    Stage 2: internal comparison on 2 datasets (texas, chameleon),
-    splits 0..9, 1 repeat, with selected methods.
+    Configurable internal comparison harness.
     """
     mod = _load_full_investigate_module()
 
-    datasets = ["texas", "chameleon"]
-    split_ids = _common_available_split_ids(datasets, split_dir=split_dir, max_split_id=100)
-    if not split_ids:
-        # Conservative fallback to canonical GEO-GCN 10-split protocol.
-        split_ids = list(range(10))
-    repeats = 1
+    datasets = [d.lower() for d in (datasets or ["texas", "chameleon"])]
+    if split_ids is None:
+        split_ids = _common_available_split_ids(datasets, split_dir=split_dir, max_split_id=100)
+        if not split_ids:
+            # Conservative fallback to canonical GEO-GCN 10-split protocol.
+            split_ids = list(range(10))
+    else:
+        split_ids = [int(s) for s in split_ids]
+    repeats = int(repeats)
 
-    methods_to_run = [
+    methods_to_run = methods_to_run or [
         "mlp_only",
         "prop_only",
         "mlp_refined",
         "prop_mlp_select",
-        # Optional method (kept off by default to avoid disrupting Stage 2 setup):
+        # Optional methods (kept off by default to avoid disrupting frozen Stage 2 setup):
         # "selective_graph_correction",
+        # "gated_mlp_prop",
         "priority_bfs",
         "ensemble_multi_source_bfs",
     ]
+    methods_to_run = [str(m) for m in methods_to_run]
 
     # Preflight: validate splits
-    split_map = validate_required_splits(datasets, split_ids, split_dir=split_dir)
+    split_map = validate_required_splits(datasets, split_ids, split_dir=split_dir, output_tag=output_tag)
     missing = [(ds, sid) for (ds, sid), p in split_map.items() if p is None]
     if missing:
         print("Split validation failed. Missing the following splits:")
         for ds, sid in missing:
             print(f"  - dataset={ds}, split_id={sid}")
-        print("See logs/comparison_split_check_stage2.{json,md} for details.")
+        print(f"See logs/comparison_split_check_{output_tag}.{{json,md}} for details.")
         return
 
     records: List[Dict[str, Any]] = []
@@ -599,6 +612,8 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                             "fraction_test_nodes_changed_from_mlp": sel_info.get("fraction_test_nodes_changed_from_mlp"),
                             "acc_test_confident_nodes": sel_info.get("acc_test_confident_nodes"),
                             "acc_test_uncertain_nodes": sel_info.get("acc_test_uncertain_nodes"),
+                            "feature_knn_used": sel_info.get("feature_knn_used"),
+                            "feature_knn_k": sel_info.get("feature_knn_k"),
                             "avg_runtime_overhead_over_mlp_sec": runtime_breakdown.get("avg_runtime_overhead_over_mlp_sec"),
                             "diagnostics_path": sel_info.get("diagnostics_path"),
                         }
@@ -679,9 +694,9 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                     )
                     records.append(rec)
 
-    # Write Stage 2 outputs
+    # Write outputs
     os.makedirs("logs", exist_ok=True)
-    runs_path = os.path.join("logs", "comparison_runs_stage2.jsonl")
+    runs_path = os.path.join("logs", f"comparison_runs_{output_tag}.jsonl")
     with open(runs_path, "w", encoding="utf-8") as f:
         for r in records:
             f.write(json.dumps(r) + "\n")
@@ -718,19 +733,21 @@ def run_stage2_internal(split_dir: Optional[str] = None):
             }
         )
 
-    summary_path = os.path.join("logs", "comparison_summary_stage2.json")
+    summary_path = os.path.join("logs", f"comparison_summary_{output_tag}.json")
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
-    # Fairness / configuration report (Stage 2)
-    fairness_path = os.path.join("logs", "comparison_fairness_report_stage2.md")
+    # Fairness / configuration report
+    fairness_path = os.path.join("logs", f"comparison_fairness_report_{output_tag}.md")
     with open(fairness_path, "w", encoding="utf-8") as f:
-        f.write("# Fairness / Configuration Report – Stage 2 Internal Pilot (texas, chameleon)\n\n")
+        f.write(f"# Fairness / Configuration Report – {output_tag}\n\n")
         f.write("## Datasets\n\n")
-        f.write("- texas\n- chameleon\n\n")
+        for ds in datasets:
+            f.write(f"- {ds}\n")
+        f.write("\n")
         f.write("## Splits and repeats\n\n")
         f.write(f"- Splits: GEO-GCN canonical splits available for all selected datasets ({len(split_ids)} total): {split_ids}\n")
-        f.write("- Repeats per split: 1\n\n")
+        f.write(f"- Repeats per split: {repeats}\n\n")
         f.write("## Methods included\n\n")
         for m in methods_to_run:
             if m == "multi_source_priority_bfs":
@@ -739,11 +756,19 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                 f.write(f"- {m}\n")
         f.write("\n## Parameter sharing\n\n")
         f.write("- `params_prop` tuned once per dataset/split/repeat via `predictclass` (robust_random_search) and reused by:\n")
-        f.write("  - prop_only\n  - priority_bfs\n  - ensemble_multi_source_bfs\n")
+        if "prop_only" in methods_to_run:
+            f.write("  - prop_only\n")
+        if "priority_bfs" in methods_to_run:
+            f.write("  - priority_bfs\n")
+        if "ensemble_multi_source_bfs" in methods_to_run:
+            f.write("  - ensemble_multi_source_bfs\n")
         if "selective_graph_correction" in methods_to_run:
             f.write("- `selective_graph_correction` selects uncertainty threshold and score weights on validation nodes only.\n")
-        f.write("- `params_hyb` tuned separately for `mlp_refined`.\n")
-        f.write("- MLP hyperparameters are specific to `mlp_only`.\n\n")
+        if "mlp_refined" in methods_to_run:
+            f.write("- `params_hyb` tuned separately for `mlp_refined`.\n")
+        if "mlp_only" in methods_to_run:
+            f.write("- MLP hyperparameters are specific to `mlp_only`.\n")
+        f.write("\n")
         f.write("## Runtime accounting policy\n\n")
         f.write("- `tuning_runtime_sec` measures the time spent in hyperparameter search or training (for MLP).\n")
         f.write("- `method_runtime_sec` measures the time for the final evaluation calls (val/test) using tuned parameters.\n")
@@ -751,10 +776,13 @@ def run_stage2_internal(split_dir: Optional[str] = None):
         f.write("- For methods that reuse parameters (e.g., priority_bfs, ensemble_multi_source_bfs), the original tuning cost is reported again so that\n")
         f.write("  comparisons can be made either including or excluding amortized tuning cost.\n\n")
         f.write("## Possible unfairness / caveats\n\n")
-        f.write("- Parameter reuse: `params_prop` tuned on `predictclass` and reused by `prop_only`, `priority_bfs`, and `ensemble_multi_source_bfs`.\n")
-        f.write("- Experimental methods: `priority_bfs` and `ensemble_multi_source_bfs` are more recent, complex propagation variants.\n")
-        f.write("- Hybrid method: `mlp_refined` uses MLP pseudo-labels to augment the train set before propagation.\n")
-        f.write("- Runtime: ensemble multi-source BFS incurs extra runtime by design due to multiple restarts.\n")
+        f.write("- Parameter reuse: `params_prop` tuned on `predictclass` and reused by propagation-family variants.\n")
+        if "priority_bfs" in methods_to_run or "ensemble_multi_source_bfs" in methods_to_run:
+            f.write("- Experimental methods: `priority_bfs` and `ensemble_multi_source_bfs` are more recent, complex propagation variants.\n")
+        if "mlp_refined" in methods_to_run:
+            f.write("- Hybrid method: `mlp_refined` uses MLP pseudo-labels to augment the train set before propagation.\n")
+        if "ensemble_multi_source_bfs" in methods_to_run:
+            f.write("- Runtime: ensemble multi-source BFS incurs extra runtime by design due to multiple restarts.\n")
         f.write("- Order sensitivity: propagation methods remain order-sensitive due to priority-queue traversal and sequential commits.\n\n")
         if "selective_graph_correction" in methods_to_run:
             f.write("- Selective correction risk: validation-tuned threshold/weights may overfit small validation sets on some splits.\n\n")
@@ -762,23 +790,60 @@ def run_stage2_internal(split_dir: Optional[str] = None):
         f.write("- `multi_source_priority_bfs_predictclass` currently uses the same seed set (`seed_mode=\"all_train\"`) as `priority_bfs`.\n")
         f.write("  It is therefore **not reported as a separate row**; it is treated as a configuration wrapper around priority-BFS.\n")
 
-    print(f"Wrote Stage 2 per-run records to {runs_path}")
-    print(f"Wrote Stage 2 summary to {summary_path}")
-    print(f"Wrote Stage 2 fairness report to {fairness_path}")
+    print(f"Wrote per-run records to {runs_path}")
+    print(f"Wrote summary to {summary_path}")
+    print(f"Wrote fairness report to {fairness_path}")
 
 
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Run Stage 2 internal comparison harness.")
+    parser = argparse.ArgumentParser(description="Run configurable internal comparison harness.")
     parser.add_argument(
         "--split-dir",
         default=None,
         help="Optional directory containing GEO-GCN split .npz files.",
     )
+    parser.add_argument(
+        "--datasets",
+        nargs="+",
+        default=["texas", "chameleon"],
+        help="Datasets to evaluate.",
+    )
+    parser.add_argument(
+        "--split-ids",
+        nargs="*",
+        type=int,
+        default=None,
+        help="Optional explicit split IDs (e.g., --split-ids 0 1 2 ... 9).",
+    )
+    parser.add_argument(
+        "--repeats",
+        type=int,
+        default=1,
+        help="Number of repeats per split.",
+    )
+    parser.add_argument(
+        "--methods",
+        nargs="+",
+        default=None,
+        help="Optional explicit methods list.",
+    )
+    parser.add_argument(
+        "--output-tag",
+        default="stage2",
+        help="Output file tag suffix, e.g., stage2 or selective_controlled.",
+    )
     args = parser.parse_args()
 
-    run_stage2_internal(split_dir=args.split_dir)
+    run_stage2_internal(
+        split_dir=args.split_dir,
+        datasets=args.datasets,
+        split_ids=args.split_ids,
+        repeats=args.repeats,
+        methods_to_run=args.methods,
+        output_tag=args.output_tag,
+    )
 
 
 if __name__ == "__main__":
