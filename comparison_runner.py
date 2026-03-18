@@ -130,7 +130,7 @@ def validate_required_splits(
 
     # Markdown report
     with open(report_md, "w", encoding="utf-8") as f:
-        f.write("# Split Check – Stage 1\n\n")
+        f.write("# Split Check – Stage 2\n\n")
         f.write("| Dataset | Split ID | Found | Path |\n")
         f.write("|---------|----------|-------|------|\n")
         for (ds, sid), path in mapping.items():
@@ -238,7 +238,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
         print("Split validation failed. Missing the following splits:")
         for ds, sid in missing:
             print(f"  - dataset={ds}, split_id={sid}")
-        print("See logs/comparison_split_check_stage1.{json,md} for details.")
+        print("See logs/comparison_split_check_stage2.{json,md} for details.")
         return
 
     records: List[Dict[str, Any]] = []
@@ -438,10 +438,20 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                     test_time = time.perf_counter() - t2
 
                     total_method_time = method_time + test_time
+                    # Match main script behavior:
+                    # choose refined only when its validation performance beats MLP.
+                    use_refined = float(acc_val_refined) > float(acc_val_mlp)
+                    final_val_acc = float(acc_val_refined if use_refined else acc_val_mlp)
+                    final_test_acc = float(acc_test_refined if use_refined else acc_test_mlp)
                     rec.update(
                         {
-                            "val_acc": float(acc_val_refined),
-                            "test_acc": float(acc_test_refined),
+                            "val_acc": final_val_acc,
+                            "test_acc": final_test_acc,
+                            "val_acc_refined_raw": float(acc_val_refined),
+                            "test_acc_refined_raw": float(acc_test_refined),
+                            "val_acc_mlp_raw": float(acc_val_mlp),
+                            "test_acc_mlp_raw": float(acc_test_mlp),
+                            "used_refined_variant": bool(use_refined),
                             "tuning_runtime_sec": tuning_time_hyb,
                             "method_runtime_sec": total_method_time,
                             "total_runtime_sec": tuning_time_hyb + total_method_time,
@@ -511,7 +521,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                         test_np,
                         **dict_params_prop,
                         seed=current_seed,
-                        log_prefix=f"{dataset_key}:STAGE1-PRIORITY-BFS",
+                        log_prefix=f"{dataset_key}:STAGE2-PRIORITY-BFS",
                         log_file=None,
                         margin_threshold=0.05,
                         refinement_margin_threshold=0.02,
@@ -552,7 +562,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                         margin_threshold=0.05,
                         refinement_margin_threshold=0.02,
                         max_deferrals_per_node=5,
-                        log_prefix=f"{dataset_key}:STAGE1-ENS-MULTI-SOURCE",
+                        log_prefix=f"{dataset_key}:STAGE2-ENS-MULTI-SOURCE",
                         log_file=None,
                     )
                     method_time = time.perf_counter() - t1
@@ -575,7 +585,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                     )
                     records.append(rec)
 
-    # Write Stage 1 outputs
+    # Write Stage 2 outputs
     os.makedirs("logs", exist_ok=True)
     runs_path = os.path.join("logs", "comparison_runs_stage2.jsonl")
     with open(runs_path, "w", encoding="utf-8") as f:
@@ -584,32 +594,33 @@ def run_stage2_internal(split_dir: Optional[str] = None):
 
     # Simple summary: per-dataset/method mean/std of test_acc (ignoring None)
     summary: List[Dict[str, Any]] = []
-    by_key: Dict[Tuple[str, str], List[float]] = {}
+    by_key: Dict[Tuple[str, str], List[Dict[str, Any]]] = {}
     for r in records:
-        if r.get("test_acc") is None:
-            continue
         key = (r["dataset"], r["method"])
-        by_key.setdefault(key, []).append(float(r["test_acc"]))
-    for (ds, method), vals in by_key.items():
-        arr = np.array(vals, dtype=float)
+        by_key.setdefault(key, []).append(r)
+    for (ds, method), items in by_key.items():
+        test_vals = [float(rr["test_acc"]) for rr in items if rr.get("test_acc") is not None]
+        arr = np.array(test_vals, dtype=float) if test_vals else np.array([], dtype=float)
+        runtime_vals = [float(rr["total_runtime_sec"]) for rr in items if rr.get("total_runtime_sec") is not None]
+        success_count = int(sum(1 for rr in items if bool(rr.get("success", False))))
+        total_count = int(len(items))
+        parameter_sources = sorted({str(rr["parameter_source"]) for rr in items if rr.get("parameter_source") is not None})
+        tuning_targets = sorted(
+            {str(rr["parameter_tuning_target_method"]) for rr in items if rr.get("parameter_tuning_target_method") is not None}
+        )
         summary.append(
             {
                 "dataset": ds,
                 "method": method,
                 "n_runs": int(arr.size),
-                "mean_test_acc": float(arr.mean()),
-                "std_test_acc": float(arr.std()),
-                "mean_total_runtime_sec": float(
-                    np.mean(
-                        [
-                            rr["total_runtime_sec"]
-                            for rr in records
-                            if rr["dataset"] == ds and rr["method"] == method and rr.get("total_runtime_sec") is not None
-                        ]
-                    )
-                )
-                if any(rr.get("total_runtime_sec") is not None and rr["dataset"] == ds and rr["method"] == method for rr in records)
-                else None,
+                "n_runs_with_test_acc": int(arr.size),
+                "mean_test_acc": float(arr.mean()) if arr.size > 0 else None,
+                "std_test_acc": float(arr.std()) if arr.size > 0 else None,
+                "mean_total_runtime_sec": float(np.mean(runtime_vals)) if runtime_vals else None,
+                "success_count": success_count,
+                "total_count": total_count,
+                "parameter_source_values": parameter_sources,
+                "parameter_tuning_target_method_values": tuning_targets,
             }
         )
 
@@ -617,7 +628,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
-    # Fairness / configuration report (Stage 1)
+    # Fairness / configuration report (Stage 2)
     fairness_path = os.path.join("logs", "comparison_fairness_report_stage2.md")
     with open(fairness_path, "w", encoding="utf-8") as f:
         f.write("# Fairness / Configuration Report – Stage 2 Internal Pilot (texas, chameleon)\n\n")
@@ -629,7 +640,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
         f.write("## Methods included\n\n")
         for m in methods_to_run:
             if m == "multi_source_priority_bfs":
-                f.write(f"- {m} (excluded from Stage 1 summary; not distinct from priority-BFS yet)\n")
+                f.write(f"- {m} (excluded from Stage 2 summary; not distinct from priority-BFS yet)\n")
             else:
                 f.write(f"- {m}\n")
         f.write("\n## Parameter sharing\n\n")
@@ -659,7 +670,17 @@ def run_stage2_internal(split_dir: Optional[str] = None):
 
 
 def main():
-    run_stage2_internal()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run Stage 2 internal comparison harness.")
+    parser.add_argument(
+        "--split-dir",
+        default=None,
+        help="Optional directory containing GEO-GCN split .npz files.",
+    )
+    args = parser.parse_args()
+
+    run_stage2_internal(split_dir=args.split_dir)
 
 
 if __name__ == "__main__":
