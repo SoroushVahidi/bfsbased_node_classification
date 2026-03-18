@@ -1,0 +1,15 @@
+dataset,kind,node_id,mlp_pred,selective_pred,true_label,outcome,mlp_margin,dominant_term,graph_support,feature_support,interpretation
+citeseer,promising,1876,3,1,1,helped,0.004155784845352173,mlp_term,1.2218085106382979,0.20893485546112062,helped: graph evidence dominated (neighbor+compatibility); margin=0.004
+citeseer,promising,2422,1,2,2,helped,0.00760340690612793,mlp_term,0.6633660321551738,0.2054668664932251,helped: graph evidence dominated (neighbor+compatibility); margin=0.008
+citeseer,promising,2848,5,3,3,helped,0.0177861750125885,mlp_term,1.005979370571793,0.21181094646453857,helped: graph evidence dominated (neighbor+compatibility); margin=0.018
+citeseer,promising,369,1,2,2,helped,0.04793861508369446,graph_neighbor_term,1.2905228758169935,0.20081794261932373,helped: graph evidence dominated (neighbor+compatibility); margin=0.048
+citeseer,promising,2013,0,2,2,helped,0.049576640129089355,graph_neighbor_term,1.2875812036934962,0.20178275108337404,helped: graph evidence dominated (neighbor+compatibility); margin=0.050
+citeseer,promising,696,2,3,3,helped,0.07348397374153137,mlp_term,1.252459549228358,0.2061544179916382,helped: graph evidence dominated (neighbor+compatibility); margin=0.073
+citeseer,promising,2802,2,3,3,helped,0.0973990261554718,mlp_term,0.9001302804360818,0.20720241069793702,helped: graph evidence dominated (neighbor+compatibility); margin=0.097
+citeseer,promising,785,1,3,3,helped,0.09906354546546936,mlp_term,1.2546511627906978,0.2038273334503174,helped: graph evidence dominated (neighbor+compatibility); margin=0.099
+chameleon,mixed,124,2,4,4,helped,0.030708372592926025,mlp_term,0.6925107622288198,0.1965370297431946,helped: graph evidence dominated (neighbor+compatibility); margin=0.031
+chameleon,mixed,1131,2,4,4,helped,0.03444662690162659,mlp_term,0.41632024429262715,0.20000030994415285,helped: graph evidence dominated (neighbor+compatibility); margin=0.034
+chameleon,mixed,189,4,1,1,helped,0.048642873764038086,mlp_term,0.4888866397632117,0.24310154914855958,helped: graph evidence dominated (neighbor+compatibility); margin=0.049
+chameleon,mixed,892,0,1,1,helped,0.05471771955490112,mlp_term,0.34918486183541364,0.22022273540496828,helped: graph evidence dominated (neighbor+compatibility); margin=0.055
+chameleon,mixed,782,1,4,4,helped,0.07643261551856995,mlp_term,0.4388374826697671,0.2040487051010132,helped: graph evidence dominated (neighbor+compatibility); margin=0.076
+chameleon,mixed,1398,4,2,0,changed_wrong_to_wrong,0.007379293441772461,mlp_term,0.29231793010395113,0.19927172660827638,changed_wrong_to_wrong: graph evidence dominated (neighbor+compatibility); margin=0.007
