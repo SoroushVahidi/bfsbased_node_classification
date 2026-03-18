@@ -304,13 +304,13 @@ def robust_random_search(
                     pass 
 
         if not scores: continue
-        agg = np.mean(scores)
+        agg = _trimmed_mean(scores, trim=0.1)
         if agg > best_score:
             best_score = agg
             best_params = params
             
     if best_score == -float("inf") and log_file:
-        write_log("All tuning trials failed. Using fallback.", log_file, tag="TUNING_WARN")
+        write_log("All tuning trials failed. Using Smart Fallback.", log_file, tag="TUNING_WARN")
     
     return best_params, best_score, {}
 
@@ -1133,6 +1133,315 @@ def ensemble_multi_source_bfs_predictclass(
     return torch.tensor(final_preds, device=device), float(test_acc)
 
 # =====================================================
+# BLOCK 3b: Selective Graph Correction
+# =====================================================
+
+def selective_graph_correction_predictclass(
+    data,
+    train_indices,
+    test_indices,
+    *,
+    mlp_probs: "torch.Tensor",
+    val_indices=None,
+    b1: float = 1.0,
+    b2: float = 1.0,
+    b3: float = 1.0,
+    b4: float = 0.5,
+    b5: float = 0.0,
+    threshold_high: float = 0.5,
+    use_feature_knn: bool = False,
+    knn_k: int = 5,
+    tune_on_val: bool = True,
+    tune_n_weight_samples: int = 25,
+    seed: int = 1337,
+    log_file=None,
+    log_prefix: str = "sgc",
+    record_diagnostics: bool = True,
+    diagnostics_run_id=None,
+    diag_log_dir: str = "logs",
+):
+    """
+    Selective graph correction for node classification.
+
+    MLP is the default predictor. Only uncertain nodes (those whose MLP
+    top-1 vs top-2 margin is below ``threshold_high``) are corrected via a
+    weighted score fusion:
+
+      s(u,c) = b1 * log p_mlp(u,c)          [log-MLP prior]
+             + b2 * feature_similarity(u,c)   [prototype similarity]
+             + b3 * neighbor_support(u,c)      [graph neighbor label vote]
+             + b4 * compatibility(u,c)         [class-compat term]
+             + b5 * knn_vote(u,c)              [feature k-NN, optional]
+
+    Confident nodes (margin >= threshold_high) keep their MLP label
+    unchanged.
+
+    If ``val_indices`` is provided and ``tune_on_val=True``, the threshold
+    and b-weights are selected jointly on the validation set with no
+    test-label leakage.
+
+    Returns
+    -------
+    preds_tensor : torch.Tensor
+        Predicted class indices for each element of ``test_indices``.
+    test_acc : float
+        Test accuracy.
+    diagnostics : dict
+        Per-run statistics and per-node correction details.
+    """
+    rng = np.random.default_rng(int(seed))
+    device = data.x.device
+    N = int(data.num_nodes)
+
+    train_indices = np.asarray(train_indices, dtype=np.int64)
+    test_indices = np.asarray(test_indices, dtype=np.int64)
+    y_true = data.y.detach().cpu().numpy().astype(np.int64)
+
+    C = int(y_true.max()) + 1
+    lbl_arr = np.arange(C, dtype=np.int64)
+
+    mlp_probs_np = mlp_probs.detach().cpu().numpy()  # [N, C]
+
+    # ---- MLP predictions and per-node margin ----
+    mlp_preds = mlp_probs_np.argmax(axis=1).astype(np.int64)
+    mlp_top = mlp_probs_np.max(axis=1)
+    tmp = mlp_probs_np.copy()
+    tmp[np.arange(N), mlp_preds] = -1e30
+    mlp_second = tmp.max(axis=1)
+    mlp_margin = mlp_top - mlp_second  # [N]
+
+    # ---- Feature standardisation (from training nodes only) ----
+    train_mask_t = torch.zeros(N, device=device, dtype=torch.bool)
+    train_mask_t[train_indices] = True
+    with torch.no_grad():
+        x_tr = data.x[train_mask_t]
+        if x_tr.size(0) > 1:
+            mu = x_tr.mean(0, keepdim=True)
+            sigma = x_tr.std(0, keepdim=True).clamp_min(1e-6)
+            xz = (data.x - mu) / sigma
+        else:
+            xz = data.x
+
+    # ---- Class prototypes from training nodes ----
+    class_insts: "defaultdict[int, set]" = defaultdict(set)
+    for i in train_indices:
+        class_insts[int(y_true[i])].add(int(i))
+
+    conf_vec_proto = np.zeros(N, dtype=np.float64)
+    conf_vec_proto[train_indices] = 1.0
+
+    D = np.zeros((N, C), dtype=np.float64)
+    _update_D_weighted(D, class_insts, lbl_arr, device, conf_vec_proto, xz)
+
+    # ---- Graph infrastructure ----
+    edge_index = torch.cat([data.edge_index, data.edge_index.flip(0)], dim=1)
+    edge_index = torch.unique(edge_index, dim=1)
+    ei = edge_index.detach().cpu().numpy()
+    src_e, dst_e = ei[0], ei[1]
+
+    neighbors: "list[list[int]]" = [[] for _ in range(N)]
+    for u_e, v_e in zip(src_e, dst_e):
+        neighbors[u_e].append(int(v_e))
+    deg = np.array([len(nbrs) for nbrs in neighbors], dtype=np.int32)
+
+    # Neighbour label counts from training nodes only
+    nbr_cts = np.zeros((N, C), dtype=np.float64)
+    for u_t in train_indices:
+        c_t = int(y_true[u_t])
+        for v_t in neighbors[u_t]:
+            nbr_cts[v_t, c_t] += 1.0
+
+    # Compatibility matrix from train-train edges
+    compat_cts = np.ones((C, C), dtype=np.float64) * 2.0
+    train_set = set(train_indices.tolist())
+    for u_t in train_indices:
+        cu = int(y_true[u_t])
+        for v_t in neighbors[u_t]:
+            if v_t in train_set:
+                cv = int(y_true[v_t])
+                compat_cts[cv, cu] += 1.0
+    compat = compat_cts / compat_cts.sum(axis=0, keepdims=True)
+
+    # ---- Optional feature k-NN vote ----
+    knn_vote: "Optional[np.ndarray]" = None
+    if use_feature_knn and b5 > 0.0 and len(train_indices) > 0:
+        with torch.no_grad():
+            x_t_norm = F.normalize(xz[train_indices], dim=1)
+            x_a_norm = F.normalize(xz, dim=1)
+            sim_mat = (x_a_norm @ x_t_norm.T).cpu().numpy()  # [N, T]
+        actual_k = min(knn_k, len(train_indices))
+        knn_vote = np.zeros((N, C), dtype=np.float64)
+        for u_k in range(N):
+            top_k = np.argpartition(sim_mat[u_k], -actual_k)[-actual_k:]
+            for tidx in top_k:
+                c_k = int(y_true[train_indices[tidx]])
+                knn_vote[u_k, c_k] += 1.0 / actual_k
+
+    # ---- Inner correction function ----
+    def _apply_correction(idx_arr, thresh, wb1, wb2, wb3, wb4, wb5):
+        """Apply selective correction; return (preds, acc, n_uncertain, n_changed, diag_list)."""
+        preds_out = mlp_preds.copy()
+        n_uncertain = 0
+        n_changed = 0
+        diag_list = []
+
+        for ui in idx_arr:
+            u = int(ui)
+            margin_u = float(mlp_margin[u])
+            if margin_u >= thresh:
+                continue  # confident: keep MLP label
+
+            n_uncertain += 1
+            old_lbl = int(mlp_preds[u])
+
+            # b1: log-MLP term
+            s_mlp_t = wb1 * np.log(np.clip(mlp_probs_np[u], 1e-9, None))
+            # b2: feature prototype similarity
+            s_sim = wb2 * D[u]
+            # b3: neighbour support
+            if deg[u] > 0 and nbr_cts[u].sum() > 0:
+                s_neigh = wb3 * nbr_cts[u] / float(deg[u])
+            else:
+                s_neigh = np.zeros(C, dtype=np.float64)
+            # b4: compatibility
+            total_nbr = nbr_cts[u].sum()
+            if total_nbr > 1e-6:
+                s_compat = wb4 * ((nbr_cts[u] / total_nbr) @ compat)
+            else:
+                s_compat = np.zeros(C, dtype=np.float64)
+            # b5: feature k-NN
+            s_knn = wb5 * knn_vote[u] if knn_vote is not None else np.zeros(C, dtype=np.float64)
+
+            final_s = s_mlp_t + s_sim + s_neigh + s_compat + s_knn
+            new_lbl = int(np.argmax(final_s))
+            preds_out[u] = new_lbl
+            changed = new_lbl != old_lbl
+            if changed:
+                n_changed += 1
+
+            if record_diagnostics:
+                diag_list.append({
+                    "node_id": u,
+                    "mlp_pred": old_lbl,
+                    "corrected_pred": new_lbl,
+                    "changed": bool(changed),
+                    "mlp_margin": float(margin_u),
+                    "mlp_top_prob": float(mlp_top[u]),
+                    "true_label": int(y_true[u]),
+                    "mlp_correct": bool(old_lbl == int(y_true[u])),
+                    "corrected_correct": bool(new_lbl == int(y_true[u])),
+                    "components": {
+                        "s_mlp": float(s_mlp_t[new_lbl]),
+                        "s_sim": float(s_sim[new_lbl]),
+                        "s_neigh": float(s_neigh[new_lbl]),
+                        "s_compat": float(s_compat[new_lbl]),
+                        "s_knn": float(s_knn[new_lbl]) if knn_vote is not None else 0.0,
+                    },
+                })
+
+        acc = _simple_accuracy(y_true[idx_arr], preds_out[idx_arr])
+        return preds_out, acc, n_uncertain, n_changed, diag_list
+
+    # ---- Validation tuning ----
+    best_thresh = float(threshold_high)
+    best_b = (float(b1), float(b2), float(b3), float(b4), float(b5))
+
+    if val_indices is not None and tune_on_val:
+        if isinstance(val_indices, torch.Tensor):
+            val_np_t = val_indices.cpu().numpy().astype(np.int64)
+        else:
+            val_np_t = np.asarray(val_indices, dtype=np.int64)
+
+        best_val_acc = -1.0
+
+        thresh_candidates = [0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+
+        # Weight candidates: random search plus fixed fallbacks
+        w_candidates = []
+        for _ in range(tune_n_weight_samples):
+            w_candidates.append((
+                rng.uniform(0.5, 2.0),   # b1: log-MLP
+                rng.uniform(0.0, 2.0),   # b2: feature sim
+                rng.uniform(0.0, 2.0),   # b3: neighbour
+                rng.uniform(0.0, 1.0),   # b4: compat
+                0.0,                     # b5: k-NN (disabled by default)
+            ))
+        w_candidates += [
+            (1.0, 1.0, 1.0, 0.5, 0.0),
+            (1.0, 0.5, 0.5, 0.0, 0.0),
+            (2.0, 1.0, 0.5, 0.0, 0.0),
+            (1.0, 2.0, 0.0, 0.0, 0.0),
+            (1.5, 0.0, 1.0, 0.5, 0.0),
+        ]
+
+        for thresh in thresh_candidates:
+            for wb1, wb2, wb3, wb4, wb5 in w_candidates:
+                _, val_acc_c, _, _, _ = _apply_correction(val_np_t, thresh, wb1, wb2, wb3, wb4, wb5)
+                if val_acc_c > best_val_acc:
+                    best_val_acc = val_acc_c
+                    best_thresh = thresh
+                    best_b = (wb1, wb2, wb3, wb4, wb5)
+
+        if log_file:
+            write_log(
+                f"Tuned: threshold={best_thresh:.2f} b={[f'{x:.3f}' for x in best_b]} "
+                f"val_acc={best_val_acc:.4f}",
+                log_file,
+                tag=f"{log_prefix}:TUNE",
+            )
+
+    b1_u, b2_u, b3_u, b4_u, b5_u = best_b
+
+    # ---- Apply correction to test set ----
+    final_preds, test_acc, n_uncertain, n_changed, diag_list = _apply_correction(
+        test_indices, best_thresh, b1_u, b2_u, b3_u, b4_u, b5_u
+    )
+
+    if log_file:
+        frac_u = n_uncertain / max(len(test_indices), 1)
+        frac_c = n_changed / max(n_uncertain, 1)
+        write_log(
+            f"Test acc={test_acc:.4f} | uncertain={n_uncertain}/{len(test_indices)} ({frac_u:.2%}) "
+            f"| changed={n_changed}/{n_uncertain} ({frac_c:.2%})",
+            log_file,
+            tag=f"{log_prefix}:DONE",
+        )
+
+    diagnostics = {
+        "threshold_high": float(best_thresh),
+        "b1": float(b1_u),
+        "b2": float(b2_u),
+        "b3": float(b3_u),
+        "b4": float(b4_u),
+        "b5": float(b5_u),
+        "use_feature_knn": bool(use_feature_knn),
+        "n_test": int(len(test_indices)),
+        "n_uncertain": int(n_uncertain),
+        "n_changed": int(n_changed),
+        "test_acc": float(test_acc),
+        "node_diagnostics": diag_list if record_diagnostics else [],
+    }
+
+    # Persist node-level diagnostics
+    if record_diagnostics and diag_list:
+        try:
+            run_id = diagnostics_run_id or f"{log_prefix}_{int(time.time())}"
+            os.makedirs(diag_log_dir, exist_ok=True)
+            diag_path = os.path.join(diag_log_dir, f"sgc_{run_id}_diagnostics.json")
+            with open(diag_path, "w", encoding="utf-8") as _df:
+                json.dump(diagnostics, _df)
+        except Exception as _de:
+            if log_file:
+                write_log(
+                    f"Failed to write diagnostics JSON: {_de}",
+                    log_file,
+                    tag=f"{log_prefix}:DIAG_ERR",
+                )
+
+    return torch.tensor(final_preds[test_indices], device=device), test_acc, diagnostics
+
+
+# =====================================================
 # BLOCK 4: MLP Model
 # =====================================================
 
@@ -1165,31 +1474,61 @@ class SimpleMLP(nn.Module):
         x = self.convs[-1](x)
         return x
 
-def train_mlp_and_predict(data, train_indices, hidden=64, layers=2, dropout=0.5, lr=0.01, epochs=200, log_file=None):
+def train_mlp_and_predict(data, train_indices, hidden=64, layers=2, dropout=0.5, lr=0.01, epochs=200, log_file=None,
+                          val_indices=None, patience=30):
     device = data.x.device
     input_dim = data.x.shape[1]
     num_classes = int(data.y.max().item()) + 1
     
     model = SimpleMLP(input_dim, hidden, num_classes, layers, dropout).to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=5e-4)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=lr * 0.01)
     loss_fn = nn.CrossEntropyLoss()
     
     train_mask = torch.zeros(data.num_nodes, dtype=torch.bool, device=device)
     train_mask[train_indices] = True
     
-    model.train()
+    # Early stopping state
+    best_state = None
+    best_val_acc = -1.0
+    bad_epochs = 0
+    
     if log_file:
-        write_log(f"    [MLP] Training for {epochs} epochs...", log_file)
+        write_log(f"Starting MLP training for {epochs} epochs...", log_file, tag="MLP")
     
     for epoch in range(epochs):
+        model.train()
         optimizer.zero_grad()
         out = model(data.x)
         loss = loss_fn(out[train_mask], data.y[train_mask])
         loss.backward()
         optimizer.step()
+        scheduler.step()
         
         if log_file and (epoch + 1) % 50 == 0:
-            write_log(f"      Epoch {epoch+1:03d} | Loss: {loss.item():.4f}", log_file)
+            write_log(f"Epoch {epoch+1:03d} | Loss: {loss.item():.4f}", log_file, tag="MLP")
+
+        # Early stopping on validation set
+        if val_indices is not None:
+            model.eval()
+            with torch.no_grad():
+                val_out = model(data.x)
+                val_preds = val_out.argmax(dim=1)
+                val_acc = float((val_preds[val_indices] == data.y[val_indices]).float().mean().item())
+            if val_acc > best_val_acc + 1e-4:
+                best_val_acc = val_acc
+                best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+                bad_epochs = 0
+            else:
+                bad_epochs += 1
+                if bad_epochs >= patience:
+                    if log_file:
+                        write_log(f"Early stopping at epoch {epoch+1} (best val={best_val_acc:.4f})", log_file, tag="MLP")
+                    break
+
+    # Restore best model when using early stopping
+    if best_state is not None:
+        model.load_state_dict({k: v.to(device) for k, v in best_state.items()})
         
     model.eval()
     with torch.no_grad():
@@ -1276,7 +1615,8 @@ for run in range(num_iterations):
         np.random.seed(current_seed)
         
         # 1. MLP ONLY
-        mlp_probs, _ = train_mlp_and_predict(data, train_idx, hidden=64, layers=2, dropout=0.5, epochs=200, log_file=LOG_FILE)
+        mlp_probs, _ = train_mlp_and_predict(data, train_idx, hidden=64, layers=2, dropout=0.5, epochs=200, log_file=LOG_FILE,
+                                              val_indices=val_idx, patience=30)
         max_probs, preds_mlp_all = mlp_probs.max(dim=1)
         
         acc_val_mlp = (preds_mlp_all[val_idx] == data.y[val_idx]).float().mean().item()
