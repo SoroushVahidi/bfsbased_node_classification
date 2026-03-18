@@ -304,13 +304,13 @@ def robust_random_search(
                     pass 
 
         if not scores: continue
-        agg = np.mean(scores)
+        agg = _trimmed_mean(scores, trim=0.1)
         if agg > best_score:
             best_score = agg
             best_params = params
             
     if best_score == -float("inf") and log_file:
-        write_log("All tuning trials failed. Using fallback.", log_file, tag="TUNING_WARN")
+        write_log("All tuning trials failed. Using Smart Fallback.", log_file, tag="TUNING_WARN")
     
     return best_params, best_score, {}
 
@@ -1165,31 +1165,61 @@ class SimpleMLP(nn.Module):
         x = self.convs[-1](x)
         return x
 
-def train_mlp_and_predict(data, train_indices, hidden=64, layers=2, dropout=0.5, lr=0.01, epochs=200, log_file=None):
+def train_mlp_and_predict(data, train_indices, hidden=64, layers=2, dropout=0.5, lr=0.01, epochs=200, log_file=None,
+                          val_indices=None, patience=30):
     device = data.x.device
     input_dim = data.x.shape[1]
     num_classes = int(data.y.max().item()) + 1
     
     model = SimpleMLP(input_dim, hidden, num_classes, layers, dropout).to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=5e-4)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=lr * 0.01)
     loss_fn = nn.CrossEntropyLoss()
     
     train_mask = torch.zeros(data.num_nodes, dtype=torch.bool, device=device)
     train_mask[train_indices] = True
     
-    model.train()
+    # Early stopping state
+    best_state = None
+    best_val_acc = -1.0
+    bad_epochs = 0
+    
     if log_file:
-        write_log(f"    [MLP] Training for {epochs} epochs...", log_file)
+        write_log(f"Starting MLP training for {epochs} epochs...", log_file, tag="MLP")
     
     for epoch in range(epochs):
+        model.train()
         optimizer.zero_grad()
         out = model(data.x)
         loss = loss_fn(out[train_mask], data.y[train_mask])
         loss.backward()
         optimizer.step()
+        scheduler.step()
         
         if log_file and (epoch + 1) % 50 == 0:
-            write_log(f"      Epoch {epoch+1:03d} | Loss: {loss.item():.4f}", log_file)
+            write_log(f"Epoch {epoch+1:03d} | Loss: {loss.item():.4f}", log_file, tag="MLP")
+
+        # Early stopping on validation set
+        if val_indices is not None:
+            model.eval()
+            with torch.no_grad():
+                val_out = model(data.x)
+                val_preds = val_out.argmax(dim=1)
+                val_acc = float((val_preds[val_indices] == data.y[val_indices]).float().mean().item())
+            if val_acc > best_val_acc + 1e-4:
+                best_val_acc = val_acc
+                best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+                bad_epochs = 0
+            else:
+                bad_epochs += 1
+                if bad_epochs >= patience:
+                    if log_file:
+                        write_log(f"Early stopping at epoch {epoch+1} (best val={best_val_acc:.4f})", log_file, tag="MLP")
+                    break
+
+    # Restore best model when using early stopping
+    if best_state is not None:
+        model.load_state_dict({k: v.to(device) for k, v in best_state.items()})
         
     model.eval()
     with torch.no_grad():
@@ -1276,7 +1306,8 @@ for run in range(num_iterations):
         np.random.seed(current_seed)
         
         # 1. MLP ONLY
-        mlp_probs, _ = train_mlp_and_predict(data, train_idx, hidden=64, layers=2, dropout=0.5, epochs=200, log_file=LOG_FILE)
+        mlp_probs, _ = train_mlp_and_predict(data, train_idx, hidden=64, layers=2, dropout=0.5, epochs=200, log_file=LOG_FILE,
+                                              val_indices=val_idx, patience=30)
         max_probs, preds_mlp_all = mlp_probs.max(dim=1)
         
         acc_val_mlp = (preds_mlp_all[val_idx] == data.y[val_idx]).float().mean().item()
