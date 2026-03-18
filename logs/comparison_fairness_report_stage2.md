@@ -7,7 +7,7 @@
 
 ## Splits and repeats
 
-- Splits: GEO-GCN splits (split_id = 0..9)
+- Splits: GEO-GCN canonical splits available for all selected datasets (10 total): [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 - Repeats per split: 1
 
 ## Methods included
