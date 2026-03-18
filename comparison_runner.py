@@ -56,40 +56,54 @@ def resolve_split_file(
       d) our repo root
       e) any subdirectory under our shared data root
     """
-    fname = f"{dataset_key.lower()}_split_0.6_0.2_{split_id}.npz"
+    ds_key = dataset_key.lower()
+    split_name_candidates = [ds_key]
+    # Canonical GEO-GCN split files use "film" for Actor.
+    if ds_key == "actor":
+        split_name_candidates.append("film")
+
+    def _probe_in_dir(base_dir: str) -> Optional[str]:
+        for name in split_name_candidates:
+            fname_local = f"{name}_split_0.6_0.2_{split_id}.npz"
+            cand_local = os.path.join(base_dir, fname_local)
+            if os.path.isfile(cand_local):
+                return cand_local
+        return None
 
     # (a) explicit split_dir
     if split_dir:
-        cand = os.path.join(split_dir, fname)
-        if os.path.isfile(cand):
+        cand = _probe_in_dir(split_dir)
+        if cand:
             return cand
 
     # (b) GEO_GCN_SPLIT_DIR env var
     env_dir = os.environ.get("GEO_GCN_SPLIT_DIR")
     if env_dir:
-        cand = os.path.join(env_dir, fname)
-        if os.path.isfile(cand):
+        cand = _probe_in_dir(env_dir)
+        if cand:
             return cand
 
     # (c) DIFFUSION_JUMP_REPO/splits
     dj_root = _get_dj_repo_root()
     if dj_root:
-        cand = os.path.join(dj_root, "splits", fname)
-        if os.path.isfile(cand):
+        cand = _probe_in_dir(os.path.join(dj_root, "splits"))
+        if cand:
             return cand
 
     # (d) our repo root
     repo_root = _get_repo_root()
-    cand_root = os.path.join(repo_root, fname)
-    if os.path.isfile(cand_root):
+    cand_root = _probe_in_dir(repo_root)
+    if cand_root:
         return cand_root
 
     # (e) search under shared data directory
     data_root = os.path.join(repo_root, "data")
     if os.path.isdir(data_root):
+        wanted_files = {f"{name}_split_0.6_0.2_{split_id}.npz" for name in split_name_candidates}
         for root, _dirs, files in os.walk(data_root):
-            if fname in files:
-                return os.path.join(root, fname)
+            for wanted in wanted_files:
+                if wanted in files:
+                    return os.path.join(root, wanted)
 
     return None
 
@@ -258,6 +272,9 @@ def run_stage2_internal(
     repeats: int = 1,
     methods_to_run: Optional[List[str]] = None,
     output_tag: str = "stage2",
+    candidate_datasets: Optional[List[str]] = None,
+    excluded_datasets: Optional[Dict[str, str]] = None,
+    split_coverage_status: Optional[Dict[str, Dict[str, Any]]] = None,
 ):
     """
     Configurable internal comparison harness.
@@ -265,6 +282,8 @@ def run_stage2_internal(
     mod = _load_full_investigate_module()
 
     datasets = [d.lower() for d in (datasets or ["texas", "chameleon"])]
+    candidate_datasets = [d.lower() for d in (candidate_datasets or datasets)]
+    excluded_datasets = excluded_datasets or {}
     if split_ids is None:
         split_ids = _common_available_split_ids(datasets, split_dir=split_dir, max_split_id=100)
         if not split_ids:
@@ -745,9 +764,29 @@ def run_stage2_internal(
         for ds in datasets:
             f.write(f"- {ds}\n")
         f.write("\n")
+        f.write("## Candidate dataset coverage and exclusions\n\n")
+        f.write(f"- Candidate datasets requested: {candidate_datasets}\n")
+        f.write(f"- Included datasets executed: {datasets}\n")
+        if excluded_datasets:
+            f.write("- Excluded datasets and reasons:\n")
+            for ds, reason in excluded_datasets.items():
+                f.write(f"  - {ds}: {reason}\n")
+        else:
+            f.write("- Excluded datasets and reasons: none\n")
+        if split_coverage_status:
+            f.write("\n- Split coverage status:\n")
+            for ds in candidate_datasets:
+                item = split_coverage_status.get(ds, {})
+                have = item.get("available_split_ids", [])
+                complete = bool(item.get("has_complete_0_9", False))
+                f.write(f"  - {ds}: has_complete_0_9={complete}, available_split_ids={have}\n")
+        f.write("\n")
         f.write("## Splits and repeats\n\n")
         f.write(f"- Splits: GEO-GCN canonical splits available for all selected datasets ({len(split_ids)} total): {split_ids}\n")
         f.write(f"- Repeats per split: {repeats}\n\n")
+        f.write("## Split policy\n\n")
+        f.write("- Random split fallback is disabled for this benchmark setup.\n")
+        f.write("- Datasets without complete canonical split coverage are excluded.\n\n")
         f.write("## Methods included\n\n")
         for m in methods_to_run:
             if m == "multi_source_priority_bfs":
