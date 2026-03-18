@@ -1,0 +1,76 @@
+[
+  {
+    "dataset": "actor",
+    "methods": {
+      "mlp_only": {
+        "mean_test_acc": 0.34208333293596904,
+        "std_test_acc": 0.009293926319911043,
+        "mean_total_runtime_sec": 1.9542229191031462,
+        "success_count": 30,
+        "total_count": 30
+      },
+      "prop_only": {
+        "mean_test_acc": 0.32256578947368425,
+        "std_test_acc": 0.019201173822901697,
+        "mean_total_runtime_sec": 75.90893893746252,
+        "success_count": 30,
+        "total_count": 30
+      },
+      "selective_graph_correction": {
+        "mean_test_acc": 0.3418859649122807,
+        "std_test_acc": 0.008782887892324908,
+        "mean_total_runtime_sec": 0.3809293252309241,
+        "success_count": 30,
+        "total_count": 30
+      }
+    },
+    "selective_vs_mlp": {
+      "mean_delta": -0.00019736802368832868,
+      "std_delta": 0.002610385403012802,
+      "wins": 16,
+      "losses": 14,
+      "ties": 0,
+      "sign_test_p": 0.8555355519056321,
+      "avg_uncertain_frac": 0.16164473684210526,
+      "avg_changed_frac": 0.035416666666666666,
+      "classification": "neutral"
+    }
+  },
+  {
+    "dataset": "cornell",
+    "methods": {
+      "mlp_only": {
+        "mean_test_acc": 0.734234235684077,
+        "std_test_acc": 0.04987607998204311,
+        "mean_total_runtime_sec": 0.21929543506897364,
+        "success_count": 30,
+        "total_count": 30
+      },
+      "prop_only": {
+        "mean_test_acc": 0.5045045045045045,
+        "std_test_acc": 0.08669269710788761,
+        "mean_total_runtime_sec": 1.3949896151985741,
+        "success_count": 30,
+        "total_count": 30
+      },
+      "selective_graph_correction": {
+        "mean_test_acc": 0.7315315315315316,
+        "std_test_acc": 0.04831382946952045,
+        "mean_total_runtime_sec": 0.006394572496841041,
+        "success_count": 30,
+        "total_count": 30
+      }
+    },
+    "selective_vs_mlp": {
+      "mean_delta": -0.002702704152545399,
+      "std_delta": 0.020164893357054882,
+      "wins": 14,
+      "losses": 16,
+      "ties": 0,
+      "sign_test_p": 0.8555355519056321,
+      "avg_uncertain_frac": 0.03063063063063063,
+      "avg_changed_frac": 0.013513513513513514,
+      "classification": "neutral"
+    }
+  }
+]

@@ -1,0 +1,402 @@
+{
+  "per_dataset_stability": [
+    {
+      "dataset": "cora",
+      "n_runs": 30,
+      "threshold_mean": 0.5917086333333333,
+      "threshold_std": 0.07146948876198073,
+      "threshold_cluster_counts": {
+        "low_lt_0.15": 0,
+        "mid_0.15_to_0.45": 0,
+        "high_ge_0.45": 30
+      },
+      "top_weight_tuples": [
+        {
+          "tuple": [
+            1.0,
+            0.4,
+            0.0,
+            0.9,
+            0.5
+          ],
+          "count": 30,
+          "fraction": 1.0
+        }
+      ],
+      "dominant_weight_tuple": [
+        1.0,
+        0.4,
+        0.0,
+        0.9,
+        0.5
+      ],
+      "dominant_weight_fraction": 1.0,
+      "avg_uncertain_frac": 0.21415157612340707,
+      "avg_changed_frac": 0.046143527833668686,
+      "zero_uncertain_runs": 0,
+      "zero_uncertain_fraction": 0.0,
+      "zero_changed_runs": 0,
+      "zero_changed_fraction": 0.0,
+      "mean_selective_minus_mlp": 0.03534540366119063,
+      "safe_fallback_indicator": "weak_or_not_fallback_dominant"
+    },
+    {
+      "dataset": "citeseer",
+      "n_runs": 30,
+      "threshold_mean": 0.5590082333333334,
+      "threshold_std": 0.08713987398838847,
+      "threshold_cluster_counts": {
+        "low_lt_0.15": 0,
+        "mid_0.15_to_0.45": 1,
+        "high_ge_0.45": 29
+      },
+      "top_weight_tuples": [
+        {
+          "tuple": [
+            1.0,
+            0.4,
+            0.0,
+            0.9,
+            0.5
+          ],
+          "count": 30,
+          "fraction": 1.0
+        }
+      ],
+      "dominant_weight_tuple": [
+        1.0,
+        0.4,
+        0.0,
+        0.9,
+        0.5
+      ],
+      "dominant_weight_fraction": 1.0,
+      "avg_uncertain_frac": 0.21376588853003947,
+      "avg_changed_frac": 0.049395149866847975,
+      "zero_uncertain_runs": 0,
+      "zero_uncertain_fraction": 0.0,
+      "zero_changed_runs": 0,
+      "zero_changed_fraction": 0.0,
+      "mean_selective_minus_mlp": 0.02442914052736991,
+      "safe_fallback_indicator": "weak_or_not_fallback_dominant"
+    },
+    {
+      "dataset": "chameleon",
+      "n_runs": 30,
+      "threshold_mean": 0.11499999999999998,
+      "threshold_std": 0.06726812023536856,
+      "threshold_cluster_counts": {
+        "low_lt_0.15": 19,
+        "mid_0.15_to_0.45": 11,
+        "high_ge_0.45": 0
+      },
+      "top_weight_tuples": [
+        {
+          "tuple": [
+            1.0,
+            0.4,
+            0.0,
+            0.9,
+            0.5
+          ],
+          "count": 12,
+          "fraction": 0.4
+        },
+        {
+          "tuple": [
+            1.0,
+            0.9,
+            0.0,
+            0.3,
+            0.2
+          ],
+          "count": 7,
+          "fraction": 0.23333333333333334
+        },
+        {
+          "tuple": [
+            1.0,
+            0.6,
+            0.0,
+            0.5,
+            0.3
+          ],
+          "count": 6,
+          "fraction": 0.2
+        }
+      ],
+      "dominant_weight_tuple": [
+        1.0,
+        0.4,
+        0.0,
+        0.9,
+        0.5
+      ],
+      "dominant_weight_fraction": 0.4,
+      "avg_uncertain_frac": 0.0692251461988304,
+      "avg_changed_frac": 0.013011695906432749,
+      "zero_uncertain_runs": 0,
+      "zero_uncertain_fraction": 0.0,
+      "zero_changed_runs": 0,
+      "zero_changed_fraction": 0.0,
+      "mean_selective_minus_mlp": 0.0007309912589558339,
+      "safe_fallback_indicator": "weak_or_not_fallback_dominant"
+    },
+    {
+      "dataset": "texas",
+      "n_runs": 30,
+      "threshold_mean": 0.05333333333333335,
+      "threshold_std": 0.012472191289246471,
+      "threshold_cluster_counts": {
+        "low_lt_0.15": 30,
+        "mid_0.15_to_0.45": 0,
+        "high_ge_0.45": 0
+      },
+      "top_weight_tuples": [
+        {
+          "tuple": [
+            1.0,
+            0.6,
+            0.0,
+            0.5,
+            0.3
+          ],
+          "count": 27,
+          "fraction": 0.9
+        },
+        {
+          "tuple": [
+            1.0,
+            0.4,
+            0.0,
+            0.9,
+            0.5
+          ],
+          "count": 2,
+          "fraction": 0.06666666666666667
+        },
+        {
+          "tuple": [
+            1.0,
+            0.9,
+            0.0,
+            0.3,
+            0.2
+          ],
+          "count": 1,
+          "fraction": 0.03333333333333333
+        }
+      ],
+      "dominant_weight_tuple": [
+        1.0,
+        0.6,
+        0.0,
+        0.5,
+        0.3
+      ],
+      "dominant_weight_fraction": 0.9,
+      "avg_uncertain_frac": 0.036036036036036036,
+      "avg_changed_frac": 0.014414414414414415,
+      "zero_uncertain_runs": 9,
+      "zero_uncertain_fraction": 0.3,
+      "zero_changed_runs": 17,
+      "zero_changed_fraction": 0.5666666666666667,
+      "mean_selective_minus_mlp": -0.001801808191849293,
+      "safe_fallback_indicator": "strong"
+    },
+    {
+      "dataset": "actor",
+      "n_runs": 30,
+      "threshold_mean": 0.12156586666666666,
+      "threshold_std": 0.0977941690639864,
+      "threshold_cluster_counts": {
+        "low_lt_0.15": 22,
+        "mid_0.15_to_0.45": 8,
+        "high_ge_0.45": 0
+      },
+      "top_weight_tuples": [
+        {
+          "tuple": [
+            1.0,
+            0.9,
+            0.0,
+            0.3,
+            0.2
+          ],
+          "count": 12,
+          "fraction": 0.4
+        },
+        {
+          "tuple": [
+            1.0,
+            0.4,
+            0.0,
+            0.9,
+            0.5
+          ],
+          "count": 10,
+          "fraction": 0.3333333333333333
+        },
+        {
+          "tuple": [
+            1.0,
+            0.6,
+            0.0,
+            0.5,
+            0.3
+          ],
+          "count": 4,
+          "fraction": 0.13333333333333333
+        }
+      ],
+      "dominant_weight_tuple": [
+        1.0,
+        0.9,
+        0.0,
+        0.3,
+        0.2
+      ],
+      "dominant_weight_fraction": 0.4,
+      "avg_uncertain_frac": 0.16164473684210526,
+      "avg_changed_frac": 0.035416666666666666,
+      "zero_uncertain_runs": 0,
+      "zero_uncertain_fraction": 0.0,
+      "zero_changed_runs": 0,
+      "zero_changed_fraction": 0.0,
+      "mean_selective_minus_mlp": -0.00019736802368832868,
+      "safe_fallback_indicator": "weak_or_not_fallback_dominant"
+    },
+    {
+      "dataset": "cornell",
+      "n_runs": 30,
+      "threshold_mean": 0.05000000000000002,
+      "threshold_std": 1.3877787807814457e-17,
+      "threshold_cluster_counts": {
+        "low_lt_0.15": 30,
+        "mid_0.15_to_0.45": 0,
+        "high_ge_0.45": 0
+      },
+      "top_weight_tuples": [
+        {
+          "tuple": [
+            1.0,
+            0.6,
+            0.0,
+            0.5,
+            0.3
+          ],
+          "count": 27,
+          "fraction": 0.9
+        },
+        {
+          "tuple": [
+            1.0,
+            0.9,
+            0.0,
+            0.3,
+            0.2
+          ],
+          "count": 2,
+          "fraction": 0.06666666666666667
+        },
+        {
+          "tuple": [
+            1.0,
+            0.4,
+            0.0,
+            0.9,
+            0.5
+          ],
+          "count": 1,
+          "fraction": 0.03333333333333333
+        }
+      ],
+      "dominant_weight_tuple": [
+        1.0,
+        0.6,
+        0.0,
+        0.5,
+        0.3
+      ],
+      "dominant_weight_fraction": 0.9,
+      "avg_uncertain_frac": 0.03063063063063063,
+      "avg_changed_frac": 0.013513513513513514,
+      "zero_uncertain_runs": 8,
+      "zero_uncertain_fraction": 0.26666666666666666,
+      "zero_changed_runs": 18,
+      "zero_changed_fraction": 0.6,
+      "mean_selective_minus_mlp": -0.002702704152545399,
+      "safe_fallback_indicator": "strong"
+    },
+    {
+      "dataset": "wisconsin",
+      "n_runs": 30,
+      "threshold_mean": 0.06000000000000002,
+      "threshold_std": 0.03741657386773942,
+      "threshold_cluster_counts": {
+        "low_lt_0.15": 29,
+        "mid_0.15_to_0.45": 1,
+        "high_ge_0.45": 0
+      },
+      "top_weight_tuples": [
+        {
+          "tuple": [
+            1.0,
+            0.6,
+            0.0,
+            0.5,
+            0.3
+          ],
+          "count": 22,
+          "fraction": 0.7333333333333333
+        },
+        {
+          "tuple": [
+            1.0,
+            0.4,
+            0.0,
+            0.9,
+            0.5
+          ],
+          "count": 4,
+          "fraction": 0.13333333333333333
+        },
+        {
+          "tuple": [
+            1.0,
+            0.9,
+            0.0,
+            0.3,
+            0.2
+          ],
+          "count": 3,
+          "fraction": 0.1
+        }
+      ],
+      "dominant_weight_tuple": [
+        1.0,
+        0.6,
+        0.0,
+        0.5,
+        0.3
+      ],
+      "dominant_weight_fraction": 0.7333333333333333,
+      "avg_uncertain_frac": 0.01437908496732026,
+      "avg_changed_frac": 0.00392156862745098,
+      "zero_uncertain_runs": 17,
+      "zero_uncertain_fraction": 0.5666666666666667,
+      "zero_changed_runs": 24,
+      "zero_changed_fraction": 0.8,
+      "mean_selective_minus_mlp": -0.0032679825047262447,
+      "safe_fallback_indicator": "strong"
+    }
+  ],
+  "group_summary": {
+    "promising_avg_threshold_mean": 0.5753584333333334,
+    "controls_avg_threshold_mean": 0.07997984000000001,
+    "promising_avg_dominant_weight_fraction": 1.0,
+    "controls_avg_dominant_weight_fraction": 0.6666666666666667,
+    "promising_avg_zero_changed_fraction": 0.0,
+    "controls_avg_zero_changed_fraction": 0.3933333333333333
+  }
+}
