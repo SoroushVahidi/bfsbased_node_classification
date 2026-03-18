@@ -1297,6 +1297,532 @@ def _safe_sigmoid(x: np.ndarray) -> np.ndarray:
     return 1.0 / (1.0 + np.exp(-x))
 
 
+def compute_mlp_margin(mlp_probs: torch.Tensor) -> Dict[str, np.ndarray]:
+    """
+    Compute MLP predictions, confidence, and margin from probabilities.
+    """
+    probs_np = mlp_probs.detach().cpu().numpy().astype(np.float64)
+    pred, top1, top2, margin = _top1_top2_margin(probs_np)
+    return {
+        "mlp_probs_np": probs_np,
+        "mlp_pred_all": pred,
+        "mlp_top1_all": top1,
+        "mlp_top2_all": top2,
+        "mlp_margin_all": margin,
+    }
+
+
+def _build_selective_correction_evidence(
+    data,
+    train_indices: np.ndarray,
+    *,
+    mlp_probs_np: np.ndarray,
+    min_labeled_neighbors_for_full_weight: int = 2,
+    enable_feature_knn: bool = False,
+    feature_knn_k: int = 5,
+) -> Dict[str, np.ndarray]:
+    """
+    Build class-wise evidence matrices for feature-first selective graph correction.
+    """
+    device = data.x.device
+    y_true = data.y.detach().cpu().numpy().astype(np.int64)
+    train_indices = np.asarray(train_indices, dtype=np.int64)
+    N = int(data.num_nodes)
+    C = int(max(int(y_true.max()) + 1, mlp_probs_np.shape[1]))
+
+    # Graph (same preprocessing style as predictclass)
+    edge_index = torch.cat([data.edge_index, data.edge_index.flip(0)], dim=1)
+    edge_index = torch.unique(edge_index, dim=1)
+    ei = edge_index.detach().cpu().numpy()
+    src, dst = ei[0], ei[1]
+
+    neighbors = [[] for _ in range(N)]
+    for u, v in zip(src, dst):
+        neighbors[int(u)].append(int(v))
+    deg = np.array([len(nbrs) for nbrs in neighbors], dtype=np.int32)
+
+    train_mask_np = np.zeros(N, dtype=bool)
+    train_mask_np[train_indices] = True
+
+    # Compatibility from train-train edges
+    compat_cts = np.ones((C, C), dtype=np.float64) * 2.0
+    tr_src = src[train_mask_np[src]]
+    tr_dst = dst[train_mask_np[src]]
+    mask_tt = train_mask_np[tr_dst]
+    if mask_tt.any():
+        u_tt, v_tt = tr_src[mask_tt], tr_dst[mask_tt]
+        np.add.at(compat_cts, (y_true[v_tt], y_true[u_tt]), 1.0)
+    compat = compat_cts / compat_cts.sum(axis=0, keepdims=True)
+
+    # Feature standardization (train stats)
+    train_mask_t = torch.zeros(N, device=device, dtype=torch.bool)
+    train_mask_t[train_indices] = True
+    with torch.no_grad():
+        x_tr = data.x[train_mask_t]
+        if x_tr.size(0) > 1:
+            mu = x_tr.mean(0, keepdim=True)
+            sigma = x_tr.std(0, keepdim=True).clamp_min(1e-6)
+            xz = (data.x - mu) / sigma
+        else:
+            xz = data.x
+
+    # Soft node states: train nodes are hard labels, others use MLP probs.
+    node_state_vec = np.zeros((N, C), dtype=np.float64)
+    node_state_conf = np.zeros(N, dtype=np.float64)
+    class_insts = defaultdict(set)
+    for i in train_indices:
+        ii = int(i)
+        yi = int(y_true[ii])
+        node_state_vec[ii, yi] = 1.0
+        node_state_conf[ii] = 1.0
+        class_insts[yi].add(ii)
+    unlabeled_idx = np.where(~train_mask_np)[0]
+    node_state_vec[unlabeled_idx] = mlp_probs_np[unlabeled_idx]
+    node_state_conf[unlabeled_idx] = mlp_probs_np[unlabeled_idx].max(axis=1)
+
+    # Neighbor evidence aggregation
+    nbr_dist = np.zeros((N, C), dtype=np.float64)
+    nbr_conf_sum = np.zeros(N, dtype=np.float64)
+    support_train_neighbors = np.zeros(N, dtype=np.int32)
+
+    for u in range(N):
+        if node_state_conf[u] <= 0:
+            continue
+        vec_u = node_state_vec[u]
+        conf_u = node_state_conf[u]
+        for v in neighbors[u]:
+            nbr_dist[v] += vec_u
+            nbr_conf_sum[v] += conf_u
+            if train_mask_np[u]:
+                support_train_neighbors[v] += 1
+
+    # Feature-prototype similarity matrix D
+    D = np.zeros((N, C), dtype=np.float64)
+    lbl_arr = np.arange(C, dtype=np.int64)
+    _update_D_weighted(D, class_insts, lbl_arr, device, node_state_conf, xz)
+
+    graph_neighbor_support = np.zeros((N, C), dtype=np.float64)
+    compatibility_support = np.zeros((N, C), dtype=np.float64)
+    neighbor_class_entropy = np.zeros(N, dtype=np.float64)
+
+    for u in range(N):
+        if deg[u] > 0:
+            dist_vec = nbr_dist[u] / float(deg[u])
+            dist_mass = dist_vec.sum()
+            if dist_mass > 1e-12:
+                neigh_prob = dist_vec / dist_mass
+            else:
+                neigh_prob = np.zeros(C, dtype=np.float64)
+            graph_neighbor_support[u] = neigh_prob
+
+            total_mass = nbr_dist[u].sum()
+            if total_mass > 1e-12:
+                norm_dist = nbr_dist[u] / total_mass
+                compatibility_support[u] = norm_dist @ compat
+            else:
+                compatibility_support[u] = np.full(C, 1.0 / C, dtype=np.float64)
+
+            nz = neigh_prob > 1e-12
+            neighbor_class_entropy[u] = float(-(neigh_prob[nz] * np.log(neigh_prob[nz])).sum()) if nz.any() else 0.0
+        else:
+            graph_neighbor_support[u] = np.zeros(C, dtype=np.float64)
+            compatibility_support[u] = np.full(C, 1.0 / C, dtype=np.float64)
+            neighbor_class_entropy[u] = 0.0
+
+    # Optional feature-space kNN vote (off by default for v1).
+    feature_knn_vote = np.zeros((N, C), dtype=np.float64)
+    if enable_feature_knn and feature_knn_k > 0 and train_indices.size > 0:
+        x_np = xz.detach().cpu().numpy().astype(np.float64)
+        x_train = x_np[train_indices]
+        y_train = y_true[train_indices]
+        k = min(int(feature_knn_k), int(train_indices.size))
+        if k > 0:
+            x_norm = np.linalg.norm(x_np, axis=1, keepdims=True) + 1e-12
+            x_train_norm = np.linalg.norm(x_train, axis=1, keepdims=True) + 1e-12
+            sim = (x_np @ x_train.T) / (x_norm * x_train_norm.T)
+            top_idx = np.argpartition(-sim, kth=k - 1, axis=1)[:, :k]
+            top_sim = np.take_along_axis(sim, top_idx, axis=1)
+            top_lbl = y_train[top_idx]
+            top_w = np.clip(top_sim, 0.0, None) + 1e-6
+            for c in range(C):
+                mask_c = (top_lbl == c)
+                feature_knn_vote[:, c] = (top_w * mask_c).sum(axis=1)
+            row_sum = feature_knn_vote.sum(axis=1, keepdims=True)
+            nz = row_sum[:, 0] > 1e-12
+            feature_knn_vote[nz] /= row_sum[nz]
+
+    return {
+        "feature_similarity": D,
+        "feature_knn_vote": feature_knn_vote,
+        "graph_neighbor_support": graph_neighbor_support,
+        "compatibility_support": compatibility_support,
+        "node_degree": deg.astype(np.float64),
+        "support_train_neighbors": support_train_neighbors.astype(np.float64),
+        "neighbor_class_entropy": neighbor_class_entropy,
+    }
+
+
+def build_selective_correction_scores(
+    mlp_probs_np: np.ndarray,
+    evidence: Dict[str, np.ndarray],
+    *,
+    b1: float,
+    b2: float,
+    b3: float,
+    b4: float,
+    b5: float,
+    eps: float = 1e-9,
+) -> Dict[str, np.ndarray]:
+    """
+    Build interpretable class-wise weighted score components.
+    """
+    mlp_term = float(b1) * np.log(np.clip(mlp_probs_np, eps, 1.0))
+    feature_similarity_term = float(b2) * evidence["feature_similarity"]
+    feature_knn_term = float(b3) * evidence["feature_knn_vote"]
+    graph_neighbor_term = float(b4) * evidence["graph_neighbor_support"]
+    compatibility_term = float(b5) * evidence["compatibility_support"]
+    combined_scores = (
+        mlp_term
+        + feature_similarity_term
+        + feature_knn_term
+        + graph_neighbor_term
+        + compatibility_term
+    )
+    return {
+        "combined_scores": combined_scores,
+        "mlp_term": mlp_term,
+        "feature_similarity_term": feature_similarity_term,
+        "feature_knn_term": feature_knn_term,
+        "graph_neighbor_term": graph_neighbor_term,
+        "compatibility_term": compatibility_term,
+    }
+
+
+def choose_uncertainty_threshold(
+    y_true: np.ndarray,
+    val_indices: np.ndarray,
+    mlp_pred_all: np.ndarray,
+    mlp_margin_all: np.ndarray,
+    combined_scores: np.ndarray,
+    *,
+    threshold_candidates: Optional[List[float]] = None,
+) -> Dict[str, Any]:
+    """
+    Select global margin threshold on validation only.
+    """
+    val_indices = np.asarray(val_indices, dtype=np.int64)
+    val_margins = mlp_margin_all[val_indices]
+
+    if threshold_candidates is None:
+        q = np.quantile(val_margins, [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
+        base = np.array([0.05, 0.10, 0.15, 0.20, 0.25, 0.30], dtype=np.float64)
+        threshold_candidates = sorted(set(np.round(np.concatenate([q, base]), 6).tolist()))
+    threshold_candidates = [float(t) for t in threshold_candidates if np.isfinite(t)]
+    if not threshold_candidates:
+        threshold_candidates = [0.2]
+
+    best = None
+    for t in threshold_candidates:
+        uncertain_val = val_margins < t
+        final_val = mlp_pred_all[val_indices].copy()
+        if uncertain_val.any():
+            final_val[uncertain_val] = np.argmax(combined_scores[val_indices][uncertain_val], axis=1).astype(np.int64)
+        val_acc = _simple_accuracy(y_true[val_indices], final_val)
+        changed_frac = float((final_val != mlp_pred_all[val_indices]).mean())
+        uncertain_frac = float(uncertain_val.mean())
+        key = (val_acc, -changed_frac, -uncertain_frac)
+        if best is None or key > best["key"]:
+            best = {
+                "threshold_high": float(t),
+                "val_acc": float(val_acc),
+                "changed_fraction_val": changed_frac,
+                "uncertain_fraction_val": uncertain_frac,
+                "key": key,
+            }
+
+    assert best is not None
+    best["threshold_candidates_evaluated"] = threshold_candidates
+    return best
+
+
+def summarize_selective_correction_behavior(
+    y_true: np.ndarray,
+    node_indices: np.ndarray,
+    mlp_pred_all: np.ndarray,
+    final_pred_all: np.ndarray,
+    uncertain_mask_all: np.ndarray,
+) -> Dict[str, Optional[float]]:
+    """
+    Summarize behavior on a node subset (validation/test).
+    """
+    idx = np.asarray(node_indices, dtype=np.int64)
+    u = uncertain_mask_all[idx]
+    c = ~u
+    out: Dict[str, Optional[float]] = {
+        "fraction_uncertain": float(u.mean()) if idx.size > 0 else 0.0,
+        "fraction_changed_from_mlp": float((final_pred_all[idx] != mlp_pred_all[idx]).mean()) if idx.size > 0 else 0.0,
+        "acc_all": float(_simple_accuracy(y_true[idx], final_pred_all[idx])) if idx.size > 0 else None,
+        "acc_uncertain": None,
+        "acc_confident": None,
+    }
+    if u.any():
+        out["acc_uncertain"] = float(_simple_accuracy(y_true[idx][u], final_pred_all[idx][u]))
+    if c.any():
+        out["acc_confident"] = float(_simple_accuracy(y_true[idx][c], final_pred_all[idx][c]))
+    return out
+
+
+def selective_graph_correction_predictclass(
+    data,
+    train_indices,
+    val_indices,
+    test_indices,
+    *,
+    mlp_probs: Optional[torch.Tensor] = None,
+    seed: int = 1337,
+    log_prefix: str = "selective_graph_correction",
+    log_file: str | None = None,
+    diagnostics_run_id: str | None = None,
+    dataset_key_for_logs: Optional[str] = None,
+    mlp_runtime_sec: Optional[float] = None,
+    threshold_candidates: Optional[List[float]] = None,
+    weight_candidates: Optional[List[Dict[str, float]]] = None,
+    enable_feature_knn: bool = False,
+    feature_knn_k: int = 5,
+    write_node_diagnostics: bool = True,
+) -> Tuple[torch.Tensor, float, Dict[str, Any]]:
+    """
+    Feature-first selective correction:
+      - keep MLP for confident nodes,
+      - apply weighted graph/feature correction only for uncertain nodes.
+    """
+    t_all0 = time.perf_counter()
+    device = data.x.device
+    y_true = data.y.detach().cpu().numpy().astype(np.int64)
+    train_indices = np.asarray(train_indices, dtype=np.int64)
+    val_indices = np.asarray(val_indices, dtype=np.int64)
+    test_indices = np.asarray(test_indices, dtype=np.int64)
+
+    # 1) MLP (primary classifier)
+    mlp_train_runtime_sec = 0.0
+    if mlp_probs is None:
+        t_mlp0 = time.perf_counter()
+        mlp_probs, _ = train_mlp_and_predict(
+            data,
+            train_indices,
+            hidden=64,
+            layers=2,
+            dropout=0.5,
+            lr=0.01,
+            epochs=200,
+            log_file=log_file,
+        )
+        mlp_train_runtime_sec = time.perf_counter() - t_mlp0
+
+    mlp_info = compute_mlp_margin(mlp_probs)
+    mlp_probs_np = mlp_info["mlp_probs_np"]
+    mlp_pred_all = mlp_info["mlp_pred_all"]
+    mlp_top1_all = mlp_info["mlp_top1_all"]
+    mlp_margin_all = mlp_info["mlp_margin_all"]
+
+    # 2) Build correction evidence once
+    t_e0 = time.perf_counter()
+    evidence = _build_selective_correction_evidence(
+        data,
+        train_indices,
+        mlp_probs_np=mlp_probs_np,
+        enable_feature_knn=enable_feature_knn,
+        feature_knn_k=feature_knn_k,
+    )
+    evidence_runtime_sec = time.perf_counter() - t_e0
+
+    # 3) Validation-only selection of weights + uncertainty threshold
+    if weight_candidates is None:
+        weight_candidates = [
+            {"b1": 1.0, "b2": 0.6, "b3": 0.0, "b4": 0.5, "b5": 0.3},
+            {"b1": 1.0, "b2": 0.9, "b3": 0.0, "b4": 0.3, "b5": 0.2},
+            {"b1": 1.0, "b2": 0.4, "b3": 0.0, "b4": 0.9, "b5": 0.5},
+            {"b1": 1.2, "b2": 0.5, "b3": 0.0, "b4": 0.4, "b5": 0.2},
+        ]
+
+    t_sel0 = time.perf_counter()
+    best_cfg: Optional[Dict[str, Any]] = None
+    best_components: Optional[Dict[str, np.ndarray]] = None
+
+    for w_cfg in weight_candidates:
+        comps = build_selective_correction_scores(
+            mlp_probs_np,
+            evidence,
+            b1=w_cfg["b1"],
+            b2=w_cfg["b2"],
+            b3=w_cfg["b3"],
+            b4=w_cfg["b4"],
+            b5=w_cfg["b5"],
+        )
+        th = choose_uncertainty_threshold(
+            y_true,
+            val_indices,
+            mlp_pred_all,
+            mlp_margin_all,
+            comps["combined_scores"],
+            threshold_candidates=threshold_candidates,
+        )
+        key = (th["val_acc"], -th["changed_fraction_val"], -th["uncertain_fraction_val"])
+        if best_cfg is None or key > best_cfg["key"]:
+            best_cfg = {
+                "weights": dict(w_cfg),
+                "threshold": th,
+                "key": key,
+            }
+            best_components = comps
+
+    assert best_cfg is not None and best_components is not None
+    selection_runtime_sec = time.perf_counter() - t_sel0
+
+    selected_threshold_high = float(best_cfg["threshold"]["threshold_high"])
+    selected_weights = best_cfg["weights"]
+
+    # 4) Inference with selected config
+    t_inf0 = time.perf_counter()
+    uncertain_mask_all = mlp_margin_all < selected_threshold_high
+    final_pred_all = mlp_pred_all.copy()
+    if uncertain_mask_all.any():
+        final_pred_all[uncertain_mask_all] = np.argmax(
+            best_components["combined_scores"][uncertain_mask_all], axis=1
+        ).astype(np.int64)
+    inference_runtime_sec = time.perf_counter() - t_inf0
+
+    test_pred = final_pred_all[test_indices]
+    test_acc = _simple_accuracy(y_true[test_indices], test_pred)
+    val_acc = _simple_accuracy(y_true[val_indices], final_pred_all[val_indices])
+    test_acc_mlp = _simple_accuracy(y_true[test_indices], mlp_pred_all[test_indices])
+
+    val_summary = summarize_selective_correction_behavior(
+        y_true, val_indices, mlp_pred_all, final_pred_all, uncertain_mask_all
+    )
+    test_summary = summarize_selective_correction_behavior(
+        y_true, test_indices, mlp_pred_all, final_pred_all, uncertain_mask_all
+    )
+
+    selective_overhead_runtime_sec = evidence_runtime_sec + selection_runtime_sec + inference_runtime_sec
+    total_runtime_sec = mlp_train_runtime_sec + selective_overhead_runtime_sec
+    if mlp_runtime_sec is not None:
+        avg_runtime_overhead_over_mlp_sec = float(selective_overhead_runtime_sec)
+    else:
+        avg_runtime_overhead_over_mlp_sec = float(selective_overhead_runtime_sec)
+
+    diagnostics_path = None
+    if write_node_diagnostics:
+        run_id = diagnostics_run_id or f"{log_prefix}_{int(time.time())}"
+        dataset_slug = (dataset_key_for_logs or globals().get("DATASET_KEY", "dataset")).lower()
+        out_dir = LOG_DIR if "LOG_DIR" in globals() else "logs"
+        os.makedirs(out_dir, exist_ok=True)
+        diagnostics_path = os.path.join(out_dir, f"{dataset_slug}_selective_graph_correction_{run_id}.json")
+
+        node_rows = []
+        for node_id in test_indices.tolist():
+            nid = int(node_id)
+            final_lbl = int(final_pred_all[nid])
+            node_rows.append(
+                {
+                    "node_id": nid,
+                    "mlp_pred": int(mlp_pred_all[nid]),
+                    "mlp_max_prob": float(mlp_top1_all[nid]),
+                    "mlp_margin": float(mlp_margin_all[nid]),
+                    "was_uncertain": bool(uncertain_mask_all[nid]),
+                    "final_pred": final_lbl,
+                    "changed_from_mlp": bool(final_pred_all[nid] != mlp_pred_all[nid]),
+                    "selected_threshold_high": float(selected_threshold_high),
+                    "selected_method_mode": "feature_first_selective_weighted_correction_v1",
+                    "winning_class_components": {
+                        "mlp_term": float(best_components["mlp_term"][nid, final_lbl]),
+                        "feature_similarity_term": float(best_components["feature_similarity_term"][nid, final_lbl]),
+                        "feature_knn_term": float(best_components["feature_knn_term"][nid, final_lbl]),
+                        "graph_neighbor_term": float(best_components["graph_neighbor_term"][nid, final_lbl]),
+                        "compatibility_term": float(best_components["compatibility_term"][nid, final_lbl]),
+                    },
+                }
+            )
+
+        payload = {
+            "dataset": dataset_key_for_logs or globals().get("DATASET_KEY", "dataset"),
+            "seed": int(seed),
+            "method": "selective_graph_correction",
+            "selected_threshold_high": float(selected_threshold_high),
+            "selected_weights": {k: float(v) for k, v in selected_weights.items()},
+            "mode": "feature_first_selective_weighted_correction_v1",
+            "runtime_sec": {
+                "mlp_training_runtime_sec": float(mlp_train_runtime_sec),
+                "evidence_runtime_sec": float(evidence_runtime_sec),
+                "selection_runtime_sec": float(selection_runtime_sec),
+                "inference_runtime_sec": float(inference_runtime_sec),
+                "selective_overhead_runtime_sec": float(selective_overhead_runtime_sec),
+                "total_runtime_sec": float(total_runtime_sec),
+                "avg_runtime_overhead_over_mlp_sec": float(avg_runtime_overhead_over_mlp_sec),
+            },
+            "summary": {
+                "val_acc_mlp": float(_simple_accuracy(y_true[val_indices], mlp_pred_all[val_indices])),
+                "val_acc_selective": float(val_acc),
+                "test_acc_mlp": float(test_acc_mlp),
+                "test_acc_selective": float(test_acc),
+                "val_fraction_uncertain": val_summary["fraction_uncertain"],
+                "test_fraction_uncertain": test_summary["fraction_uncertain"],
+                "val_fraction_changed_from_mlp": val_summary["fraction_changed_from_mlp"],
+                "test_fraction_changed_from_mlp": test_summary["fraction_changed_from_mlp"],
+                "acc_val_confident": val_summary["acc_confident"],
+                "acc_val_uncertain": val_summary["acc_uncertain"],
+                "acc_test_confident": test_summary["acc_confident"],
+                "acc_test_uncertain": test_summary["acc_uncertain"],
+            },
+            "test_node_diagnostics": node_rows,
+        }
+        with open(diagnostics_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f)
+
+    if log_file:
+        write_log(
+            (
+                f"SelectiveCorrection: test_acc={test_acc:.4f} vs MLP={test_acc_mlp:.4f} | "
+                f"thr={selected_threshold_high:.4f} | uncertain_frac_test={test_summary['fraction_uncertain']:.3f} | "
+                f"changed_frac_test={test_summary['fraction_changed_from_mlp']:.3f}"
+            ),
+            log_file,
+            tag=f"{log_prefix}:SUMMARY",
+        )
+
+    info = {
+        "selected_threshold_high": float(selected_threshold_high),
+        "selected_weights": {k: float(v) for k, v in selected_weights.items()},
+        "mode": "feature_first_selective_weighted_correction_v1",
+        "val_acc_selective": float(val_acc),
+        "test_acc_mlp": float(test_acc_mlp),
+        "test_acc_selective": float(test_acc),
+        "fraction_test_nodes_uncertain": float(test_summary["fraction_uncertain"] or 0.0),
+        "fraction_test_nodes_changed_from_mlp": float(test_summary["fraction_changed_from_mlp"] or 0.0),
+        "acc_test_confident_nodes": test_summary["acc_confident"],
+        "acc_test_uncertain_nodes": test_summary["acc_uncertain"],
+        "runtime_breakdown_sec": {
+            "mlp_training_runtime_sec": float(mlp_train_runtime_sec),
+            "evidence_runtime_sec": float(evidence_runtime_sec),
+            "selection_runtime_sec": float(selection_runtime_sec),
+            "inference_runtime_sec": float(inference_runtime_sec),
+            "selective_overhead_runtime_sec": float(selective_overhead_runtime_sec),
+            "total_runtime_sec": float(total_runtime_sec),
+            "avg_runtime_overhead_over_mlp_sec": float(avg_runtime_overhead_over_mlp_sec),
+        },
+        "diagnostics_path": diagnostics_path,
+        "selection_trace": {
+            "best_val_acc": float(best_cfg["threshold"]["val_acc"]),
+            "best_val_uncertain_fraction": float(best_cfg["threshold"]["uncertain_fraction_val"]),
+            "best_val_changed_fraction": float(best_cfg["threshold"]["changed_fraction_val"]),
+            "threshold_candidates_evaluated": best_cfg["threshold"]["threshold_candidates_evaluated"],
+            "weight_candidates_evaluated": [{k: float(v) for k, v in cfg.items()} for cfg in weight_candidates],
+        },
+        "wall_clock_runtime_sec": float(time.perf_counter() - t_all0),
+    }
+    return torch.tensor(test_pred, device=device), float(test_acc), info
+
+
 def _build_gate_feature_matrix(
     node_indices: np.ndarray,
     *,
@@ -1688,7 +2214,10 @@ PRIORITY_BFS_MARGIN_THRESHOLD = 0.05
 PRIORITY_BFS_REFINEMENT_MARGIN_THRESHOLD = 0.02
 
 # Optional learned node-wise gate between MLP and propagation.
-ENABLE_GATED_MLP_PROP_EXPERIMENT = True
+ENABLE_GATED_MLP_PROP_EXPERIMENT = False
+
+# Optional feature-first selective graph correction (new side-by-side method).
+ENABLE_SELECTIVE_GRAPH_CORRECTION_EXPERIMENT = False
 
 # Optional multi-source and ensemble experiments (disabled by default).
 ENABLE_MULTI_SOURCE_BFS_EXPERIMENT = False
@@ -1699,6 +2228,9 @@ results = {
     'prop_only': [],
     'mlp_refined': [],
     'prop_mlp_selected': [],
+    'selective_graph_correction': [],
+    'selective_graph_correction_uncertain_fraction': [],
+    'selective_graph_correction_changed_fraction': [],
     'gated_mlp_prop': [],
     'gated_mlp_fraction': [],
     'priority_bfs': [],
@@ -1747,7 +2279,9 @@ for run in range(num_iterations):
         np.random.seed(current_seed)
         
         # 1. MLP ONLY
+        t_mlp0 = time.perf_counter()
         mlp_probs, _ = train_mlp_and_predict(data, train_idx, hidden=64, layers=2, dropout=0.5, epochs=200, log_file=LOG_FILE)
+        mlp_runtime_sec = time.perf_counter() - t_mlp0
         max_probs, preds_mlp_all = mlp_probs.max(dim=1)
         
         acc_val_mlp = (preds_mlp_all[val_idx] == data.y[val_idx]).float().mean().item()
@@ -1836,7 +2370,37 @@ for run in range(num_iterations):
         decision_s4 = "MLP" if use_mlp_s4 else "PROP"
         write_log(f"  [4] Prop+MLP(Select): Val(Prop)={acc_val_prop:.4f} vs Val(MLP)={acc_val_mlp:.4f} -> Chosen: {decision_s4}. Test={final_acc_s4:.4f}", LOG_FILE)
 
-        # 5. Optional: learned node-wise gate (MLP vs propagation)
+        # 5. Optional: feature-first selective graph correction (MLP primary, graph correction on uncertain nodes)
+        if ENABLE_SELECTIVE_GRAPH_CORRECTION_EXPERIMENT:
+            _, acc_test_sel, sel_info = selective_graph_correction_predictclass(
+                data,
+                train_np,
+                val_np,
+                test_np,
+                mlp_probs=mlp_probs,
+                seed=current_seed,
+                log_prefix=f"{DATASET_KEY}:TEST-SELECTIVE-CORR run={run} rep={repeat}",
+                log_file=LOG_FILE,
+                diagnostics_run_id=f"run{run}_rep{repeat}",
+                dataset_key_for_logs=DATASET_KEY,
+                mlp_runtime_sec=mlp_runtime_sec,
+                enable_feature_knn=False,
+                write_node_diagnostics=True,
+            )
+            results['selective_graph_correction'].append(float(acc_test_sel))
+            results['selective_graph_correction_uncertain_fraction'].append(float(sel_info["fraction_test_nodes_uncertain"]))
+            results['selective_graph_correction_changed_fraction'].append(float(sel_info["fraction_test_nodes_changed_from_mlp"]))
+            write_log(
+                (
+                    f"  [5] SelectiveGraphCorrection: Test={acc_test_sel:.4f} | "
+                    f"UncertainFrac={sel_info['fraction_test_nodes_uncertain']:.3f} | "
+                    f"ChangedFrac={sel_info['fraction_test_nodes_changed_from_mlp']:.3f} | "
+                    f"Thr={sel_info['selected_threshold_high']:.3f}"
+                ),
+                LOG_FILE,
+            )
+
+        # 6. Optional: learned node-wise gate (MLP vs propagation)
         if ENABLE_GATED_MLP_PROP_EXPERIMENT:
             _, acc_test_gated, gated_info = gated_mlp_prop_predictclass(
                 data,
@@ -1856,14 +2420,14 @@ for run in range(num_iterations):
             results['gated_mlp_fraction'].append(float(gated_info["fraction_test_nodes_assigned_to_mlp"]))
             write_log(
                 (
-                    f"  [5] Gated MLP+Prop: Test={acc_test_gated:.4f} | "
+                    f"  [6] Gated MLP+Prop: Test={acc_test_gated:.4f} | "
                     f"GateValAcc={gated_info['gate_accuracy_on_val_supervised_nodes']} | "
                     f"FracMLP={gated_info['fraction_test_nodes_assigned_to_mlp']:.3f}"
                 ),
                 LOG_FILE,
             )
 
-        # 6. Optional: Priority-BFS propagation (side-by-side, non-disruptive)
+        # 7. Optional: Priority-BFS propagation (side-by-side, non-disruptive)
         if ENABLE_PRIORITY_BFS_EXPERIMENT:
             _, acc_test_priority = priority_bfs_predictclass(
                 data,
@@ -1878,9 +2442,9 @@ for run in range(num_iterations):
                 diagnostics_run_id=f"run{run}_rep{repeat}",
             )
             results['priority_bfs'].append(float(acc_test_priority))
-            write_log(f"  [6] Priority-BFS: Test={acc_test_priority:.4f}", LOG_FILE)
+            write_log(f"  [7] Priority-BFS: Test={acc_test_priority:.4f}", LOG_FILE)
 
-        # 7. Optional: Multi-source priority BFS (single run, all_train seeds)
+        # 8. Optional: Multi-source priority BFS (single run, all_train seeds)
         if ENABLE_MULTI_SOURCE_BFS_EXPERIMENT:
             _, acc_test_ms = multi_source_priority_bfs_predictclass(
                 data,
@@ -1900,9 +2464,9 @@ for run in range(num_iterations):
                 diagnostics_only_test_nodes=True,
             )
             results['multi_source_bfs'].append(float(acc_test_ms))
-            write_log(f"  [7] Multi-Source BFS: Test={acc_test_ms:.4f}", LOG_FILE)
+            write_log(f"  [8] Multi-Source BFS: Test={acc_test_ms:.4f}", LOG_FILE)
 
-        # 8. Optional: Ensemble multi-source BFS
+        # 9. Optional: Ensemble multi-source BFS
         if ENABLE_ENSEMBLE_MULTI_SOURCE_BFS:
             _, acc_test_ens = ensemble_multi_source_bfs_predictclass(
                 data,
@@ -1920,7 +2484,7 @@ for run in range(num_iterations):
                 log_file=LOG_FILE,
             )
             results['ensemble_multi_source_bfs'].append(float(acc_test_ens))
-            write_log(f"  [8] Ensemble Multi-Source BFS: Test={acc_test_ens:.4f}", LOG_FILE)
+            write_log(f"  [9] Ensemble Multi-Source BFS: Test={acc_test_ens:.4f}", LOG_FILE)
 
 
 msg = "\n" + "="*50 + f"\n FINAL SUMMARY ({DATASET_KEY})\n" + "="*50 + "\n"
@@ -1935,15 +2499,19 @@ msg += f"[3] MLP + Refined:     {get_stats(results['mlp_refined'])}\n"
 msg += f"    -> Refinement Chosen: {results['refined_chosen_count']}/{results['total_runs']} ({(results['refined_chosen_count']/results['total_runs'])*100:.1f}%)\n"
 msg += f"[4] Prop + MLP(Select):{get_stats(results['prop_mlp_selected'])}\n"
 msg += f"    -> Switched to MLP:   {results['prop_mlp_switched_to_mlp']}/{results['total_runs']} ({(results['prop_mlp_switched_to_mlp']/results['total_runs'])*100:.1f}%)\n"
+if results['selective_graph_correction']:
+    msg += f"[5] Selective Graph Correction: {get_stats(results['selective_graph_correction'])}\n"
+    msg += f"    -> Mean uncertain fraction: {np.mean(np.array(results['selective_graph_correction_uncertain_fraction'])):.3f}\n"
+    msg += f"    -> Mean changed fraction:   {np.mean(np.array(results['selective_graph_correction_changed_fraction'])):.3f}\n"
 if results['gated_mlp_prop']:
-    msg += f"[5] Gated MLP+Prop:    {get_stats(results['gated_mlp_prop'])}\n"
+    msg += f"[6] Gated MLP+Prop:    {get_stats(results['gated_mlp_prop'])}\n"
     msg += f"    -> Mean MLP assignment fraction: {np.mean(np.array(results['gated_mlp_fraction'])):.3f}\n"
 if results['priority_bfs']:
-    msg += f"[6] Priority-BFS:       {get_stats(results['priority_bfs'])}\n"
+    msg += f"[7] Priority-BFS:       {get_stats(results['priority_bfs'])}\n"
 if results['multi_source_bfs']:
-    msg += f"[7] Multi-Source BFS:   {get_stats(results['multi_source_bfs'])}\n"
+    msg += f"[8] Multi-Source BFS:   {get_stats(results['multi_source_bfs'])}\n"
 if results['ensemble_multi_source_bfs']:
-    msg += f"[8] Ensemble Multi-Source BFS: {get_stats(results['ensemble_multi_source_bfs'])}\n"
+    msg += f"[9] Ensemble Multi-Source BFS: {get_stats(results['ensemble_multi_source_bfs'])}\n"
 
 write_log(msg, LOG_FILE, tag="SUMMARY")
 print(f"Logs written to {LOG_FILE}")

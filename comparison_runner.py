@@ -268,6 +268,8 @@ def run_stage2_internal(split_dir: Optional[str] = None):
         "prop_only",
         "mlp_refined",
         "prop_mlp_select",
+        # Optional method (kept off by default to avoid disrupting Stage 2 setup):
+        # "selective_graph_correction",
         "priority_bfs",
         "ensemble_multi_source_bfs",
     ]
@@ -552,7 +554,58 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                     )
                     records.append(rec)
 
-                # 5) Priority-BFS
+                # 5) Feature-first selective graph correction (optional)
+                if (
+                    "selective_graph_correction" in methods_to_run
+                    and mlp_probs is not None
+                    and hasattr(mod, "selective_graph_correction_predictclass")
+                ):
+                    rec = _record_common_info(mod, dataset_key, dataset, data, split_path, split_id, repeat, "selective_graph_correction", current_seed)
+                    t1 = time.perf_counter()
+                    _, acc_test_sel, sel_info = mod.selective_graph_correction_predictclass(
+                        data,
+                        train_np,
+                        val_np,
+                        test_np,
+                        mlp_probs=mlp_probs,
+                        seed=current_seed,
+                        log_prefix=f"{dataset_key}:STAGE2-SELECTIVE-CORR",
+                        log_file=None,
+                        diagnostics_run_id=f"split{split_id}_rep{repeat}",
+                        dataset_key_for_logs=dataset_key,
+                        enable_feature_knn=False,
+                        write_node_diagnostics=True,
+                    )
+                    runtime_breakdown = sel_info.get("runtime_breakdown_sec", {})
+                    tuning_time_sel = float(runtime_breakdown.get("selection_runtime_sec", 0.0))
+                    method_time_sel = float(runtime_breakdown.get("evidence_runtime_sec", 0.0)) + float(
+                        runtime_breakdown.get("inference_runtime_sec", 0.0)
+                    )
+                    rec.update(
+                        {
+                            "val_acc": float(sel_info.get("val_acc_selective")) if sel_info.get("val_acc_selective") is not None else None,
+                            "test_acc": float(acc_test_sel),
+                            "tuning_runtime_sec": tuning_time_sel,
+                            "method_runtime_sec": method_time_sel,
+                            "total_runtime_sec": tuning_time_sel + method_time_sel,
+                            "parameter_source": "validation_selected_threshold_and_weights",
+                            "parameter_tuning_target_method": "selective_graph_correction",
+                            "tuned_separately_for_this_method": True,
+                            "is_distinct_method_variant": True,
+                            "parent_method": "mlp_only",
+                            "selected_threshold_high": sel_info.get("selected_threshold_high"),
+                            "selected_weights": sel_info.get("selected_weights"),
+                            "fraction_test_nodes_uncertain": sel_info.get("fraction_test_nodes_uncertain"),
+                            "fraction_test_nodes_changed_from_mlp": sel_info.get("fraction_test_nodes_changed_from_mlp"),
+                            "acc_test_confident_nodes": sel_info.get("acc_test_confident_nodes"),
+                            "acc_test_uncertain_nodes": sel_info.get("acc_test_uncertain_nodes"),
+                            "avg_runtime_overhead_over_mlp_sec": runtime_breakdown.get("avg_runtime_overhead_over_mlp_sec"),
+                            "diagnostics_path": sel_info.get("diagnostics_path"),
+                        }
+                    )
+                    records.append(rec)
+
+                # 6) Priority-BFS
                 if "priority_bfs" in methods_to_run:
                     rec = _record_common_info(mod, dataset_key, dataset, data, split_path, split_id, repeat, "priority_bfs", current_seed)
                     t1 = time.perf_counter()
@@ -587,7 +640,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                     )
                     records.append(rec)
 
-                # 6) Ensemble multi-source BFS (distinct because of multiple restarts)
+                # 7) Ensemble multi-source BFS (distinct because of multiple restarts)
                 if "ensemble_multi_source_bfs" in methods_to_run:
                     rec = _record_common_info(mod, dataset_key, dataset, data, split_path, split_id, repeat, "ensemble_multi_source_bfs", current_seed)
                     t1 = time.perf_counter()
@@ -687,6 +740,8 @@ def run_stage2_internal(split_dir: Optional[str] = None):
         f.write("\n## Parameter sharing\n\n")
         f.write("- `params_prop` tuned once per dataset/split/repeat via `predictclass` (robust_random_search) and reused by:\n")
         f.write("  - prop_only\n  - priority_bfs\n  - ensemble_multi_source_bfs\n")
+        if "selective_graph_correction" in methods_to_run:
+            f.write("- `selective_graph_correction` selects uncertainty threshold and score weights on validation nodes only.\n")
         f.write("- `params_hyb` tuned separately for `mlp_refined`.\n")
         f.write("- MLP hyperparameters are specific to `mlp_only`.\n\n")
         f.write("## Runtime accounting policy\n\n")
@@ -701,6 +756,8 @@ def run_stage2_internal(split_dir: Optional[str] = None):
         f.write("- Hybrid method: `mlp_refined` uses MLP pseudo-labels to augment the train set before propagation.\n")
         f.write("- Runtime: ensemble multi-source BFS incurs extra runtime by design due to multiple restarts.\n")
         f.write("- Order sensitivity: propagation methods remain order-sensitive due to priority-queue traversal and sequential commits.\n\n")
+        if "selective_graph_correction" in methods_to_run:
+            f.write("- Selective correction risk: validation-tuned threshold/weights may overfit small validation sets on some splits.\n\n")
         f.write("## Methods excluded or merged\n\n")
         f.write("- `multi_source_priority_bfs_predictclass` currently uses the same seed set (`seed_mode=\"all_train\"`) as `priority_bfs`.\n")
         f.write("  It is therefore **not reported as a separate row**; it is treated as a configuration wrapper around priority-BFS.\n")
