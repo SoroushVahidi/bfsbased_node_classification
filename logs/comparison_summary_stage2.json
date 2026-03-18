@@ -1,0 +1,206 @@
+[
+  {
+    "dataset": "texas",
+    "method": "mlp_only",
+    "n_runs": 10,
+    "n_runs_with_test_acc": 10,
+    "mean_test_acc": 0.7891891956329345,
+    "std_test_acc": 0.05378309661320749,
+    "mean_total_runtime_sec": 0.24379883290239376,
+    "success_count": 10,
+    "total_count": 10,
+    "parameter_source_values": [
+      "mlp_only_self_tuned"
+    ],
+    "parameter_tuning_target_method_values": [
+      "mlp_only"
+    ]
+  },
+  {
+    "dataset": "texas",
+    "method": "prop_only",
+    "n_runs": 10,
+    "n_runs_with_test_acc": 10,
+    "mean_test_acc": 0.5648648648648649,
+    "std_test_acc": 0.10145040204931598,
+    "mean_total_runtime_sec": 3.2255463502006023,
+    "success_count": 10,
+    "total_count": 10,
+    "parameter_source_values": [
+      "tuned_on_predictclass_then_reused"
+    ],
+    "parameter_tuning_target_method_values": [
+      "predictclass"
+    ]
+  },
+  {
+    "dataset": "texas",
+    "method": "mlp_refined",
+    "n_runs": 10,
+    "n_runs_with_test_acc": 10,
+    "mean_test_acc": 0.7891891956329345,
+    "std_test_acc": 0.05378309661320749,
+    "mean_total_runtime_sec": 3.270866489803302,
+    "success_count": 10,
+    "total_count": 10,
+    "parameter_source_values": [
+      "tuned_on_predictclass_then_reused"
+    ],
+    "parameter_tuning_target_method_values": [
+      "predictclass_with_mlp"
+    ]
+  },
+  {
+    "dataset": "texas",
+    "method": "prop_mlp_select",
+    "n_runs": 10,
+    "n_runs_with_test_acc": 10,
+    "mean_test_acc": 0.7891891956329345,
+    "std_test_acc": 0.05378309661320749,
+    "mean_total_runtime_sec": 3.191071708100208,
+    "success_count": 10,
+    "total_count": 10,
+    "parameter_source_values": [
+      "tuned_on_predictclass_then_reused"
+    ],
+    "parameter_tuning_target_method_values": [
+      "predictclass"
+    ]
+  },
+  {
+    "dataset": "texas",
+    "method": "priority_bfs",
+    "n_runs": 10,
+    "n_runs_with_test_acc": 10,
+    "mean_test_acc": 0.5567567567567566,
+    "std_test_acc": 0.10127023781186592,
+    "mean_total_runtime_sec": 3.2104300297010924,
+    "success_count": 10,
+    "total_count": 10,
+    "parameter_source_values": [
+      "tuned_on_predictclass_then_reused"
+    ],
+    "parameter_tuning_target_method_values": [
+      "predictclass"
+    ]
+  },
+  {
+    "dataset": "texas",
+    "method": "ensemble_multi_source_bfs",
+    "n_runs": 10,
+    "n_runs_with_test_acc": 10,
+    "mean_test_acc": 0.5567567567567566,
+    "std_test_acc": 0.10127023781186592,
+    "mean_total_runtime_sec": 3.2878798419988016,
+    "success_count": 10,
+    "total_count": 10,
+    "parameter_source_values": [
+      "tuned_on_predictclass_then_reused"
+    ],
+    "parameter_tuning_target_method_values": [
+      "predictclass"
+    ]
+  },
+  {
+    "dataset": "chameleon",
+    "method": "mlp_only",
+    "n_runs": 10,
+    "n_runs_with_test_acc": 10,
+    "mean_test_acc": 0.4594298303127289,
+    "std_test_acc": 0.014554863331189487,
+    "mean_total_runtime_sec": 0.9858010791009292,
+    "success_count": 10,
+    "total_count": 10,
+    "parameter_source_values": [
+      "mlp_only_self_tuned"
+    ],
+    "parameter_tuning_target_method_values": [
+      "mlp_only"
+    ]
+  },
+  {
+    "dataset": "chameleon",
+    "method": "prop_only",
+    "n_runs": 10,
+    "n_runs_with_test_acc": 10,
+    "mean_test_acc": 0.3894736842105263,
+    "std_test_acc": 0.03492561237126044,
+    "mean_total_runtime_sec": 49.56743064289621,
+    "success_count": 10,
+    "total_count": 10,
+    "parameter_source_values": [
+      "tuned_on_predictclass_then_reused"
+    ],
+    "parameter_tuning_target_method_values": [
+      "predictclass"
+    ]
+  },
+  {
+    "dataset": "chameleon",
+    "method": "mlp_refined",
+    "n_runs": 10,
+    "n_runs_with_test_acc": 10,
+    "mean_test_acc": 0.4594298303127289,
+    "std_test_acc": 0.014554863331189487,
+    "mean_total_runtime_sec": 54.7933023983991,
+    "success_count": 10,
+    "total_count": 10,
+    "parameter_source_values": [
+      "tuned_on_predictclass_then_reused"
+    ],
+    "parameter_tuning_target_method_values": [
+      "predictclass_with_mlp"
+    ]
+  },
+  {
+    "dataset": "chameleon",
+    "method": "prop_mlp_select",
+    "n_runs": 10,
+    "n_runs_with_test_acc": 10,
+    "mean_test_acc": 0.4594298303127289,
+    "std_test_acc": 0.014554863331189487,
+    "mean_total_runtime_sec": 48.943813013397445,
+    "success_count": 10,
+    "total_count": 10,
+    "parameter_source_values": [
+      "tuned_on_predictclass_then_reused"
+    ],
+    "parameter_tuning_target_method_values": [
+      "predictclass"
+    ]
+  },
+  {
+    "dataset": "chameleon",
+    "method": "priority_bfs",
+    "n_runs": 10,
+    "n_runs_with_test_acc": 10,
+    "mean_test_acc": 0.3642543859649122,
+    "std_test_acc": 0.039673592239757235,
+    "mean_total_runtime_sec": 49.32681780140265,
+    "success_count": 10,
+    "total_count": 10,
+    "parameter_source_values": [
+      "tuned_on_predictclass_then_reused"
+    ],
+    "parameter_tuning_target_method_values": [
+      "predictclass"
+    ]
+  },
+  {
+    "dataset": "chameleon",
+    "method": "ensemble_multi_source_bfs",
+    "n_runs": 10,
+    "n_runs_with_test_acc": 10,
+    "mean_test_acc": 0.3642543859649122,
+    "std_test_acc": 0.039673592239757235,
+    "mean_total_runtime_sec": 50.86350031129841,
+    "success_count": 10,
+    "total_count": 10,
+    "parameter_source_values": [
+      "tuned_on_predictclass_then_reused"
+    ],
+    "parameter_tuning_target_method_values": [
+      "predictclass"
+    ]
+  }
+]
