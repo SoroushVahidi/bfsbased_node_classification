@@ -166,6 +166,44 @@ def _load_split_npz(dataset_key: str, split_id: int, device: torch.device, split
     return train_idx, val_idx, test_idx, split_path
 
 
+def _discover_available_split_ids(
+    datasets: List[str],
+    *,
+    split_dir: Optional[str] = None,
+    max_split_id: int = 100,
+) -> Dict[str, List[int]]:
+    """
+    Discover available split IDs per dataset by probing resolution helper.
+    """
+    out: Dict[str, List[int]] = {}
+    for ds in datasets:
+        found: List[int] = []
+        for sid in range(max_split_id):
+            if resolve_split_file(ds, sid, split_dir=split_dir) is not None:
+                found.append(sid)
+        out[ds] = found
+    return out
+
+
+def _common_available_split_ids(
+    datasets: List[str],
+    *,
+    split_dir: Optional[str] = None,
+    max_split_id: int = 100,
+) -> List[int]:
+    """
+    Return split IDs available for every requested dataset.
+    """
+    discovered = _discover_available_split_ids(datasets, split_dir=split_dir, max_split_id=max_split_id)
+    if not discovered:
+        return []
+    common: Optional[set[int]] = None
+    for ds in datasets:
+        ds_set = set(discovered.get(ds, []))
+        common = ds_set if common is None else (common & ds_set)
+    return sorted(common) if common is not None else []
+
+
 def _record_common_info(mod, dataset_key: str, dataset, data, split_path: str, split_id: int, repeat_id: int, method: str, seed: int) -> Dict[str, Any]:
     """
     Build the common metadata part of a per-run record.
@@ -219,7 +257,10 @@ def run_stage2_internal(split_dir: Optional[str] = None):
     mod = _load_full_investigate_module()
 
     datasets = ["texas", "chameleon"]
-    split_ids = list(range(10))
+    split_ids = _common_available_split_ids(datasets, split_dir=split_dir, max_split_id=100)
+    if not split_ids:
+        # Conservative fallback to canonical GEO-GCN 10-split protocol.
+        split_ids = list(range(10))
     repeats = 1
 
     methods_to_run = [
@@ -227,8 +268,6 @@ def run_stage2_internal(split_dir: Optional[str] = None):
         "prop_only",
         "mlp_refined",
         "prop_mlp_select",
-        # Optional new method (left off by default for backward-compatible runs):
-        # "gated_mlp_prop",
         "priority_bfs",
         "ensemble_multi_source_bfs",
     ]
@@ -513,50 +552,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                     )
                     records.append(rec)
 
-                # 5) Learned node-wise gate between MLP and propagation
-                if "gated_mlp_prop" in methods_to_run and mlp_probs is not None and hasattr(mod, "gated_mlp_prop_predictclass"):
-                    rec = _record_common_info(mod, dataset_key, dataset, data, split_path, split_id, repeat, "gated_mlp_prop", current_seed)
-                    t1 = time.perf_counter()
-                    _, acc_test_gated, gate_info = mod.gated_mlp_prop_predictclass(
-                        data,
-                        train_np,
-                        val_np,
-                        test_np,
-                        prop_params=dict_params_prop,
-                        mlp_probs=mlp_probs,
-                        seed=current_seed,
-                        log_prefix=f"{dataset_key}:STAGE2-GATED-MLP-PROP",
-                        log_file=None,
-                        diagnostics_run_id=f"split{split_id}_rep{repeat}",
-                        write_node_diagnostics=True,
-                        dataset_key_for_logs=dataset_key,
-                    )
-                    method_time = time.perf_counter() - t1
-                    rec.update(
-                        {
-                            "val_acc": float(gate_info.get("val_acc_gated")) if gate_info.get("val_acc_gated") is not None else None,
-                            "test_acc": float(acc_test_gated),
-                            "tuning_runtime_sec": tuning_time_prop,  # gate reuses propagation tuning
-                            "method_runtime_sec": method_time,
-                            "total_runtime_sec": tuning_time_prop + method_time,
-                            "parameter_source": "gate_trained_on_validation_nodes",
-                            "parameter_tuning_target_method": "gated_mlp_prop",
-                            "tuned_separately_for_this_method": True,
-                            "is_distinct_method_variant": True,
-                            "parent_method": "prop_mlp_select",
-                            "a_values": params_prop,
-                            "gate_mode": gate_info.get("gate_mode"),
-                            "gate_train_size": gate_info.get("gate_train_size"),
-                            "gate_accuracy_on_val_supervised_nodes": gate_info.get("gate_accuracy_on_val_supervised_nodes"),
-                            "fraction_test_nodes_assigned_to_mlp": gate_info.get("fraction_test_nodes_assigned_to_mlp"),
-                            "fraction_test_nodes_assigned_to_propagation": gate_info.get("fraction_test_nodes_assigned_to_propagation"),
-                            "gate_feature_names": gate_info.get("gate_feature_names"),
-                            "gate_diagnostics_path": gate_info.get("diagnostics_path"),
-                        }
-                    )
-                    records.append(rec)
-
-                # 6) Priority-BFS
+                # 5) Priority-BFS
                 if "priority_bfs" in methods_to_run:
                     rec = _record_common_info(mod, dataset_key, dataset, data, split_path, split_id, repeat, "priority_bfs", current_seed)
                     t1 = time.perf_counter()
@@ -591,7 +587,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                     )
                     records.append(rec)
 
-                # 7) Ensemble multi-source BFS (distinct because of multiple restarts)
+                # 6) Ensemble multi-source BFS (distinct because of multiple restarts)
                 if "ensemble_multi_source_bfs" in methods_to_run:
                     rec = _record_common_info(mod, dataset_key, dataset, data, split_path, split_id, repeat, "ensemble_multi_source_bfs", current_seed)
                     t1 = time.perf_counter()
@@ -680,7 +676,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
         f.write("## Datasets\n\n")
         f.write("- texas\n- chameleon\n\n")
         f.write("## Splits and repeats\n\n")
-        f.write("- Splits: GEO-GCN splits (split_id = 0..9)\n")
+        f.write(f"- Splits: GEO-GCN canonical splits available for all selected datasets ({len(split_ids)} total): {split_ids}\n")
         f.write("- Repeats per split: 1\n\n")
         f.write("## Methods included\n\n")
         for m in methods_to_run:
@@ -691,8 +687,6 @@ def run_stage2_internal(split_dir: Optional[str] = None):
         f.write("\n## Parameter sharing\n\n")
         f.write("- `params_prop` tuned once per dataset/split/repeat via `predictclass` (robust_random_search) and reused by:\n")
         f.write("  - prop_only\n  - priority_bfs\n  - ensemble_multi_source_bfs\n")
-        if "gated_mlp_prop" in methods_to_run:
-            f.write("  - gated_mlp_prop (plus a validation-trained node-wise gate)\n")
         f.write("- `params_hyb` tuned separately for `mlp_refined`.\n")
         f.write("- MLP hyperparameters are specific to `mlp_only`.\n\n")
         f.write("## Runtime accounting policy\n\n")
@@ -707,8 +701,6 @@ def run_stage2_internal(split_dir: Optional[str] = None):
         f.write("- Hybrid method: `mlp_refined` uses MLP pseudo-labels to augment the train set before propagation.\n")
         f.write("- Runtime: ensemble multi-source BFS incurs extra runtime by design due to multiple restarts.\n")
         f.write("- Order sensitivity: propagation methods remain order-sensitive due to priority-queue traversal and sequential commits.\n\n")
-        if "gated_mlp_prop" in methods_to_run:
-            f.write("- Gate data sparsity: `gated_mlp_prop` trains only on validation nodes where MLP/prop disagree in correctness, which can be small on some splits.\n\n")
         f.write("## Methods excluded or merged\n\n")
         f.write("- `multi_source_priority_bfs_predictclass` currently uses the same seed set (`seed_mode=\"all_train\"`) as `priority_bfs`.\n")
         f.write("  It is therefore **not reported as a separate row**; it is treated as a configuration wrapper around priority-BFS.\n")
