@@ -1,0 +1,54 @@
+# Split Check – manuscript_focus_r3
+
+| Dataset | Split ID | Found | Path |
+|---------|----------|-------|------|
+| cora | 0 | yes | /workspace/data/geom-gcn-splits-broad/cora_split_0.6_0.2_0.npz |
+| cora | 1 | yes | /workspace/data/geom-gcn-splits-broad/cora_split_0.6_0.2_1.npz |
+| cora | 2 | yes | /workspace/data/geom-gcn-splits-broad/cora_split_0.6_0.2_2.npz |
+| cora | 3 | yes | /workspace/data/geom-gcn-splits-broad/cora_split_0.6_0.2_3.npz |
+| cora | 4 | yes | /workspace/data/geom-gcn-splits-broad/cora_split_0.6_0.2_4.npz |
+| cora | 5 | yes | /workspace/data/geom-gcn-splits-broad/cora_split_0.6_0.2_5.npz |
+| cora | 6 | yes | /workspace/data/geom-gcn-splits-broad/cora_split_0.6_0.2_6.npz |
+| cora | 7 | yes | /workspace/data/geom-gcn-splits-broad/cora_split_0.6_0.2_7.npz |
+| cora | 8 | yes | /workspace/data/geom-gcn-splits-broad/cora_split_0.6_0.2_8.npz |
+| cora | 9 | yes | /workspace/data/geom-gcn-splits-broad/cora_split_0.6_0.2_9.npz |
+| citeseer | 0 | yes | /workspace/data/geom-gcn-splits-broad/citeseer_split_0.6_0.2_0.npz |
+| citeseer | 1 | yes | /workspace/data/geom-gcn-splits-broad/citeseer_split_0.6_0.2_1.npz |
+| citeseer | 2 | yes | /workspace/data/geom-gcn-splits-broad/citeseer_split_0.6_0.2_2.npz |
+| citeseer | 3 | yes | /workspace/data/geom-gcn-splits-broad/citeseer_split_0.6_0.2_3.npz |
+| citeseer | 4 | yes | /workspace/data/geom-gcn-splits-broad/citeseer_split_0.6_0.2_4.npz |
+| citeseer | 5 | yes | /workspace/data/geom-gcn-splits-broad/citeseer_split_0.6_0.2_5.npz |
+| citeseer | 6 | yes | /workspace/data/geom-gcn-splits-broad/citeseer_split_0.6_0.2_6.npz |
+| citeseer | 7 | yes | /workspace/data/geom-gcn-splits-broad/citeseer_split_0.6_0.2_7.npz |
+| citeseer | 8 | yes | /workspace/data/geom-gcn-splits-broad/citeseer_split_0.6_0.2_8.npz |
+| citeseer | 9 | yes | /workspace/data/geom-gcn-splits-broad/citeseer_split_0.6_0.2_9.npz |
+| chameleon | 0 | yes | /workspace/data/geom-gcn-splits-broad/chameleon_split_0.6_0.2_0.npz |
+| chameleon | 1 | yes | /workspace/data/geom-gcn-splits-broad/chameleon_split_0.6_0.2_1.npz |
+| chameleon | 2 | yes | /workspace/data/geom-gcn-splits-broad/chameleon_split_0.6_0.2_2.npz |
+| chameleon | 3 | yes | /workspace/data/geom-gcn-splits-broad/chameleon_split_0.6_0.2_3.npz |
+| chameleon | 4 | yes | /workspace/data/geom-gcn-splits-broad/chameleon_split_0.6_0.2_4.npz |
+| chameleon | 5 | yes | /workspace/data/geom-gcn-splits-broad/chameleon_split_0.6_0.2_5.npz |
+| chameleon | 6 | yes | /workspace/data/geom-gcn-splits-broad/chameleon_split_0.6_0.2_6.npz |
+| chameleon | 7 | yes | /workspace/data/geom-gcn-splits-broad/chameleon_split_0.6_0.2_7.npz |
+| chameleon | 8 | yes | /workspace/data/geom-gcn-splits-broad/chameleon_split_0.6_0.2_8.npz |
+| chameleon | 9 | yes | /workspace/data/geom-gcn-splits-broad/chameleon_split_0.6_0.2_9.npz |
+| texas | 0 | yes | /workspace/data/geom-gcn-splits-broad/texas_split_0.6_0.2_0.npz |
+| texas | 1 | yes | /workspace/data/geom-gcn-splits-broad/texas_split_0.6_0.2_1.npz |
+| texas | 2 | yes | /workspace/data/geom-gcn-splits-broad/texas_split_0.6_0.2_2.npz |
+| texas | 3 | yes | /workspace/data/geom-gcn-splits-broad/texas_split_0.6_0.2_3.npz |
+| texas | 4 | yes | /workspace/data/geom-gcn-splits-broad/texas_split_0.6_0.2_4.npz |
+| texas | 5 | yes | /workspace/data/geom-gcn-splits-broad/texas_split_0.6_0.2_5.npz |
+| texas | 6 | yes | /workspace/data/geom-gcn-splits-broad/texas_split_0.6_0.2_6.npz |
+| texas | 7 | yes | /workspace/data/geom-gcn-splits-broad/texas_split_0.6_0.2_7.npz |
+| texas | 8 | yes | /workspace/data/geom-gcn-splits-broad/texas_split_0.6_0.2_8.npz |
+| texas | 9 | yes | /workspace/data/geom-gcn-splits-broad/texas_split_0.6_0.2_9.npz |
+| wisconsin | 0 | yes | /workspace/data/geom-gcn-splits-broad/wisconsin_split_0.6_0.2_0.npz |
+| wisconsin | 1 | yes | /workspace/data/geom-gcn-splits-broad/wisconsin_split_0.6_0.2_1.npz |
+| wisconsin | 2 | yes | /workspace/data/geom-gcn-splits-broad/wisconsin_split_0.6_0.2_2.npz |
+| wisconsin | 3 | yes | /workspace/data/geom-gcn-splits-broad/wisconsin_split_0.6_0.2_3.npz |
+| wisconsin | 4 | yes | /workspace/data/geom-gcn-splits-broad/wisconsin_split_0.6_0.2_4.npz |
+| wisconsin | 5 | yes | /workspace/data/geom-gcn-splits-broad/wisconsin_split_0.6_0.2_5.npz |
+| wisconsin | 6 | yes | /workspace/data/geom-gcn-splits-broad/wisconsin_split_0.6_0.2_6.npz |
+| wisconsin | 7 | yes | /workspace/data/geom-gcn-splits-broad/wisconsin_split_0.6_0.2_7.npz |
+| wisconsin | 8 | yes | /workspace/data/geom-gcn-splits-broad/wisconsin_split_0.6_0.2_8.npz |
+| wisconsin | 9 | yes | /workspace/data/geom-gcn-splits-broad/wisconsin_split_0.6_0.2_9.npz |
