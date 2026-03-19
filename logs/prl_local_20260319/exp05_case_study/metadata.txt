@@ -1,0 +1,9 @@
+timestamp_utc: 2026-03-19T03:12:16.201795+00:00
+hostname: cursor
+pwd: /workspace
+python_version: Python 3.12.3
+key_script_names_used: comparison_runner.py, bfsbased-full-investigate-homophil.py
+dataset_list: ['citeseer', 'chameleon', 'wisconsin(optional)']
+split_list: reused from existing diagnostics
+repeat_count: reused from existing diagnostics
+important_hyperparameters_configs: no rerun preferred; extract illustrative changed-node examples
