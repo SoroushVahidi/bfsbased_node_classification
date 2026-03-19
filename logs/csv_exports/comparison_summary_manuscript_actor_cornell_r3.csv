@@ -1,0 +1,7 @@
+dataset,method,n_runs,n_runs_with_test_acc,mean_test_acc,std_test_acc,mean_total_runtime_sec,success_count,total_count,parameter_source_values,parameter_tuning_target_method_values
+actor,mlp_only,30,30,0.34208333293596904,0.009293926319911043,1.9542229191031462,30,30,['mlp_only_self_tuned'],['mlp_only']
+actor,prop_only,30,30,0.32256578947368425,0.019201173822901697,75.90893893746252,30,30,['tuned_on_predictclass_then_reused'],['predictclass']
+actor,selective_graph_correction,30,30,0.3418859649122807,0.008782887892324908,0.3809293252309241,30,30,['validation_selected_threshold_and_weights'],['selective_graph_correction']
+cornell,mlp_only,30,30,0.734234235684077,0.04987607998204311,0.21929543506897364,30,30,['mlp_only_self_tuned'],['mlp_only']
+cornell,prop_only,30,30,0.5045045045045045,0.08669269710788761,1.3949896151985741,30,30,['tuned_on_predictclass_then_reused'],['predictclass']
+cornell,selective_graph_correction,30,30,0.7315315315315316,0.04831382946952045,0.006394572496841041,30,30,['validation_selected_threshold_and_weights'],['selective_graph_correction']
