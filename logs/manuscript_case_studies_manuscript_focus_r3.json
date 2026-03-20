@@ -1,0 +1,274 @@
+[
+  {
+    "dataset": "citeseer",
+    "kind": "promising",
+    "diagnostics_path": "/workspace/logs/citeseer_selective_graph_correction_split0_rep0.json",
+    "n_changed_nodes": 33,
+    "n_corrected": 24,
+    "n_harmed": 4,
+    "examples": [
+      {
+        "node_id": 33,
+        "true_label": 5,
+        "mlp_pred": 2,
+        "final_pred": 5,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.32479310035705566,
+        "mlp_margin": 0.10781466960906982,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -1.7116999440161622,
+        "winning_components": {
+          "mlp_term": -1.7116999440161622,
+          "feature_similarity_term": 0.20258612632751466,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.5404725262446055,
+          "compatibility_term": 0.2332274692797521
+        }
+      },
+      {
+        "node_id": 319,
+        "true_label": 4,
+        "mlp_pred": 2,
+        "final_pred": 4,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.3561150133609772,
+        "mlp_margin": 0.013398587703704834,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -1.0708519211151633,
+        "winning_components": {
+          "mlp_term": -1.0708519211151633,
+          "feature_similarity_term": 0.20949199199676516,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.9,
+          "compatibility_term": 0.38990825688073394
+        }
+      },
+      {
+        "node_id": 400,
+        "true_label": 3,
+        "mlp_pred": 1,
+        "final_pred": 3,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.6934748291969299,
+        "mlp_margin": 0.47677046060562134,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -1.5292212110153909,
+        "winning_components": {
+          "mlp_term": -1.5292212110153909,
+          "feature_similarity_term": 0.20000009536743166,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.9,
+          "compatibility_term": 0.39364303178484106
+        }
+      },
+      {
+        "node_id": 726,
+        "true_label": 5,
+        "mlp_pred": 4,
+        "final_pred": 5,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.47197139263153076,
+        "mlp_margin": 0.151728093624115,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -1.1386742626789603,
+        "winning_components": {
+          "mlp_term": -1.1386742626789603,
+          "feature_similarity_term": 0.20919544696807862,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.8999444935272691,
+          "compatibility_term": 0.3834902941154031
+        }
+      },
+      {
+        "node_id": 1016,
+        "true_label": 1,
+        "mlp_pred": 2,
+        "final_pred": 1,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.342912882566452,
+        "mlp_margin": 0.11761850118637085,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -1.4903473702477983,
+        "winning_components": {
+          "mlp_term": -1.4903473702477983,
+          "feature_similarity_term": 0.2067052125930786,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.36191751424897983,
+          "compatibility_term": 0.1312230362569442
+        }
+      },
+      {
+        "node_id": 1274,
+        "true_label": 5,
+        "mlp_pred": 2,
+        "final_pred": 5,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.45841872692108154,
+        "mlp_margin": 0.03236493468284607,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -0.8531896678248054,
+        "winning_components": {
+          "mlp_term": -0.8531896678248054,
+          "feature_similarity_term": 0.20999734401702883,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.787088716821582,
+          "compatibility_term": 0.3367208303102507
+        }
+      },
+      {
+        "node_id": 1689,
+        "true_label": 3,
+        "mlp_pred": 0,
+        "final_pred": 3,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.37144115567207336,
+        "mlp_margin": 0.11378854513168335,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -2.1078676272087,
+        "winning_components": {
+          "mlp_term": -2.1078676272087,
+          "feature_similarity_term": 0.20748038291931153,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.861374500936972,
+          "compatibility_term": 0.37732285014500755
+        }
+      },
+      {
+        "node_id": 1859,
+        "true_label": 2,
+        "mlp_pred": 1,
+        "final_pred": 2,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.7567647695541382,
+        "mlp_margin": 0.5136880874633789,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -1.4143783212619825,
+        "winning_components": {
+          "mlp_term": -1.4143783212619825,
+          "feature_similarity_term": 0.2114801645278931,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.9,
+          "compatibility_term": 0.3935119887165021
+        }
+      },
+      {
+        "node_id": 1866,
+        "true_label": 0,
+        "mlp_pred": 5,
+        "final_pred": 0,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.35106387734413147,
+        "mlp_margin": 0.07567235827445984,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -1.4814212734360432,
+        "winning_components": {
+          "mlp_term": -1.4814212734360432,
+          "feature_similarity_term": 0.2060185432434082,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.5397236436102962,
+          "compatibility_term": 0.12582013862046665
+        }
+      },
+      {
+        "node_id": 2117,
+        "true_label": 1,
+        "mlp_pred": 3,
+        "final_pred": 1,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.34906208515167236,
+        "mlp_margin": 0.04235357046127319,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -1.9116641274649484,
+        "winning_components": {
+          "mlp_term": -1.9116641274649484,
+          "feature_similarity_term": 0.20420699119567873,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.8239495000618068,
+          "compatibility_term": 0.26394900731975907
+        }
+      },
+      {
+        "node_id": 2125,
+        "true_label": 2,
+        "mlp_pred": 3,
+        "final_pred": 2,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.567071795463562,
+        "mlp_margin": 0.16830796003341675,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -0.9193859284815107,
+        "winning_components": {
+          "mlp_term": -0.9193859284815107,
+          "feature_similarity_term": 0.20864200592041016,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.9,
+          "compatibility_term": 0.3935119887165021
+        }
+      },
+      {
+        "node_id": 2140,
+        "true_label": 5,
+        "mlp_pred": 0,
+        "final_pred": 5,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.2634214758872986,
+        "mlp_margin": 0.005962997674942017,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -1.3568968215412216,
+        "winning_components": {
+          "mlp_term": -1.3568968215412216,
+          "feature_similarity_term": 0.20809094905853273,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.8972162199564809,
+          "compatibility_term": 0.3823715732230405
+        }
+      }
+    ]
+  },
+  {
+    "dataset": "chameleon",
+    "kind": "neutral",
+    "diagnostics_path": "/workspace/logs/chameleon_selective_graph_correction_split0_rep0.json",
+    "n_changed_nodes": 2,
+    "n_corrected": 1,
+    "n_harmed": 1,
+    "examples": [
+      {
+        "node_id": 457,
+        "true_label": 2,
+        "mlp_pred": 0,
+        "final_pred": 2,
+        "outcome": "corrected",
+        "mlp_max_prob": 0.4999769330024719,
+        "mlp_margin": 0.0032105445861816406,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -0.6996354068185372,
+        "winning_components": {
+          "mlp_term": -0.6996354068185372,
+          "feature_similarity_term": 0.46542693972587584,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.07002990589451931,
+          "compatibility_term": 0.04145716084180398
+        }
+      },
+      {
+        "node_id": 2258,
+        "true_label": 0,
+        "mlp_pred": 0,
+        "final_pred": 1,
+        "outcome": "harmed",
+        "mlp_max_prob": 0.4857247471809387,
+        "mlp_margin": 0.04053807258605957,
+        "dominant_term": "mlp_term",
+        "dominant_term_value": -0.8092615913070457,
+        "winning_components": {
+          "mlp_term": -0.8092615913070457,
+          "feature_similarity_term": 0.5280939102172851,
+          "feature_knn_term": 0.0,
+          "graph_neighbor_term": 0.2145925750573395,
+          "compatibility_term": 0.03329171622013132
+        }
+      }
+    ]
+  }
+]

@@ -56,40 +56,54 @@ def resolve_split_file(
       d) our repo root
       e) any subdirectory under our shared data root
     """
-    fname = f"{dataset_key.lower()}_split_0.6_0.2_{split_id}.npz"
+    ds_key = dataset_key.lower()
+    split_name_candidates = [ds_key]
+    # Canonical GEO-GCN split files use "film" for Actor.
+    if ds_key == "actor":
+        split_name_candidates.append("film")
+
+    def _probe_in_dir(base_dir: str) -> Optional[str]:
+        for name in split_name_candidates:
+            fname_local = f"{name}_split_0.6_0.2_{split_id}.npz"
+            cand_local = os.path.join(base_dir, fname_local)
+            if os.path.isfile(cand_local):
+                return cand_local
+        return None
 
     # (a) explicit split_dir
     if split_dir:
-        cand = os.path.join(split_dir, fname)
-        if os.path.isfile(cand):
+        cand = _probe_in_dir(split_dir)
+        if cand:
             return cand
 
     # (b) GEO_GCN_SPLIT_DIR env var
     env_dir = os.environ.get("GEO_GCN_SPLIT_DIR")
     if env_dir:
-        cand = os.path.join(env_dir, fname)
-        if os.path.isfile(cand):
+        cand = _probe_in_dir(env_dir)
+        if cand:
             return cand
 
     # (c) DIFFUSION_JUMP_REPO/splits
     dj_root = _get_dj_repo_root()
     if dj_root:
-        cand = os.path.join(dj_root, "splits", fname)
-        if os.path.isfile(cand):
+        cand = _probe_in_dir(os.path.join(dj_root, "splits"))
+        if cand:
             return cand
 
     # (d) our repo root
     repo_root = _get_repo_root()
-    cand_root = os.path.join(repo_root, fname)
-    if os.path.isfile(cand_root):
+    cand_root = _probe_in_dir(repo_root)
+    if cand_root:
         return cand_root
 
     # (e) search under shared data directory
     data_root = os.path.join(repo_root, "data")
     if os.path.isdir(data_root):
+        wanted_files = {f"{name}_split_0.6_0.2_{split_id}.npz" for name in split_name_candidates}
         for root, _dirs, files in os.walk(data_root):
-            if fname in files:
-                return os.path.join(root, fname)
+            for wanted in wanted_files:
+                if wanted in files:
+                    return os.path.join(root, wanted)
 
     return None
 
@@ -99,6 +113,7 @@ def validate_required_splits(
     split_ids: List[int],
     *,
     split_dir: Optional[str] = None,
+    output_tag: str = "stage2",
 ) -> Dict[Tuple[str, int], Optional[str]]:
     """
     Resolve and validate split files for the requested datasets/split_ids.
@@ -111,8 +126,8 @@ def validate_required_splits(
             mapping[(ds, sid)] = p
 
     os.makedirs("logs", exist_ok=True)
-    report_json = os.path.join("logs", "comparison_split_check_stage2.json")
-    report_md = os.path.join("logs", "comparison_split_check_stage2.md")
+    report_json = os.path.join("logs", f"comparison_split_check_{output_tag}.json")
+    report_md = os.path.join("logs", f"comparison_split_check_{output_tag}.md")
 
     # JSON report
     js_payload = []
@@ -130,7 +145,7 @@ def validate_required_splits(
 
     # Markdown report
     with open(report_md, "w", encoding="utf-8") as f:
-        f.write("# Split Check – Stage 1\n\n")
+        f.write(f"# Split Check – {output_tag}\n\n")
         f.write("| Dataset | Split ID | Found | Path |\n")
         f.write("|---------|----------|-------|------|\n")
         for (ds, sid), path in mapping.items():
@@ -164,6 +179,44 @@ def _load_split_npz(dataset_key: str, split_id: int, device: torch.device, split
     val_idx = torch.as_tensor(np.where(split["val_mask"])[0], dtype=torch.long, device=device)
     test_idx = torch.as_tensor(np.where(split["test_mask"])[0], dtype=torch.long, device=device)
     return train_idx, val_idx, test_idx, split_path
+
+
+def _discover_available_split_ids(
+    datasets: List[str],
+    *,
+    split_dir: Optional[str] = None,
+    max_split_id: int = 100,
+) -> Dict[str, List[int]]:
+    """
+    Discover available split IDs per dataset by probing resolution helper.
+    """
+    out: Dict[str, List[int]] = {}
+    for ds in datasets:
+        found: List[int] = []
+        for sid in range(max_split_id):
+            if resolve_split_file(ds, sid, split_dir=split_dir) is not None:
+                found.append(sid)
+        out[ds] = found
+    return out
+
+
+def _common_available_split_ids(
+    datasets: List[str],
+    *,
+    split_dir: Optional[str] = None,
+    max_split_id: int = 100,
+) -> List[int]:
+    """
+    Return split IDs available for every requested dataset.
+    """
+    discovered = _discover_available_split_ids(datasets, split_dir=split_dir, max_split_id=max_split_id)
+    if not discovered:
+        return []
+    common: Optional[set[int]] = None
+    for ds in datasets:
+        ds_set = set(discovered.get(ds, []))
+        common = ds_set if common is None else (common & ds_set)
+    return sorted(common) if common is not None else []
 
 
 def _record_common_info(mod, dataset_key: str, dataset, data, split_path: str, split_id: int, repeat_id: int, method: str, seed: int) -> Dict[str, Any]:
@@ -211,34 +264,56 @@ def _record_common_info(mod, dataset_key: str, dataset, data, split_path: str, s
     return record
 
 
-def run_stage2_internal(split_dir: Optional[str] = None):
+def run_stage2_internal(
+    split_dir: Optional[str] = None,
+    *,
+    datasets: Optional[List[str]] = None,
+    split_ids: Optional[List[int]] = None,
+    repeats: int = 1,
+    methods_to_run: Optional[List[str]] = None,
+    output_tag: str = "stage2",
+    candidate_datasets: Optional[List[str]] = None,
+    excluded_datasets: Optional[Dict[str, str]] = None,
+    split_coverage_status: Optional[Dict[str, Dict[str, Any]]] = None,
+):
     """
-    Stage 2: internal comparison on 2 datasets (texas, chameleon),
-    splits 0..9, 1 repeat, with selected methods.
+    Configurable internal comparison harness.
     """
     mod = _load_full_investigate_module()
 
-    datasets = ["texas", "chameleon"]
-    split_ids = list(range(10))
-    repeats = 1
+    datasets = [d.lower() for d in (datasets or ["texas", "chameleon"])]
+    candidate_datasets = [d.lower() for d in (candidate_datasets or datasets)]
+    excluded_datasets = excluded_datasets or {}
+    if split_ids is None:
+        split_ids = _common_available_split_ids(datasets, split_dir=split_dir, max_split_id=100)
+        if not split_ids:
+            # Conservative fallback to canonical GEO-GCN 10-split protocol.
+            split_ids = list(range(10))
+    else:
+        split_ids = [int(s) for s in split_ids]
+    repeats = int(repeats)
 
-    methods_to_run = [
+    methods_to_run = methods_to_run or [
         "mlp_only",
         "prop_only",
         "mlp_refined",
         "prop_mlp_select",
+        # Optional methods (kept off by default to avoid disrupting frozen Stage 2 setup):
+        # "selective_graph_correction",
+        # "gated_mlp_prop",
         "priority_bfs",
         "ensemble_multi_source_bfs",
     ]
+    methods_to_run = [str(m) for m in methods_to_run]
 
     # Preflight: validate splits
-    split_map = validate_required_splits(datasets, split_ids, split_dir=split_dir)
+    split_map = validate_required_splits(datasets, split_ids, split_dir=split_dir, output_tag=output_tag)
     missing = [(ds, sid) for (ds, sid), p in split_map.items() if p is None]
     if missing:
         print("Split validation failed. Missing the following splits:")
         for ds, sid in missing:
             print(f"  - dataset={ds}, split_id={sid}")
-        print("See logs/comparison_split_check_stage1.{json,md} for details.")
+        print(f"See logs/comparison_split_check_{output_tag}.{{json,md}} for details.")
         return
 
     records: List[Dict[str, Any]] = []
@@ -441,10 +516,20 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                     test_time = time.perf_counter() - t2
 
                     total_method_time = method_time + test_time
+                    # Match main script behavior:
+                    # choose refined only when its validation performance beats MLP.
+                    use_refined = float(acc_val_refined) > float(acc_val_mlp)
+                    final_val_acc = float(acc_val_refined if use_refined else acc_val_mlp)
+                    final_test_acc = float(acc_test_refined if use_refined else acc_test_mlp)
                     rec.update(
                         {
-                            "val_acc": float(acc_val_refined),
-                            "test_acc": float(acc_test_refined),
+                            "val_acc": final_val_acc,
+                            "test_acc": final_test_acc,
+                            "val_acc_refined_raw": float(acc_val_refined),
+                            "test_acc_refined_raw": float(acc_test_refined),
+                            "val_acc_mlp_raw": float(acc_val_mlp),
+                            "test_acc_mlp_raw": float(acc_test_mlp),
+                            "used_refined_variant": bool(use_refined),
                             "tuning_runtime_sec": tuning_time_hyb,
                             "method_runtime_sec": total_method_time,
                             "total_runtime_sec": tuning_time_hyb + total_method_time,
@@ -504,7 +589,60 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                     )
                     records.append(rec)
 
-                # 5) Priority-BFS
+                # 5) Feature-first selective graph correction (optional)
+                if (
+                    "selective_graph_correction" in methods_to_run
+                    and mlp_probs is not None
+                    and hasattr(mod, "selective_graph_correction_predictclass")
+                ):
+                    rec = _record_common_info(mod, dataset_key, dataset, data, split_path, split_id, repeat, "selective_graph_correction", current_seed)
+                    t1 = time.perf_counter()
+                    _, acc_test_sel, sel_info = mod.selective_graph_correction_predictclass(
+                        data,
+                        train_np,
+                        val_np,
+                        test_np,
+                        mlp_probs=mlp_probs,
+                        seed=current_seed,
+                        log_prefix=f"{dataset_key}:STAGE2-SELECTIVE-CORR",
+                        log_file=None,
+                        diagnostics_run_id=f"split{split_id}_rep{repeat}",
+                        dataset_key_for_logs=dataset_key,
+                        enable_feature_knn=False,
+                        write_node_diagnostics=True,
+                    )
+                    runtime_breakdown = sel_info.get("runtime_breakdown_sec", {})
+                    tuning_time_sel = float(runtime_breakdown.get("selection_runtime_sec", 0.0))
+                    method_time_sel = float(runtime_breakdown.get("evidence_runtime_sec", 0.0)) + float(
+                        runtime_breakdown.get("inference_runtime_sec", 0.0)
+                    )
+                    rec.update(
+                        {
+                            "val_acc": float(sel_info.get("val_acc_selective")) if sel_info.get("val_acc_selective") is not None else None,
+                            "test_acc": float(acc_test_sel),
+                            "tuning_runtime_sec": tuning_time_sel,
+                            "method_runtime_sec": method_time_sel,
+                            "total_runtime_sec": tuning_time_sel + method_time_sel,
+                            "parameter_source": "validation_selected_threshold_and_weights",
+                            "parameter_tuning_target_method": "selective_graph_correction",
+                            "tuned_separately_for_this_method": True,
+                            "is_distinct_method_variant": True,
+                            "parent_method": "mlp_only",
+                            "selected_threshold_high": sel_info.get("selected_threshold_high"),
+                            "selected_weights": sel_info.get("selected_weights"),
+                            "fraction_test_nodes_uncertain": sel_info.get("fraction_test_nodes_uncertain"),
+                            "fraction_test_nodes_changed_from_mlp": sel_info.get("fraction_test_nodes_changed_from_mlp"),
+                            "acc_test_confident_nodes": sel_info.get("acc_test_confident_nodes"),
+                            "acc_test_uncertain_nodes": sel_info.get("acc_test_uncertain_nodes"),
+                            "feature_knn_used": sel_info.get("feature_knn_used"),
+                            "feature_knn_k": sel_info.get("feature_knn_k"),
+                            "avg_runtime_overhead_over_mlp_sec": runtime_breakdown.get("avg_runtime_overhead_over_mlp_sec"),
+                            "diagnostics_path": sel_info.get("diagnostics_path"),
+                        }
+                    )
+                    records.append(rec)
+
+                # 6) Priority-BFS
                 if "priority_bfs" in methods_to_run:
                     rec = _record_common_info(mod, dataset_key, dataset, data, split_path, split_id, repeat, "priority_bfs", current_seed)
                     t1 = time.perf_counter()
@@ -514,7 +652,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                         test_np,
                         **dict_params_prop,
                         seed=current_seed,
-                        log_prefix=f"{dataset_key}:STAGE1-PRIORITY-BFS",
+                        log_prefix=f"{dataset_key}:STAGE2-PRIORITY-BFS",
                         log_file=None,
                         margin_threshold=0.05,
                         refinement_margin_threshold=0.02,
@@ -539,7 +677,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                     )
                     records.append(rec)
 
-                # 6) Ensemble multi-source BFS (distinct because of multiple restarts)
+                # 7) Ensemble multi-source BFS (distinct because of multiple restarts)
                 if "ensemble_multi_source_bfs" in methods_to_run:
                     rec = _record_common_info(mod, dataset_key, dataset, data, split_path, split_id, repeat, "ensemble_multi_source_bfs", current_seed)
                     t1 = time.perf_counter()
@@ -555,7 +693,7 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                         margin_threshold=0.05,
                         refinement_margin_threshold=0.02,
                         max_deferrals_per_node=5,
-                        log_prefix=f"{dataset_key}:STAGE1-ENS-MULTI-SOURCE",
+                        log_prefix=f"{dataset_key}:STAGE2-ENS-MULTI-SOURCE",
                         log_file=None,
                     )
                     method_time = time.perf_counter() - t1
@@ -578,68 +716,101 @@ def run_stage2_internal(split_dir: Optional[str] = None):
                     )
                     records.append(rec)
 
-    # Write Stage 1 outputs
+    # Write outputs
     os.makedirs("logs", exist_ok=True)
-    runs_path = os.path.join("logs", "comparison_runs_stage2.jsonl")
+    runs_path = os.path.join("logs", f"comparison_runs_{output_tag}.jsonl")
     with open(runs_path, "w", encoding="utf-8") as f:
         for r in records:
             f.write(json.dumps(r) + "\n")
 
     # Simple summary: per-dataset/method mean/std of test_acc (ignoring None)
     summary: List[Dict[str, Any]] = []
-    by_key: Dict[Tuple[str, str], List[float]] = {}
+    by_key: Dict[Tuple[str, str], List[Dict[str, Any]]] = {}
     for r in records:
-        if r.get("test_acc") is None:
-            continue
         key = (r["dataset"], r["method"])
-        by_key.setdefault(key, []).append(float(r["test_acc"]))
-    for (ds, method), vals in by_key.items():
-        arr = np.array(vals, dtype=float)
+        by_key.setdefault(key, []).append(r)
+    for (ds, method), items in by_key.items():
+        test_vals = [float(rr["test_acc"]) for rr in items if rr.get("test_acc") is not None]
+        arr = np.array(test_vals, dtype=float) if test_vals else np.array([], dtype=float)
+        runtime_vals = [float(rr["total_runtime_sec"]) for rr in items if rr.get("total_runtime_sec") is not None]
+        success_count = int(sum(1 for rr in items if bool(rr.get("success", False))))
+        total_count = int(len(items))
+        parameter_sources = sorted({str(rr["parameter_source"]) for rr in items if rr.get("parameter_source") is not None})
+        tuning_targets = sorted(
+            {str(rr["parameter_tuning_target_method"]) for rr in items if rr.get("parameter_tuning_target_method") is not None}
+        )
         summary.append(
             {
                 "dataset": ds,
                 "method": method,
                 "n_runs": int(arr.size),
-                "mean_test_acc": float(arr.mean()),
-                "std_test_acc": float(arr.std()),
-                "mean_total_runtime_sec": float(
-                    np.mean(
-                        [
-                            rr["total_runtime_sec"]
-                            for rr in records
-                            if rr["dataset"] == ds and rr["method"] == method and rr.get("total_runtime_sec") is not None
-                        ]
-                    )
-                )
-                if any(rr.get("total_runtime_sec") is not None and rr["dataset"] == ds and rr["method"] == method for rr in records)
-                else None,
+                "n_runs_with_test_acc": int(arr.size),
+                "mean_test_acc": float(arr.mean()) if arr.size > 0 else None,
+                "std_test_acc": float(arr.std()) if arr.size > 0 else None,
+                "mean_total_runtime_sec": float(np.mean(runtime_vals)) if runtime_vals else None,
+                "success_count": success_count,
+                "total_count": total_count,
+                "parameter_source_values": parameter_sources,
+                "parameter_tuning_target_method_values": tuning_targets,
             }
         )
 
-    summary_path = os.path.join("logs", "comparison_summary_stage2.json")
+    summary_path = os.path.join("logs", f"comparison_summary_{output_tag}.json")
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
-    # Fairness / configuration report (Stage 1)
-    fairness_path = os.path.join("logs", "comparison_fairness_report_stage2.md")
+    # Fairness / configuration report
+    fairness_path = os.path.join("logs", f"comparison_fairness_report_{output_tag}.md")
     with open(fairness_path, "w", encoding="utf-8") as f:
-        f.write("# Fairness / Configuration Report – Stage 2 Internal Pilot (texas, chameleon)\n\n")
+        f.write(f"# Fairness / Configuration Report – {output_tag}\n\n")
         f.write("## Datasets\n\n")
-        f.write("- texas\n- chameleon\n\n")
+        for ds in datasets:
+            f.write(f"- {ds}\n")
+        f.write("\n")
+        f.write("## Candidate dataset coverage and exclusions\n\n")
+        f.write(f"- Candidate datasets requested: {candidate_datasets}\n")
+        f.write(f"- Included datasets executed: {datasets}\n")
+        if excluded_datasets:
+            f.write("- Excluded datasets and reasons:\n")
+            for ds, reason in excluded_datasets.items():
+                f.write(f"  - {ds}: {reason}\n")
+        else:
+            f.write("- Excluded datasets and reasons: none\n")
+        if split_coverage_status:
+            f.write("\n- Split coverage status:\n")
+            for ds in candidate_datasets:
+                item = split_coverage_status.get(ds, {})
+                have = item.get("available_split_ids", [])
+                complete = bool(item.get("has_complete_0_9", False))
+                f.write(f"  - {ds}: has_complete_0_9={complete}, available_split_ids={have}\n")
+        f.write("\n")
         f.write("## Splits and repeats\n\n")
-        f.write("- Splits: GEO-GCN splits (split_id = 0..9)\n")
-        f.write("- Repeats per split: 1\n\n")
+        f.write(f"- Splits: GEO-GCN canonical splits available for all selected datasets ({len(split_ids)} total): {split_ids}\n")
+        f.write(f"- Repeats per split: {repeats}\n\n")
+        f.write("## Split policy\n\n")
+        f.write("- Random split fallback is disabled for this benchmark setup.\n")
+        f.write("- Datasets without complete canonical split coverage are excluded.\n\n")
         f.write("## Methods included\n\n")
         for m in methods_to_run:
             if m == "multi_source_priority_bfs":
-                f.write(f"- {m} (excluded from Stage 1 summary; not distinct from priority-BFS yet)\n")
+                f.write(f"- {m} (excluded from Stage 2 summary; not distinct from priority-BFS yet)\n")
             else:
                 f.write(f"- {m}\n")
         f.write("\n## Parameter sharing\n\n")
         f.write("- `params_prop` tuned once per dataset/split/repeat via `predictclass` (robust_random_search) and reused by:\n")
-        f.write("  - prop_only\n  - priority_bfs\n  - ensemble_multi_source_bfs\n")
-        f.write("- `params_hyb` tuned separately for `mlp_refined`.\n")
-        f.write("- MLP hyperparameters are specific to `mlp_only`.\n\n")
+        if "prop_only" in methods_to_run:
+            f.write("  - prop_only\n")
+        if "priority_bfs" in methods_to_run:
+            f.write("  - priority_bfs\n")
+        if "ensemble_multi_source_bfs" in methods_to_run:
+            f.write("  - ensemble_multi_source_bfs\n")
+        if "selective_graph_correction" in methods_to_run:
+            f.write("- `selective_graph_correction` selects uncertainty threshold and score weights on validation nodes only.\n")
+        if "mlp_refined" in methods_to_run:
+            f.write("- `params_hyb` tuned separately for `mlp_refined`.\n")
+        if "mlp_only" in methods_to_run:
+            f.write("- MLP hyperparameters are specific to `mlp_only`.\n")
+        f.write("\n")
         f.write("## Runtime accounting policy\n\n")
         f.write("- `tuning_runtime_sec` measures the time spent in hyperparameter search or training (for MLP).\n")
         f.write("- `method_runtime_sec` measures the time for the final evaluation calls (val/test) using tuned parameters.\n")
@@ -647,32 +818,75 @@ def run_stage2_internal(split_dir: Optional[str] = None):
         f.write("- For methods that reuse parameters (e.g., priority_bfs, ensemble_multi_source_bfs), the original tuning cost is reported again so that\n")
         f.write("  comparisons can be made either including or excluding amortized tuning cost.\n\n")
         f.write("## Possible unfairness / caveats\n\n")
-        f.write("- Parameter reuse: `params_prop` tuned on `predictclass` and reused by `prop_only`, `priority_bfs`, and `ensemble_multi_source_bfs`.\n")
-        f.write("- Experimental methods: `priority_bfs` and `ensemble_multi_source_bfs` are more recent, complex propagation variants.\n")
-        f.write("- Hybrid method: `mlp_refined` uses MLP pseudo-labels to augment the train set before propagation.\n")
-        f.write("- Runtime: ensemble multi-source BFS incurs extra runtime by design due to multiple restarts.\n")
+        f.write("- Parameter reuse: `params_prop` tuned on `predictclass` and reused by propagation-family variants.\n")
+        if "priority_bfs" in methods_to_run or "ensemble_multi_source_bfs" in methods_to_run:
+            f.write("- Experimental methods: `priority_bfs` and `ensemble_multi_source_bfs` are more recent, complex propagation variants.\n")
+        if "mlp_refined" in methods_to_run:
+            f.write("- Hybrid method: `mlp_refined` uses MLP pseudo-labels to augment the train set before propagation.\n")
+        if "ensemble_multi_source_bfs" in methods_to_run:
+            f.write("- Runtime: ensemble multi-source BFS incurs extra runtime by design due to multiple restarts.\n")
         f.write("- Order sensitivity: propagation methods remain order-sensitive due to priority-queue traversal and sequential commits.\n\n")
+        if "selective_graph_correction" in methods_to_run:
+            f.write("- Selective correction risk: validation-tuned threshold/weights may overfit small validation sets on some splits.\n\n")
         f.write("## Methods excluded or merged\n\n")
         f.write("- `multi_source_priority_bfs_predictclass` currently uses the same seed set (`seed_mode=\"all_train\"`) as `priority_bfs`.\n")
         f.write("  It is therefore **not reported as a separate row**; it is treated as a configuration wrapper around priority-BFS.\n")
 
-    print(f"Wrote Stage 2 per-run records to {runs_path}")
-    print(f"Wrote Stage 2 summary to {summary_path}")
-    print(f"Wrote Stage 2 fairness report to {fairness_path}")
+    print(f"Wrote per-run records to {runs_path}")
+    print(f"Wrote summary to {summary_path}")
+    print(f"Wrote fairness report to {fairness_path}")
 
 
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Stage 2 internal comparison runner")
+    parser = argparse.ArgumentParser(description="Run configurable internal comparison harness.")
     parser.add_argument(
         "--split-dir",
         default=None,
         help="Path to directory containing GEO-GCN split .npz files. "
              "Falls back to GEO_GCN_SPLIT_DIR env var, then auto-discovery.",
     )
+    parser.add_argument(
+        "--datasets",
+        nargs="+",
+        default=["texas", "chameleon"],
+        help="Datasets to evaluate.",
+    )
+    parser.add_argument(
+        "--split-ids",
+        nargs="*",
+        type=int,
+        default=None,
+        help="Optional explicit split IDs (e.g., --split-ids 0 1 2 ... 9).",
+    )
+    parser.add_argument(
+        "--repeats",
+        type=int,
+        default=1,
+        help="Number of repeats per split.",
+    )
+    parser.add_argument(
+        "--methods",
+        nargs="+",
+        default=None,
+        help="Optional explicit methods list.",
+    )
+    parser.add_argument(
+        "--output-tag",
+        default="stage2",
+        help="Output file tag suffix, e.g., stage2 or selective_controlled.",
+    )
     args = parser.parse_args()
-    run_stage2_internal(split_dir=args.split_dir)
+
+    run_stage2_internal(
+        split_dir=args.split_dir,
+        datasets=args.datasets,
+        split_ids=args.split_ids,
+        repeats=args.repeats,
+        methods_to_run=args.methods,
+        output_tag=args.output_tag,
+    )
 
 
 if __name__ == "__main__":

@@ -1,0 +1,1092 @@
+[15:53:09][RUN] [START] Full Investigation for DATASET_KEY=texas
+[15:53:09] ==================== SPLIT 0 ====================
+[15:53:09][WARN] Split texas_split_0.6_0.2_0.npz not found. Generating random split.
+[15:53:09][SPLIT_INFO] n_train=109 | n_val=36
+[15:53:09] -- Repeat 1/5 --
+[15:53:09]     [MLP] Training for 200 epochs...
+[15:53:09]       Epoch 050 | Loss: 0.0295
+[15:53:09]       Epoch 100 | Loss: 0.0197
+[15:53:09]       Epoch 150 | Loss: 0.0204
+[15:53:09]       Epoch 200 | Loss: 0.0062
+[15:53:09]   [1] MLP Only: Val=0.8333, Test=0.7895
+[15:53:09][TUNING] Graph H=0.127 (Base=0.200) -> Mode=HETERO
+[15:53:12][predictclass:FEATS] Avg Max Feature Similarity: 0.5715
+[15:53:12][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.018, Neigh=0.000, Sim=0.007, Compat=0.222
+[15:53:12][predictclass:FEATS] Avg Max Feature Similarity: 0.5715
+[15:53:12][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.018, Neigh=0.000, Sim=0.007, Compat=0.222
+[15:53:12]   [2] Prop Only: Val=0.6111, Test=0.5526
+[15:53:15] Running Val-Refined:
+[15:53:15][predictclass:FEATS] Avg Max Feature Similarity: 0.5768
+[15:53:15][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.036, Neigh=0.004, Sim=0.285, Compat=0.275
+[15:53:15] Running Test-Refined:
+[15:53:15][predictclass:FEATS] Avg Max Feature Similarity: 0.5799
+[15:53:15][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.037, Neigh=0.004, Sim=0.261, Compat=0.270
+[15:53:15]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.7895
+[15:53:15]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.7895
+[15:53:15] -- Repeat 2/5 --
+[15:53:15]     [MLP] Training for 200 epochs...
+[15:53:15]       Epoch 050 | Loss: 0.0305
+[15:53:15]       Epoch 100 | Loss: 0.0158
+[15:53:15]       Epoch 150 | Loss: 0.0078
+[15:53:15]       Epoch 200 | Loss: 0.0063
+[15:53:15]   [1] MLP Only: Val=0.8056, Test=0.6579
+[15:53:15][TUNING] Graph H=0.127 (Base=0.200) -> Mode=HETERO
+[15:53:18][predictclass:FEATS] Avg Max Feature Similarity: 0.5715
+[15:53:18][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.014, Neigh=0.000, Sim=0.053, Compat=0.164
+[15:53:18][predictclass:FEATS] Avg Max Feature Similarity: 0.5715
+[15:53:18][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.014, Neigh=0.000, Sim=0.053, Compat=0.164
+[15:53:18]   [2] Prop Only: Val=0.6111, Test=0.5526
+[15:53:21] Running Val-Refined:
+[15:53:21][predictclass:FEATS] Avg Max Feature Similarity: 0.5772
+[15:53:21][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.046, Neigh=0.014, Sim=0.248, Compat=0.155
+[15:53:21] Running Test-Refined:
+[15:53:21][predictclass:FEATS] Avg Max Feature Similarity: 0.5798
+[15:53:21][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.046, Neigh=0.017, Sim=0.249, Compat=0.158
+[15:53:21]   [3] MLP+Refined: Val(Ref)=0.5278 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.6579
+[15:53:21]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.6579
+[15:53:21] -- Repeat 3/5 --
+[15:53:21]     [MLP] Training for 200 epochs...
+[15:53:21]       Epoch 050 | Loss: 0.0228
+[15:53:21]       Epoch 100 | Loss: 0.0061
+[15:53:21]       Epoch 150 | Loss: 0.0062
+[15:53:21]       Epoch 200 | Loss: 0.0024
+[15:53:21]   [1] MLP Only: Val=0.8056, Test=0.7368
+[15:53:21][TUNING] Graph H=0.127 (Base=0.200) -> Mode=HETERO
+[15:53:24][predictclass:FEATS] Avg Max Feature Similarity: 0.5715
+[15:53:24][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.077, Neigh=0.000, Sim=0.264, Compat=0.257
+[15:53:24][predictclass:FEATS] Avg Max Feature Similarity: 0.5715
+[15:53:24][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.077, Neigh=0.000, Sim=0.264, Compat=0.257
+[15:53:24]   [2] Prop Only: Val=0.6111, Test=0.5789
+[15:53:26] Running Val-Refined:
+[15:53:26][predictclass:FEATS] Avg Max Feature Similarity: 0.5771
+[15:53:26][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.119, Neigh=0.005, Sim=0.007, Compat=0.216
+[15:53:26] Running Test-Refined:
+[15:53:27][predictclass:FEATS] Avg Max Feature Similarity: 0.5801
+[15:53:27][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.082, Neigh=0.003, Sim=0.006, Compat=0.246
+[15:53:27]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.7368
+[15:53:27]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.7368
+[15:53:27] -- Repeat 4/5 --
+[15:53:27]     [MLP] Training for 200 epochs...
+[15:53:27]       Epoch 050 | Loss: 0.0229
+[15:53:27]       Epoch 100 | Loss: 0.0148
+[15:53:27]       Epoch 150 | Loss: 0.0025
+[15:53:27]       Epoch 200 | Loss: 0.0077
+[15:53:27]   [1] MLP Only: Val=0.8056, Test=0.6842
+[15:53:27][TUNING] Graph H=0.127 (Base=0.200) -> Mode=HETERO
+[15:53:30][predictclass:FEATS] Avg Max Feature Similarity: 0.5715
+[15:53:30][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.126, Neigh=0.000, Sim=0.090, Compat=0.217
+[15:53:30][predictclass:FEATS] Avg Max Feature Similarity: 0.5715
+[15:53:30][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.126, Neigh=0.000, Sim=0.090, Compat=0.217
+[15:53:30]   [2] Prop Only: Val=0.6389, Test=0.5263
+[15:53:32] Running Val-Refined:
+[15:53:32][predictclass:FEATS] Avg Max Feature Similarity: 0.5774
+[15:53:32][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.118, Neigh=0.002, Sim=0.117, Compat=0.369
+[15:53:32] Running Test-Refined:
+[15:53:32][predictclass:FEATS] Avg Max Feature Similarity: 0.5773
+[15:53:32][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.120, Neigh=0.001, Sim=0.113, Compat=0.278
+[15:53:32]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.6842
+[15:53:32]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.6842
+[15:53:32] -- Repeat 5/5 --
+[15:53:32]     [MLP] Training for 200 epochs...
+[15:53:32]       Epoch 050 | Loss: 0.0160
+[15:53:32]       Epoch 100 | Loss: 0.0051
+[15:53:33]       Epoch 150 | Loss: 0.0070
+[15:53:33]       Epoch 200 | Loss: 0.0098
+[15:53:33]   [1] MLP Only: Val=0.8333, Test=0.7895
+[15:53:33][TUNING] Graph H=0.127 (Base=0.200) -> Mode=HETERO
+[15:53:36][predictclass:FEATS] Avg Max Feature Similarity: 0.5715
+[15:53:36][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.075, Neigh=0.000, Sim=0.124, Compat=0.324
+[15:53:36][predictclass:FEATS] Avg Max Feature Similarity: 0.5715
+[15:53:36][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.075, Neigh=0.000, Sim=0.124, Compat=0.324
+[15:53:36]   [2] Prop Only: Val=0.6111, Test=0.5526
+[15:53:38] Running Val-Refined:
+[15:53:38][predictclass:FEATS] Avg Max Feature Similarity: 0.5788
+[15:53:38][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.060, Neigh=0.001, Sim=0.145, Compat=0.161
+[15:53:38] Running Test-Refined:
+[15:53:38][predictclass:FEATS] Avg Max Feature Similarity: 0.5790
+[15:53:38][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.063, Neigh=0.001, Sim=0.132, Compat=0.174
+[15:53:38]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.7895
+[15:53:38]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.7895
+[15:53:38] ==================== SPLIT 1 ====================
+[15:53:38][WARN] Split texas_split_0.6_0.2_1.npz not found. Generating random split.
+[15:53:38][SPLIT_INFO] n_train=109 | n_val=36
+[15:53:38] -- Repeat 1/5 --
+[15:53:38]     [MLP] Training for 200 epochs...
+[15:53:38]       Epoch 050 | Loss: 0.0133
+[15:53:38]       Epoch 100 | Loss: 0.0031
+[15:53:38]       Epoch 150 | Loss: 0.0039
+[15:53:38]       Epoch 200 | Loss: 0.0024
+[15:53:38]   [1] MLP Only: Val=0.8056, Test=0.7895
+[15:53:38][TUNING] Graph H=0.098 (Base=0.250) -> Mode=HETERO
+[15:53:41][predictclass:FEATS] Avg Max Feature Similarity: 0.5648
+[15:53:41][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.117, Neigh=0.000, Sim=0.180, Compat=0.217
+[15:53:41][predictclass:FEATS] Avg Max Feature Similarity: 0.5648
+[15:53:41][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.117, Neigh=0.000, Sim=0.180, Compat=0.217
+[15:53:41]   [2] Prop Only: Val=0.5000, Test=0.5526
+[15:53:43] Running Val-Refined:
+[15:53:43][predictclass:FEATS] Avg Max Feature Similarity: 0.5691
+[15:53:43][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.280, Neigh=0.023, Sim=0.179, Compat=0.417
+[15:53:43] Running Test-Refined:
+[15:53:43][predictclass:FEATS] Avg Max Feature Similarity: 0.5728
+[15:53:43][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.241, Neigh=0.001, Sim=0.176, Compat=0.481
+[15:53:43]   [3] MLP+Refined: Val(Ref)=0.5000 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.7895
+[15:53:43]   [4] Prop+MLP(Select): Val(Prop)=0.5000 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.7895
+[15:53:43] -- Repeat 2/5 --
+[15:53:43]     [MLP] Training for 200 epochs...
+[15:53:44]       Epoch 050 | Loss: 0.0236
+[15:53:44]       Epoch 100 | Loss: 0.0055
+[15:53:44]       Epoch 150 | Loss: 0.0063
+[15:53:44]       Epoch 200 | Loss: 0.0148
+[15:53:44]   [1] MLP Only: Val=0.7500, Test=0.8421
+[15:53:44][TUNING] Graph H=0.098 (Base=0.250) -> Mode=HETERO
+[15:53:46][predictclass:FEATS] Avg Max Feature Similarity: 0.5648
+[15:53:46][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.058, Neigh=0.000, Sim=0.165, Compat=0.117
+[15:53:46][predictclass:FEATS] Avg Max Feature Similarity: 0.5648
+[15:53:46][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.058, Neigh=0.000, Sim=0.165, Compat=0.117
+[15:53:46]   [2] Prop Only: Val=0.5000, Test=0.5789
+[15:53:49] Running Val-Refined:
+[15:53:49][predictclass:FEATS] Avg Max Feature Similarity: 0.5715
+[15:53:49][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.282, Neigh=0.022, Sim=0.011, Compat=0.299
+[15:53:49] Running Test-Refined:
+[15:53:49][predictclass:FEATS] Avg Max Feature Similarity: 0.5761
+[15:53:49][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.242, Neigh=0.000, Sim=0.010, Compat=0.348
+[15:53:49]   [3] MLP+Refined: Val(Ref)=0.5278 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8421
+[15:53:49]   [4] Prop+MLP(Select): Val(Prop)=0.5000 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8421
+[15:53:49] -- Repeat 3/5 --
+[15:53:49]     [MLP] Training for 200 epochs...
+[15:53:49]       Epoch 050 | Loss: 0.0051
+[15:53:49]       Epoch 100 | Loss: 0.0142
+[15:53:49]       Epoch 150 | Loss: 0.0176
+[15:53:49]       Epoch 200 | Loss: 0.0016
+[15:53:49]   [1] MLP Only: Val=0.7500, Test=0.8158
+[15:53:49][TUNING] Graph H=0.098 (Base=0.250) -> Mode=HETERO
+[15:53:51][predictclass:FEATS] Avg Max Feature Similarity: 0.5648
+[15:53:51][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.026, Neigh=0.000, Sim=0.193, Compat=0.338
+[15:53:51][predictclass:FEATS] Avg Max Feature Similarity: 0.5648
+[15:53:51][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.026, Neigh=0.000, Sim=0.193, Compat=0.338
+[15:53:51]   [2] Prop Only: Val=0.3889, Test=0.5789
+[15:53:54] Running Val-Refined:
+[15:53:54][predictclass:FEATS] Avg Max Feature Similarity: 0.5702
+[15:53:54][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.249, Neigh=0.010, Sim=0.202, Compat=0.288
+[15:53:54] Running Test-Refined:
+[15:53:54][predictclass:FEATS] Avg Max Feature Similarity: 0.5794
+[15:53:54][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.181, Neigh=0.000, Sim=0.201, Compat=0.304
+[15:53:54]   [3] MLP+Refined: Val(Ref)=0.5278 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8158
+[15:53:54]   [4] Prop+MLP(Select): Val(Prop)=0.3889 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8158
+[15:53:54] -- Repeat 4/5 --
+[15:53:54]     [MLP] Training for 200 epochs...
+[15:53:54]       Epoch 050 | Loss: 0.0094
+[15:53:54]       Epoch 100 | Loss: 0.0035
+[15:53:54]       Epoch 150 | Loss: 0.0024
+[15:53:54]       Epoch 200 | Loss: 0.0049
+[15:53:54]   [1] MLP Only: Val=0.7500, Test=0.7895
+[15:53:54][TUNING] Graph H=0.098 (Base=0.250) -> Mode=HETERO
+[15:53:57][predictclass:FEATS] Avg Max Feature Similarity: 0.5648
+[15:53:57][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.114, Neigh=0.000, Sim=0.021, Compat=0.335
+[15:53:57][predictclass:FEATS] Avg Max Feature Similarity: 0.5648
+[15:53:57][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.114, Neigh=0.000, Sim=0.021, Compat=0.335
+[15:53:57]   [2] Prop Only: Val=0.5000, Test=0.5526
+[15:53:59] Running Val-Refined:
+[15:53:59][predictclass:FEATS] Avg Max Feature Similarity: 0.5692
+[15:53:59][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.119, Neigh=0.011, Sim=0.064, Compat=0.226
+[15:53:59] Running Test-Refined:
+[15:53:59][predictclass:FEATS] Avg Max Feature Similarity: 0.5806
+[15:53:59][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.100, Neigh=0.000, Sim=0.063, Compat=0.277
+[15:53:59]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.7895
+[15:53:59]   [4] Prop+MLP(Select): Val(Prop)=0.5000 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.7895
+[15:53:59] -- Repeat 5/5 --
+[15:53:59]     [MLP] Training for 200 epochs...
+[15:53:59]       Epoch 050 | Loss: 0.0059
+[15:53:59]       Epoch 100 | Loss: 0.0066
+[15:53:59]       Epoch 150 | Loss: 0.0044
+[15:54:00]       Epoch 200 | Loss: 0.0031
+[15:54:00]   [1] MLP Only: Val=0.7500, Test=0.7632
+[15:54:00][TUNING] Graph H=0.098 (Base=0.250) -> Mode=HETERO
+[15:54:02][predictclass:FEATS] Avg Max Feature Similarity: 0.5648
+[15:54:02][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.199, Neigh=0.000, Sim=0.181, Compat=0.302
+[15:54:02][predictclass:FEATS] Avg Max Feature Similarity: 0.5648
+[15:54:02][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.199, Neigh=0.000, Sim=0.181, Compat=0.302
+[15:54:02]   [2] Prop Only: Val=0.5000, Test=0.5526
+[15:54:05] Running Val-Refined:
+[15:54:05][predictclass:FEATS] Avg Max Feature Similarity: 0.5689
+[15:54:05][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.138, Neigh=0.018, Sim=0.271, Compat=0.299
+[15:54:05] Running Test-Refined:
+[15:54:05][predictclass:FEATS] Avg Max Feature Similarity: 0.5801
+[15:54:05][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.099, Neigh=0.002, Sim=0.274, Compat=0.365
+[15:54:05]   [3] MLP+Refined: Val(Ref)=0.5278 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.7632
+[15:54:05]   [4] Prop+MLP(Select): Val(Prop)=0.5000 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.7632
+[15:54:05] ==================== SPLIT 2 ====================
+[15:54:05][WARN] Split texas_split_0.6_0.2_2.npz not found. Generating random split.
+[15:54:05][SPLIT_INFO] n_train=109 | n_val=36
+[15:54:05] -- Repeat 1/5 --
+[15:54:05]     [MLP] Training for 200 epochs...
+[15:54:05]       Epoch 050 | Loss: 0.0231
+[15:54:05]       Epoch 100 | Loss: 0.0056
+[15:54:05]       Epoch 150 | Loss: 0.0030
+[15:54:05]       Epoch 200 | Loss: 0.0032
+[15:54:05]   [1] MLP Only: Val=0.7778, Test=0.7105
+[15:54:05][TUNING] Graph H=0.100 (Base=0.250) -> Mode=HETERO
+[15:54:08][predictclass:FEATS] Avg Max Feature Similarity: 0.5721
+[15:54:08][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.062, Neigh=0.006, Sim=0.232, Compat=0.302
+[15:54:08][predictclass:FEATS] Avg Max Feature Similarity: 0.5721
+[15:54:08][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.062, Neigh=0.006, Sim=0.232, Compat=0.302
+[15:54:08]   [2] Prop Only: Val=0.6667, Test=0.6053
+[15:54:11] Running Val-Refined:
+[15:54:11][predictclass:FEATS] Avg Max Feature Similarity: 0.5799
+[15:54:11][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.074, Neigh=0.001, Sim=0.113, Compat=0.523
+[15:54:11] Running Test-Refined:
+[15:54:11][predictclass:FEATS] Avg Max Feature Similarity: 0.5749
+[15:54:11][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.065, Neigh=0.000, Sim=0.111, Compat=0.417
+[15:54:11]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.7105
+[15:54:11]   [4] Prop+MLP(Select): Val(Prop)=0.6667 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.7105
+[15:54:11] -- Repeat 2/5 --
+[15:54:11]     [MLP] Training for 200 epochs...
+[15:54:11]       Epoch 050 | Loss: 0.0124
+[15:54:11]       Epoch 100 | Loss: 0.0037
+[15:54:11]       Epoch 150 | Loss: 0.0041
+[15:54:11]       Epoch 200 | Loss: 0.0026
+[15:54:11]   [1] MLP Only: Val=0.8056, Test=0.7105
+[15:54:11][TUNING] Graph H=0.100 (Base=0.250) -> Mode=HETERO
+[15:54:15][predictclass:FEATS] Avg Max Feature Similarity: 0.5721
+[15:54:15][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.043, Neigh=0.001, Sim=0.043, Compat=0.290
+[15:54:15][predictclass:FEATS] Avg Max Feature Similarity: 0.5721
+[15:54:15][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.043, Neigh=0.001, Sim=0.043, Compat=0.290
+[15:54:15]   [2] Prop Only: Val=0.6667, Test=0.5789
+[15:54:17] Running Val-Refined:
+[15:54:17][predictclass:FEATS] Avg Max Feature Similarity: 0.5755
+[15:54:17][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.060, Neigh=0.003, Sim=0.044, Compat=0.309
+[15:54:17] Running Test-Refined:
+[15:54:17][predictclass:FEATS] Avg Max Feature Similarity: 0.5754
+[15:54:17][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.031, Neigh=0.000, Sim=0.040, Compat=0.298
+[15:54:17]   [3] MLP+Refined: Val(Ref)=0.6389 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.7105
+[15:54:17]   [4] Prop+MLP(Select): Val(Prop)=0.6667 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.7105
+[15:54:17] -- Repeat 3/5 --
+[15:54:17]     [MLP] Training for 200 epochs...
+[15:54:18]       Epoch 050 | Loss: 0.0128
+[15:54:18]       Epoch 100 | Loss: 0.0016
+[15:54:18]       Epoch 150 | Loss: 0.0024
+[15:54:18]       Epoch 200 | Loss: 0.0012
+[15:54:18]   [1] MLP Only: Val=0.7778, Test=0.7105
+[15:54:18][TUNING] Graph H=0.100 (Base=0.250) -> Mode=HETERO
+[15:54:21][predictclass:FEATS] Avg Max Feature Similarity: 0.5721
+[15:54:21][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.170, Neigh=0.006, Sim=0.138, Compat=0.359
+[15:54:21][predictclass:FEATS] Avg Max Feature Similarity: 0.5721
+[15:54:21][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.170, Neigh=0.006, Sim=0.138, Compat=0.359
+[15:54:21]   [2] Prop Only: Val=0.6389, Test=0.5526
+[15:54:24] Running Val-Refined:
+[15:54:24][predictclass:FEATS] Avg Max Feature Similarity: 0.5756
+[15:54:24][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.061, Neigh=0.000, Sim=0.087, Compat=0.413
+[15:54:24] Running Test-Refined:
+[15:54:24][predictclass:FEATS] Avg Max Feature Similarity: 0.5755
+[15:54:24][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.044, Neigh=0.005, Sim=0.084, Compat=0.395
+[15:54:24]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.7105
+[15:54:24]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.7105
+[15:54:24] -- Repeat 4/5 --
+[15:54:24]     [MLP] Training for 200 epochs...
+[15:54:24]       Epoch 050 | Loss: 0.0116
+[15:54:24]       Epoch 100 | Loss: 0.0023
+[15:54:24]       Epoch 150 | Loss: 0.0027
+[15:54:24]       Epoch 200 | Loss: 0.0039
+[15:54:24]   [1] MLP Only: Val=0.8056, Test=0.6579
+[15:54:24][TUNING] Graph H=0.100 (Base=0.250) -> Mode=HETERO
+[15:54:27][predictclass:FEATS] Avg Max Feature Similarity: 0.5721
+[15:54:27][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.011, Neigh=0.007, Sim=0.200, Compat=0.186
+[15:54:27][predictclass:FEATS] Avg Max Feature Similarity: 0.5721
+[15:54:27][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.011, Neigh=0.007, Sim=0.200, Compat=0.186
+[15:54:27]   [2] Prop Only: Val=0.6944, Test=0.6053
+[15:54:29] Running Val-Refined:
+[15:54:29][predictclass:FEATS] Avg Max Feature Similarity: 0.5754
+[15:54:29][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.157, Neigh=0.028, Sim=0.162, Compat=0.266
+[15:54:29] Running Test-Refined:
+[15:54:29][predictclass:FEATS] Avg Max Feature Similarity: 0.5757
+[15:54:29][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.101, Neigh=0.000, Sim=0.148, Compat=0.232
+[15:54:29]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.6579
+[15:54:29]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.6579
+[15:54:29] -- Repeat 5/5 --
+[15:54:29]     [MLP] Training for 200 epochs...
+[15:54:29]       Epoch 050 | Loss: 0.0111
+[15:54:29]       Epoch 100 | Loss: 0.0039
+[15:54:29]       Epoch 150 | Loss: 0.0021
+[15:54:29]       Epoch 200 | Loss: 0.0017
+[15:54:29]   [1] MLP Only: Val=0.8611, Test=0.6842
+[15:54:29][TUNING] Graph H=0.100 (Base=0.250) -> Mode=HETERO
+[15:54:32][predictclass:FEATS] Avg Max Feature Similarity: 0.5721
+[15:54:32][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.021, Neigh=0.000, Sim=0.056, Compat=0.260
+[15:54:32][predictclass:FEATS] Avg Max Feature Similarity: 0.5721
+[15:54:32][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.021, Neigh=0.000, Sim=0.056, Compat=0.260
+[15:54:32]   [2] Prop Only: Val=0.6389, Test=0.5526
+[15:54:35] Running Val-Refined:
+[15:54:35][predictclass:FEATS] Avg Max Feature Similarity: 0.5757
+[15:54:35][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.234, Neigh=0.002, Sim=0.261, Compat=0.296
+[15:54:35] Running Test-Refined:
+[15:54:35][predictclass:FEATS] Avg Max Feature Similarity: 0.5754
+[15:54:35][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.152, Neigh=0.000, Sim=0.244, Compat=0.303
+[15:54:35]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.6842
+[15:54:35]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.6842
+[15:54:35] ==================== SPLIT 3 ====================
+[15:54:35][WARN] Split texas_split_0.6_0.2_3.npz not found. Generating random split.
+[15:54:35][SPLIT_INFO] n_train=109 | n_val=36
+[15:54:35] -- Repeat 1/5 --
+[15:54:35]     [MLP] Training for 200 epochs...
+[15:54:35]       Epoch 050 | Loss: 0.0095
+[15:54:35]       Epoch 100 | Loss: 0.0089
+[15:54:35]       Epoch 150 | Loss: 0.0017
+[15:54:35]       Epoch 200 | Loss: 0.0016
+[15:54:35]   [1] MLP Only: Val=0.7500, Test=0.8947
+[15:54:35][TUNING] Graph H=0.134 (Base=0.250) -> Mode=HETERO
+[15:54:38][predictclass:FEATS] Avg Max Feature Similarity: 0.5668
+[15:54:38][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.044, Neigh=0.000, Sim=0.200, Compat=0.151
+[15:54:38][predictclass:FEATS] Avg Max Feature Similarity: 0.5668
+[15:54:38][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.044, Neigh=0.000, Sim=0.200, Compat=0.151
+[15:54:38]   [2] Prop Only: Val=0.5833, Test=0.6316
+[15:54:40] Running Val-Refined:
+[15:54:40][predictclass:FEATS] Avg Max Feature Similarity: 0.5784
+[15:54:40][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.055, Neigh=0.004, Sim=0.140, Compat=0.255
+[15:54:40] Running Test-Refined:
+[15:54:40][predictclass:FEATS] Avg Max Feature Similarity: 0.5729
+[15:54:40][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.076, Neigh=0.004, Sim=0.139, Compat=0.289
+[15:54:40]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8947
+[15:54:40]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8947
+[15:54:40] -- Repeat 2/5 --
+[15:54:40]     [MLP] Training for 200 epochs...
+[15:54:40]       Epoch 050 | Loss: 0.0123
+[15:54:40]       Epoch 100 | Loss: 0.0041
+[15:54:40]       Epoch 150 | Loss: 0.0030
+[15:54:40]       Epoch 200 | Loss: 0.0064
+[15:54:40]   [1] MLP Only: Val=0.7222, Test=0.8684
+[15:54:40][TUNING] Graph H=0.134 (Base=0.250) -> Mode=HETERO
+[15:54:43][predictclass:FEATS] Avg Max Feature Similarity: 0.5668
+[15:54:43][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.123, Neigh=0.000, Sim=0.115, Compat=0.092
+[15:54:43][predictclass:FEATS] Avg Max Feature Similarity: 0.5668
+[15:54:43][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.123, Neigh=0.000, Sim=0.115, Compat=0.092
+[15:54:43]   [2] Prop Only: Val=0.5278, Test=0.6053
+[15:54:45] Running Val-Refined:
+[15:54:45][predictclass:FEATS] Avg Max Feature Similarity: 0.5794
+[15:54:45][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.134, Neigh=0.004, Sim=0.261, Compat=0.112
+[15:54:45] Running Test-Refined:
+[15:54:45][predictclass:FEATS] Avg Max Feature Similarity: 0.5722
+[15:54:45][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.129, Neigh=0.036, Sim=0.270, Compat=0.181
+[15:54:45]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.7222 -> Chosen: MLP. Test=0.8684
+[15:54:45]   [4] Prop+MLP(Select): Val(Prop)=0.5278 vs Val(MLP)=0.7222 -> Chosen: MLP. Test=0.8684
+[15:54:45] -- Repeat 3/5 --
+[15:54:45]     [MLP] Training for 200 epochs...
+[15:54:45]       Epoch 050 | Loss: 0.0042
+[15:54:45]       Epoch 100 | Loss: 0.0031
+[15:54:46]       Epoch 150 | Loss: 0.0027
+[15:54:46]       Epoch 200 | Loss: 0.0028
+[15:54:46]   [1] MLP Only: Val=0.7500, Test=0.8684
+[15:54:46][TUNING] Graph H=0.134 (Base=0.250) -> Mode=HETERO
+[15:54:48][predictclass:FEATS] Avg Max Feature Similarity: 0.5668
+[15:54:48][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.097, Neigh=0.000, Sim=0.022, Compat=0.358
+[15:54:48][predictclass:FEATS] Avg Max Feature Similarity: 0.5668
+[15:54:48][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.097, Neigh=0.000, Sim=0.022, Compat=0.358
+[15:54:48]   [2] Prop Only: Val=0.5278, Test=0.5789
+[15:54:51] Running Val-Refined:
+[15:54:51][predictclass:FEATS] Avg Max Feature Similarity: 0.5787
+[15:54:51][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.080, Neigh=0.003, Sim=0.024, Compat=0.249
+[15:54:51] Running Test-Refined:
+[15:54:51][predictclass:FEATS] Avg Max Feature Similarity: 0.5732
+[15:54:51][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.088, Neigh=0.003, Sim=0.026, Compat=0.327
+[15:54:51]   [3] MLP+Refined: Val(Ref)=0.6389 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8684
+[15:54:51]   [4] Prop+MLP(Select): Val(Prop)=0.5278 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8684
+[15:54:51] -- Repeat 4/5 --
+[15:54:51]     [MLP] Training for 200 epochs...
+[15:54:51]       Epoch 050 | Loss: 0.0055
+[15:54:51]       Epoch 100 | Loss: 0.0020
+[15:54:51]       Epoch 150 | Loss: 0.0047
+[15:54:51]       Epoch 200 | Loss: 0.0056
+[15:54:51]   [1] MLP Only: Val=0.7500, Test=0.8947
+[15:54:51][TUNING] Graph H=0.134 (Base=0.250) -> Mode=HETERO
+[15:54:53][predictclass:FEATS] Avg Max Feature Similarity: 0.5668
+[15:54:53][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.180, Neigh=0.000, Sim=0.040, Compat=0.250
+[15:54:53][predictclass:FEATS] Avg Max Feature Similarity: 0.5668
+[15:54:53][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.180, Neigh=0.000, Sim=0.040, Compat=0.250
+[15:54:53]   [2] Prop Only: Val=0.5556, Test=0.5789
+[15:54:56] Running Val-Refined:
+[15:54:56][predictclass:FEATS] Avg Max Feature Similarity: 0.5783
+[15:54:56][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.204, Neigh=0.015, Sim=0.136, Compat=0.130
+[15:54:56] Running Test-Refined:
+[15:54:56][predictclass:FEATS] Avg Max Feature Similarity: 0.5727
+[15:54:56][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.161, Neigh=0.030, Sim=0.133, Compat=0.234
+[15:54:56]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8947
+[15:54:56]   [4] Prop+MLP(Select): Val(Prop)=0.5556 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8947
+[15:54:56] -- Repeat 5/5 --
+[15:54:56]     [MLP] Training for 200 epochs...
+[15:54:56]       Epoch 050 | Loss: 0.0048
+[15:54:56]       Epoch 100 | Loss: 0.0065
+[15:54:56]       Epoch 150 | Loss: 0.0038
+[15:54:56]       Epoch 200 | Loss: 0.0020
+[15:54:56]   [1] MLP Only: Val=0.7500, Test=0.9211
+[15:54:56][TUNING] Graph H=0.134 (Base=0.250) -> Mode=HETERO
+[15:54:59][predictclass:FEATS] Avg Max Feature Similarity: 0.5668
+[15:54:59][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.032, Neigh=0.000, Sim=0.089, Compat=0.173
+[15:54:59][predictclass:FEATS] Avg Max Feature Similarity: 0.5668
+[15:54:59][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.032, Neigh=0.000, Sim=0.089, Compat=0.173
+[15:54:59]   [2] Prop Only: Val=0.5833, Test=0.6053
+[15:55:01] Running Val-Refined:
+[15:55:01][predictclass:FEATS] Avg Max Feature Similarity: 0.5787
+[15:55:01][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.092, Neigh=0.003, Sim=0.220, Compat=0.275
+[15:55:01] Running Test-Refined:
+[15:55:01][predictclass:FEATS] Avg Max Feature Similarity: 0.5708
+[15:55:01][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.083, Neigh=0.003, Sim=0.227, Compat=0.414
+[15:55:01]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.9211
+[15:55:01]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.9211
+[15:55:01] ==================== SPLIT 4 ====================
+[15:55:01][WARN] Split texas_split_0.6_0.2_4.npz not found. Generating random split.
+[15:55:01][SPLIT_INFO] n_train=109 | n_val=36
+[15:55:01] -- Repeat 1/5 --
+[15:55:01]     [MLP] Training for 200 epochs...
+[15:55:01]       Epoch 050 | Loss: 0.0103
+[15:55:01]       Epoch 100 | Loss: 0.0169
+[15:55:01]       Epoch 150 | Loss: 0.0085
+[15:55:01]       Epoch 200 | Loss: 0.0064
+[15:55:01]   [1] MLP Only: Val=0.8611, Test=0.8158
+[15:55:01][TUNING] Graph H=0.103 (Base=0.250) -> Mode=HETERO
+[15:55:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5684
+[15:55:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.074, Neigh=0.000, Sim=0.067, Compat=0.368
+[15:55:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5684
+[15:55:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.074, Neigh=0.000, Sim=0.067, Compat=0.368
+[15:55:04]   [2] Prop Only: Val=0.6944, Test=0.6053
+[15:55:07] Running Val-Refined:
+[15:55:07][predictclass:FEATS] Avg Max Feature Similarity: 0.5740
+[15:55:07][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.112, Neigh=0.000, Sim=0.271, Compat=0.243
+[15:55:07] Running Test-Refined:
+[15:55:07][predictclass:FEATS] Avg Max Feature Similarity: 0.5792
+[15:55:07][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.101, Neigh=0.033, Sim=0.274, Compat=0.317
+[15:55:07]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8158
+[15:55:07]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8158
+[15:55:07] -- Repeat 2/5 --
+[15:55:07]     [MLP] Training for 200 epochs...
+[15:55:07]       Epoch 050 | Loss: 0.0186
+[15:55:07]       Epoch 100 | Loss: 0.0035
+[15:55:07]       Epoch 150 | Loss: 0.0070
+[15:55:07]       Epoch 200 | Loss: 0.0043
+[15:55:07]   [1] MLP Only: Val=0.8611, Test=0.8421
+[15:55:07][TUNING] Graph H=0.103 (Base=0.250) -> Mode=HETERO
+[15:55:10][predictclass:FEATS] Avg Max Feature Similarity: 0.5684
+[15:55:10][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.161, Neigh=0.013, Sim=0.012, Compat=0.389
+[15:55:10][predictclass:FEATS] Avg Max Feature Similarity: 0.5684
+[15:55:10][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.161, Neigh=0.013, Sim=0.012, Compat=0.389
+[15:55:10]   [2] Prop Only: Val=0.6389, Test=0.5526
+[15:55:12] Running Val-Refined:
+[15:55:12][predictclass:FEATS] Avg Max Feature Similarity: 0.5749
+[15:55:12][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.230, Neigh=0.000, Sim=0.043, Compat=0.371
+[15:55:12] Running Test-Refined:
+[15:55:12][predictclass:FEATS] Avg Max Feature Similarity: 0.5805
+[15:55:12][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.200, Neigh=0.020, Sim=0.044, Compat=0.468
+[15:55:12]   [3] MLP+Refined: Val(Ref)=0.6389 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8421
+[15:55:12]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8421
+[15:55:12] -- Repeat 3/5 --
+[15:55:12]     [MLP] Training for 200 epochs...
+[15:55:12]       Epoch 050 | Loss: 0.0094
+[15:55:12]       Epoch 100 | Loss: 0.0019
+[15:55:12]       Epoch 150 | Loss: 0.0051
+[15:55:13]       Epoch 200 | Loss: 0.0030
+[15:55:13]   [1] MLP Only: Val=0.8611, Test=0.8684
+[15:55:13][TUNING] Graph H=0.103 (Base=0.250) -> Mode=HETERO
+[15:55:16][predictclass:FEATS] Avg Max Feature Similarity: 0.5684
+[15:55:16][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.085, Neigh=0.000, Sim=0.214, Compat=0.231
+[15:55:16][predictclass:FEATS] Avg Max Feature Similarity: 0.5684
+[15:55:16][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.085, Neigh=0.000, Sim=0.214, Compat=0.231
+[15:55:16]   [2] Prop Only: Val=0.6111, Test=0.6053
+[15:55:18] Running Val-Refined:
+[15:55:18][predictclass:FEATS] Avg Max Feature Similarity: 0.5739
+[15:55:18][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.087, Neigh=0.000, Sim=0.030, Compat=0.279
+[15:55:18] Running Test-Refined:
+[15:55:18][predictclass:FEATS] Avg Max Feature Similarity: 0.5808
+[15:55:18][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.074, Neigh=0.009, Sim=0.030, Compat=0.344
+[15:55:18]   [3] MLP+Refined: Val(Ref)=0.7222 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8684
+[15:55:18]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8684
+[15:55:18] -- Repeat 4/5 --
+[15:55:18]     [MLP] Training for 200 epochs...
+[15:55:18]       Epoch 050 | Loss: 0.0175
+[15:55:18]       Epoch 100 | Loss: 0.0043
+[15:55:19]       Epoch 150 | Loss: 0.0045
+[15:55:19]       Epoch 200 | Loss: 0.0066
+[15:55:19]   [1] MLP Only: Val=0.8611, Test=0.8421
+[15:55:19][TUNING] Graph H=0.103 (Base=0.250) -> Mode=HETERO
+[15:55:21][predictclass:FEATS] Avg Max Feature Similarity: 0.5684
+[15:55:21][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.050, Neigh=0.000, Sim=0.273, Compat=0.228
+[15:55:21][predictclass:FEATS] Avg Max Feature Similarity: 0.5684
+[15:55:21][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.050, Neigh=0.000, Sim=0.273, Compat=0.228
+[15:55:21]   [2] Prop Only: Val=0.6667, Test=0.5789
+[15:55:24] Running Val-Refined:
+[15:55:24][predictclass:FEATS] Avg Max Feature Similarity: 0.5734
+[15:55:24][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.165, Neigh=0.000, Sim=0.059, Compat=0.136
+[15:55:24] Running Test-Refined:
+[15:55:24][predictclass:FEATS] Avg Max Feature Similarity: 0.5792
+[15:55:24][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.106, Neigh=0.014, Sim=0.057, Compat=0.200
+[15:55:24]   [3] MLP+Refined: Val(Ref)=0.6389 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8421
+[15:55:24]   [4] Prop+MLP(Select): Val(Prop)=0.6667 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8421
+[15:55:24] -- Repeat 5/5 --
+[15:55:24]     [MLP] Training for 200 epochs...
+[15:55:24]       Epoch 050 | Loss: 0.0216
+[15:55:24]       Epoch 100 | Loss: 0.0090
+[15:55:25]       Epoch 150 | Loss: 0.0111
+[15:55:25]       Epoch 200 | Loss: 0.0034
+[15:55:25]   [1] MLP Only: Val=0.8611, Test=0.8421
+[15:55:25][TUNING] Graph H=0.103 (Base=0.250) -> Mode=HETERO
+[15:55:28][predictclass:FEATS] Avg Max Feature Similarity: 0.5684
+[15:55:28][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.112, Neigh=0.003, Sim=0.232, Compat=0.366
+[15:55:28][predictclass:FEATS] Avg Max Feature Similarity: 0.5684
+[15:55:28][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.112, Neigh=0.003, Sim=0.232, Compat=0.366
+[15:55:28]   [2] Prop Only: Val=0.6944, Test=0.6053
+[15:55:30] Running Val-Refined:
+[15:55:30][predictclass:FEATS] Avg Max Feature Similarity: 0.5724
+[15:55:30][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.049, Neigh=0.000, Sim=0.051, Compat=0.375
+[15:55:30] Running Test-Refined:
+[15:55:30][predictclass:FEATS] Avg Max Feature Similarity: 0.5779
+[15:55:30][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.041, Neigh=0.000, Sim=0.047, Compat=0.487
+[15:55:30]   [3] MLP+Refined: Val(Ref)=0.6944 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8421
+[15:55:30]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8421
+[15:55:30] ==================== SPLIT 5 ====================
+[15:55:30][WARN] Split texas_split_0.6_0.2_5.npz not found. Generating random split.
+[15:55:30][SPLIT_INFO] n_train=109 | n_val=36
+[15:55:30] -- Repeat 1/5 --
+[15:55:30]     [MLP] Training for 200 epochs...
+[15:55:30]       Epoch 050 | Loss: 0.0074
+[15:55:30]       Epoch 100 | Loss: 0.0032
+[15:55:31]       Epoch 150 | Loss: 0.0034
+[15:55:31]       Epoch 200 | Loss: 0.0031
+[15:55:31]   [1] MLP Only: Val=0.8611, Test=0.8421
+[15:55:31][TUNING] Graph H=0.183 (Base=0.250) -> Mode=HETERO
+[15:55:33][predictclass:FEATS] Avg Max Feature Similarity: 0.5603
+[15:55:33][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.114, Neigh=0.014, Sim=0.151, Compat=0.218
+[15:55:33][predictclass:FEATS] Avg Max Feature Similarity: 0.5603
+[15:55:33][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.114, Neigh=0.014, Sim=0.151, Compat=0.218
+[15:55:33]   [2] Prop Only: Val=0.6944, Test=0.7105
+[15:55:36] Running Val-Refined:
+[15:55:36][predictclass:FEATS] Avg Max Feature Similarity: 0.5717
+[15:55:36][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.149, Neigh=0.009, Sim=0.276, Compat=0.409
+[15:55:36] Running Test-Refined:
+[15:55:36][predictclass:FEATS] Avg Max Feature Similarity: 0.5726
+[15:55:36][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.141, Neigh=0.001, Sim=0.273, Compat=0.247
+[15:55:36]   [3] MLP+Refined: Val(Ref)=0.6944 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8421
+[15:55:36]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8421
+[15:55:36] -- Repeat 2/5 --
+[15:55:36]     [MLP] Training for 200 epochs...
+[15:55:36]       Epoch 050 | Loss: 0.0095
+[15:55:36]       Epoch 100 | Loss: 0.0123
+[15:55:36]       Epoch 150 | Loss: 0.0031
+[15:55:36]       Epoch 200 | Loss: 0.0023
+[15:55:36]   [1] MLP Only: Val=0.8056, Test=0.8421
+[15:55:36][TUNING] Graph H=0.183 (Base=0.250) -> Mode=HETERO
+[15:55:38][predictclass:FEATS] Avg Max Feature Similarity: 0.5603
+[15:55:38][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.123, Neigh=0.020, Sim=0.189, Compat=0.359
+[15:55:38][predictclass:FEATS] Avg Max Feature Similarity: 0.5603
+[15:55:38][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.123, Neigh=0.020, Sim=0.189, Compat=0.359
+[15:55:38]   [2] Prop Only: Val=0.6667, Test=0.7368
+[15:55:41] Running Val-Refined:
+[15:55:41][predictclass:FEATS] Avg Max Feature Similarity: 0.5706
+[15:55:41][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.191, Neigh=0.002, Sim=0.129, Compat=0.507
+[15:55:41] Running Test-Refined:
+[15:55:41][predictclass:FEATS] Avg Max Feature Similarity: 0.5723
+[15:55:41][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.182, Neigh=0.002, Sim=0.132, Compat=0.220
+[15:55:41]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8421
+[15:55:41]   [4] Prop+MLP(Select): Val(Prop)=0.6667 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8421
+[15:55:41] -- Repeat 3/5 --
+[15:55:41]     [MLP] Training for 200 epochs...
+[15:55:41]       Epoch 050 | Loss: 0.0061
+[15:55:41]       Epoch 100 | Loss: 0.0068
+[15:55:41]       Epoch 150 | Loss: 0.0025
+[15:55:41]       Epoch 200 | Loss: 0.0035
+[15:55:41]   [1] MLP Only: Val=0.7500, Test=0.8421
+[15:55:41][TUNING] Graph H=0.183 (Base=0.250) -> Mode=HETERO
+[15:55:44][predictclass:FEATS] Avg Max Feature Similarity: 0.5603
+[15:55:44][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.083, Neigh=0.000, Sim=0.243, Compat=0.302
+[15:55:44][predictclass:FEATS] Avg Max Feature Similarity: 0.5603
+[15:55:44][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.083, Neigh=0.000, Sim=0.243, Compat=0.302
+[15:55:44]   [2] Prop Only: Val=0.6667, Test=0.7368
+[15:55:46] Running Val-Refined:
+[15:55:46][predictclass:FEATS] Avg Max Feature Similarity: 0.5703
+[15:55:46][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.072, Neigh=0.000, Sim=0.249, Compat=0.400
+[15:55:46] Running Test-Refined:
+[15:55:46][predictclass:FEATS] Avg Max Feature Similarity: 0.5708
+[15:55:46][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.080, Neigh=0.000, Sim=0.247, Compat=0.230
+[15:55:46]   [3] MLP+Refined: Val(Ref)=0.7500 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8421
+[15:55:46]   [4] Prop+MLP(Select): Val(Prop)=0.6667 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8421
+[15:55:46] -- Repeat 4/5 --
+[15:55:46]     [MLP] Training for 200 epochs...
+[15:55:46]       Epoch 050 | Loss: 0.0064
+[15:55:46]       Epoch 100 | Loss: 0.0027
+[15:55:46]       Epoch 150 | Loss: 0.0119
+[15:55:46]       Epoch 200 | Loss: 0.0051
+[15:55:46]   [1] MLP Only: Val=0.7500, Test=0.8158
+[15:55:46][TUNING] Graph H=0.183 (Base=0.250) -> Mode=HETERO
+[15:55:49][predictclass:FEATS] Avg Max Feature Similarity: 0.5603
+[15:55:49][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.071, Neigh=0.000, Sim=0.251, Compat=0.102
+[15:55:49][predictclass:FEATS] Avg Max Feature Similarity: 0.5603
+[15:55:49][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.071, Neigh=0.000, Sim=0.251, Compat=0.102
+[15:55:49]   [2] Prop Only: Val=0.6389, Test=0.7105
+[15:55:51] Running Val-Refined:
+[15:55:51][predictclass:FEATS] Avg Max Feature Similarity: 0.5703
+[15:55:51][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.173, Neigh=0.027, Sim=0.107, Compat=0.164
+[15:55:51] Running Test-Refined:
+[15:55:51][predictclass:FEATS] Avg Max Feature Similarity: 0.5724
+[15:55:51][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.197, Neigh=0.003, Sim=0.106, Compat=0.087
+[15:55:51]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8158
+[15:55:51]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8158
+[15:55:51] -- Repeat 5/5 --
+[15:55:51]     [MLP] Training for 200 epochs...
+[15:55:51]       Epoch 050 | Loss: 0.0085
+[15:55:51]       Epoch 100 | Loss: 0.0038
+[15:55:51]       Epoch 150 | Loss: 0.0070
+[15:55:51]       Epoch 200 | Loss: 0.0016
+[15:55:51]   [1] MLP Only: Val=0.8056, Test=0.8158
+[15:55:51][TUNING] Graph H=0.183 (Base=0.250) -> Mode=HETERO
+[15:55:54][predictclass:FEATS] Avg Max Feature Similarity: 0.5603
+[15:55:54][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.054, Neigh=0.000, Sim=0.012, Compat=0.386
+[15:55:54][predictclass:FEATS] Avg Max Feature Similarity: 0.5603
+[15:55:54][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.054, Neigh=0.000, Sim=0.012, Compat=0.386
+[15:55:54]   [2] Prop Only: Val=0.6667, Test=0.7105
+[15:55:56] Running Val-Refined:
+[15:55:56][predictclass:FEATS] Avg Max Feature Similarity: 0.5707
+[15:55:56][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.093, Neigh=0.007, Sim=0.070, Compat=0.349
+[15:55:56] Running Test-Refined:
+[15:55:56][predictclass:FEATS] Avg Max Feature Similarity: 0.5692
+[15:55:56][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.090, Neigh=0.000, Sim=0.068, Compat=0.142
+[15:55:56]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8158
+[15:55:56]   [4] Prop+MLP(Select): Val(Prop)=0.6667 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8158
+[15:55:56] ==================== SPLIT 6 ====================
+[15:55:56][WARN] Split texas_split_0.6_0.2_6.npz not found. Generating random split.
+[15:55:56][SPLIT_INFO] n_train=109 | n_val=36
+[15:55:56] -- Repeat 1/5 --
+[15:55:56]     [MLP] Training for 200 epochs...
+[15:55:56]       Epoch 050 | Loss: 0.0108
+[15:55:56]       Epoch 100 | Loss: 0.0027
+[15:55:56]       Epoch 150 | Loss: 0.0063
+[15:55:57]       Epoch 200 | Loss: 0.0041
+[15:55:57]   [1] MLP Only: Val=0.9722, Test=0.7368
+[15:55:57][TUNING] Graph H=0.202 (Base=0.250) -> Mode=HETERO
+[15:55:59][predictclass:FEATS] Avg Max Feature Similarity: 0.5685
+[15:55:59][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.027, Neigh=0.000, Sim=0.232, Compat=0.201
+[15:55:59][predictclass:FEATS] Avg Max Feature Similarity: 0.5685
+[15:55:59][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.027, Neigh=0.000, Sim=0.232, Compat=0.201
+[15:55:59]   [2] Prop Only: Val=0.6111, Test=0.5789
+[15:56:01] Running Val-Refined:
+[15:56:01][predictclass:FEATS] Avg Max Feature Similarity: 0.5738
+[15:56:01][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.072, Neigh=0.005, Sim=0.227, Compat=0.370
+[15:56:01] Running Test-Refined:
+[15:56:01][predictclass:FEATS] Avg Max Feature Similarity: 0.5771
+[15:56:01][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.133, Neigh=0.013, Sim=0.243, Compat=0.221
+[15:56:01]   [3] MLP+Refined: Val(Ref)=0.4722 vs Val(MLP)=0.9722 -> Chosen: MLP. Test=0.7368
+[15:56:01]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.9722 -> Chosen: MLP. Test=0.7368
+[15:56:01] -- Repeat 2/5 --
+[15:56:01]     [MLP] Training for 200 epochs...
+[15:56:01]       Epoch 050 | Loss: 0.0040
+[15:56:01]       Epoch 100 | Loss: 0.0082
+[15:56:02]       Epoch 150 | Loss: 0.0010
+[15:56:02]       Epoch 200 | Loss: 0.0125
+[15:56:02]   [1] MLP Only: Val=0.8889, Test=0.7368
+[15:56:02][TUNING] Graph H=0.202 (Base=0.250) -> Mode=HETERO
+[15:56:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5685
+[15:56:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.029, Neigh=0.000, Sim=0.101, Compat=0.258
+[15:56:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5685
+[15:56:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.029, Neigh=0.000, Sim=0.101, Compat=0.258
+[15:56:04]   [2] Prop Only: Val=0.5833, Test=0.5789
+[15:56:06] Running Val-Refined:
+[15:56:06][predictclass:FEATS] Avg Max Feature Similarity: 0.5763
+[15:56:06][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.024, Neigh=0.000, Sim=0.133, Compat=0.266
+[15:56:06] Running Test-Refined:
+[15:56:06][predictclass:FEATS] Avg Max Feature Similarity: 0.5778
+[15:56:06][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.028, Neigh=0.000, Sim=0.131, Compat=0.189
+[15:56:06]   [3] MLP+Refined: Val(Ref)=0.5000 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.7368
+[15:56:06]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.7368
+[15:56:06] -- Repeat 3/5 --
+[15:56:06]     [MLP] Training for 200 epochs...
+[15:56:06]       Epoch 050 | Loss: 0.0050
+[15:56:06]       Epoch 100 | Loss: 0.0029
+[15:56:06]       Epoch 150 | Loss: 0.0020
+[15:56:07]       Epoch 200 | Loss: 0.0023
+[15:56:07]   [1] MLP Only: Val=0.9444, Test=0.7368
+[15:56:07][TUNING] Graph H=0.202 (Base=0.250) -> Mode=HETERO
+[15:56:09][predictclass:FEATS] Avg Max Feature Similarity: 0.5685
+[15:56:09][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.074, Neigh=0.013, Sim=0.218, Compat=0.211
+[15:56:09][predictclass:FEATS] Avg Max Feature Similarity: 0.5685
+[15:56:09][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.074, Neigh=0.013, Sim=0.218, Compat=0.211
+[15:56:09]   [2] Prop Only: Val=0.5833, Test=0.6053
+[15:56:11] Running Val-Refined:
+[15:56:11][predictclass:FEATS] Avg Max Feature Similarity: 0.5749
+[15:56:11][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.035, Neigh=0.000, Sim=0.122, Compat=0.382
+[15:56:11] Running Test-Refined:
+[15:56:11][predictclass:FEATS] Avg Max Feature Similarity: 0.5778
+[15:56:11][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.058, Neigh=0.000, Sim=0.127, Compat=0.255
+[15:56:11]   [3] MLP+Refined: Val(Ref)=0.5000 vs Val(MLP)=0.9444 -> Chosen: MLP. Test=0.7368
+[15:56:11]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.9444 -> Chosen: MLP. Test=0.7368
+[15:56:11] -- Repeat 4/5 --
+[15:56:11]     [MLP] Training for 200 epochs...
+[15:56:11]       Epoch 050 | Loss: 0.0163
+[15:56:12]       Epoch 100 | Loss: 0.0068
+[15:56:12]       Epoch 150 | Loss: 0.0015
+[15:56:12]       Epoch 200 | Loss: 0.0017
+[15:56:12]   [1] MLP Only: Val=0.9444, Test=0.7632
+[15:56:12][TUNING] Graph H=0.202 (Base=0.250) -> Mode=HETERO
+[15:56:14][predictclass:FEATS] Avg Max Feature Similarity: 0.5685
+[15:56:14][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.012, Neigh=0.000, Sim=0.055, Compat=0.318
+[15:56:14][predictclass:FEATS] Avg Max Feature Similarity: 0.5685
+[15:56:14][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.012, Neigh=0.000, Sim=0.055, Compat=0.318
+[15:56:14]   [2] Prop Only: Val=0.6111, Test=0.5789
+[15:56:17] Running Val-Refined:
+[15:56:17][predictclass:FEATS] Avg Max Feature Similarity: 0.5745
+[15:56:17][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.086, Neigh=0.011, Sim=0.178, Compat=0.420
+[15:56:17] Running Test-Refined:
+[15:56:17][predictclass:FEATS] Avg Max Feature Similarity: 0.5776
+[15:56:17][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.162, Neigh=0.024, Sim=0.190, Compat=0.248
+[15:56:17]   [3] MLP+Refined: Val(Ref)=0.5278 vs Val(MLP)=0.9444 -> Chosen: MLP. Test=0.7632
+[15:56:17]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.9444 -> Chosen: MLP. Test=0.7632
+[15:56:17] -- Repeat 5/5 --
+[15:56:17]     [MLP] Training for 200 epochs...
+[15:56:17]       Epoch 050 | Loss: 0.0117
+[15:56:17]       Epoch 100 | Loss: 0.0093
+[15:56:17]       Epoch 150 | Loss: 0.0033
+[15:56:17]       Epoch 200 | Loss: 0.0091
+[15:56:17]   [1] MLP Only: Val=0.9167, Test=0.6842
+[15:56:17][TUNING] Graph H=0.202 (Base=0.250) -> Mode=HETERO
+[15:56:20][predictclass:FEATS] Avg Max Feature Similarity: 0.5685
+[15:56:20][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.030, Neigh=0.000, Sim=0.169, Compat=0.182
+[15:56:20][predictclass:FEATS] Avg Max Feature Similarity: 0.5685
+[15:56:20][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.030, Neigh=0.000, Sim=0.169, Compat=0.182
+[15:56:20]   [2] Prop Only: Val=0.5833, Test=0.6053
+[15:56:22] Running Val-Refined:
+[15:56:22][predictclass:FEATS] Avg Max Feature Similarity: 0.5748
+[15:56:22][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.080, Neigh=0.004, Sim=0.241, Compat=0.420
+[15:56:22] Running Test-Refined:
+[15:56:22][predictclass:FEATS] Avg Max Feature Similarity: 0.5778
+[15:56:22][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.093, Neigh=0.004, Sim=0.240, Compat=0.386
+[15:56:22]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.9167 -> Chosen: MLP. Test=0.6842
+[15:56:22]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.9167 -> Chosen: MLP. Test=0.6842
+[15:56:22] ==================== SPLIT 7 ====================
+[15:56:22][WARN] Split texas_split_0.6_0.2_7.npz not found. Generating random split.
+[15:56:22][SPLIT_INFO] n_train=109 | n_val=36
+[15:56:22] -- Repeat 1/5 --
+[15:56:22]     [MLP] Training for 200 epochs...
+[15:56:22]       Epoch 050 | Loss: 0.0194
+[15:56:22]       Epoch 100 | Loss: 0.0070
+[15:56:22]       Epoch 150 | Loss: 0.0015
+[15:56:22]       Epoch 200 | Loss: 0.0030
+[15:56:22]   [1] MLP Only: Val=0.7778, Test=0.7895
+[15:56:22][TUNING] Graph H=0.119 (Base=0.250) -> Mode=HETERO
+[15:56:26][predictclass:FEATS] Avg Max Feature Similarity: 0.5760
+[15:56:26][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.028, Neigh=0.000, Sim=0.194, Compat=0.318
+[15:56:26][predictclass:FEATS] Avg Max Feature Similarity: 0.5760
+[15:56:26][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.028, Neigh=0.000, Sim=0.194, Compat=0.318
+[15:56:26]   [2] Prop Only: Val=0.5833, Test=0.4474
+[15:56:29] Running Val-Refined:
+[15:56:29][predictclass:FEATS] Avg Max Feature Similarity: 0.5805
+[15:56:29][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.051, Neigh=0.010, Sim=0.279, Compat=0.444
+[15:56:29] Running Test-Refined:
+[15:56:29][predictclass:FEATS] Avg Max Feature Similarity: 0.5816
+[15:56:29][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.051, Neigh=0.009, Sim=0.265, Compat=0.336
+[15:56:29]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.7895
+[15:56:29]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.7895
+[15:56:29] -- Repeat 2/5 --
+[15:56:29]     [MLP] Training for 200 epochs...
+[15:56:29]       Epoch 050 | Loss: 0.0066
+[15:56:29]       Epoch 100 | Loss: 0.0036
+[15:56:29]       Epoch 150 | Loss: 0.0032
+[15:56:29]       Epoch 200 | Loss: 0.0019
+[15:56:29]   [1] MLP Only: Val=0.7778, Test=0.7105
+[15:56:29][TUNING] Graph H=0.119 (Base=0.250) -> Mode=HETERO
+[15:56:32][predictclass:FEATS] Avg Max Feature Similarity: 0.5760
+[15:56:32][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.035, Neigh=0.000, Sim=0.197, Compat=0.310
+[15:56:32][predictclass:FEATS] Avg Max Feature Similarity: 0.5760
+[15:56:32][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.035, Neigh=0.000, Sim=0.197, Compat=0.310
+[15:56:32]   [2] Prop Only: Val=0.5556, Test=0.4737
+[15:56:34] Running Val-Refined:
+[15:56:34][predictclass:FEATS] Avg Max Feature Similarity: 0.5799
+[15:56:34][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.027, Neigh=0.001, Sim=0.067, Compat=0.448
+[15:56:34] Running Test-Refined:
+[15:56:34][predictclass:FEATS] Avg Max Feature Similarity: 0.5814
+[15:56:34][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.027, Neigh=0.001, Sim=0.068, Compat=0.330
+[15:56:34]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.7105
+[15:56:34]   [4] Prop+MLP(Select): Val(Prop)=0.5556 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.7105
+[15:56:34] -- Repeat 3/5 --
+[15:56:34]     [MLP] Training for 200 epochs...
+[15:56:34]       Epoch 050 | Loss: 0.0037
+[15:56:34]       Epoch 100 | Loss: 0.0134
+[15:56:34]       Epoch 150 | Loss: 0.0037
+[15:56:34]       Epoch 200 | Loss: 0.0032
+[15:56:34]   [1] MLP Only: Val=0.8333, Test=0.7895
+[15:56:34][TUNING] Graph H=0.119 (Base=0.250) -> Mode=HETERO
+[15:56:37][predictclass:FEATS] Avg Max Feature Similarity: 0.5760
+[15:56:37][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.036, Neigh=0.000, Sim=0.178, Compat=0.314
+[15:56:37][predictclass:FEATS] Avg Max Feature Similarity: 0.5760
+[15:56:37][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.036, Neigh=0.000, Sim=0.178, Compat=0.314
+[15:56:37]   [2] Prop Only: Val=0.5556, Test=0.4737
+[15:56:39] Running Val-Refined:
+[15:56:39][predictclass:FEATS] Avg Max Feature Similarity: 0.5794
+[15:56:39][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.101, Neigh=0.037, Sim=0.078, Compat=0.514
+[15:56:39] Running Test-Refined:
+[15:56:39][predictclass:FEATS] Avg Max Feature Similarity: 0.5809
+[15:56:39][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.064, Neigh=0.001, Sim=0.072, Compat=0.425
+[15:56:39]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.7895
+[15:56:39]   [4] Prop+MLP(Select): Val(Prop)=0.5556 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.7895
+[15:56:39] -- Repeat 4/5 --
+[15:56:39]     [MLP] Training for 200 epochs...
+[15:56:40]       Epoch 050 | Loss: 0.0038
+[15:56:40]       Epoch 100 | Loss: 0.0037
+[15:56:40]       Epoch 150 | Loss: 0.0105
+[15:56:40]       Epoch 200 | Loss: 0.0014
+[15:56:40]   [1] MLP Only: Val=0.8611, Test=0.7368
+[15:56:40][TUNING] Graph H=0.119 (Base=0.250) -> Mode=HETERO
+[15:56:42][predictclass:FEATS] Avg Max Feature Similarity: 0.5760
+[15:56:42][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.014, Neigh=0.000, Sim=0.000, Compat=0.456
+[15:56:42][predictclass:FEATS] Avg Max Feature Similarity: 0.5760
+[15:56:42][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.014, Neigh=0.000, Sim=0.000, Compat=0.456
+[15:56:42]   [2] Prop Only: Val=0.5833, Test=0.4211
+[15:56:45] Running Val-Refined:
+[15:56:45][predictclass:FEATS] Avg Max Feature Similarity: 0.5807
+[15:56:45][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.039, Neigh=0.003, Sim=0.176, Compat=0.301
+[15:56:45] Running Test-Refined:
+[15:56:45][predictclass:FEATS] Avg Max Feature Similarity: 0.5818
+[15:56:45][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.039, Neigh=0.002, Sim=0.166, Compat=0.224
+[15:56:45]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.7368
+[15:56:45]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.7368
+[15:56:45] -- Repeat 5/5 --
+[15:56:45]     [MLP] Training for 200 epochs...
+[15:56:45]       Epoch 050 | Loss: 0.0076
+[15:56:45]       Epoch 100 | Loss: 0.0037
+[15:56:45]       Epoch 150 | Loss: 0.0056
+[15:56:45]       Epoch 200 | Loss: 0.0036
+[15:56:45]   [1] MLP Only: Val=0.8333, Test=0.7632
+[15:56:45][TUNING] Graph H=0.119 (Base=0.250) -> Mode=HETERO
+[15:56:47][predictclass:FEATS] Avg Max Feature Similarity: 0.5760
+[15:56:47][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.090, Neigh=0.000, Sim=0.014, Compat=0.393
+[15:56:47][predictclass:FEATS] Avg Max Feature Similarity: 0.5760
+[15:56:47][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.090, Neigh=0.000, Sim=0.014, Compat=0.393
+[15:56:47]   [2] Prop Only: Val=0.5278, Test=0.5263
+[15:56:50] Running Val-Refined:
+[15:56:50][predictclass:FEATS] Avg Max Feature Similarity: 0.5802
+[15:56:50][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.110, Neigh=0.050, Sim=0.278, Compat=0.375
+[15:56:50] Running Test-Refined:
+[15:56:50][predictclass:FEATS] Avg Max Feature Similarity: 0.5814
+[15:56:50][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.091, Neigh=0.027, Sim=0.256, Compat=0.287
+[15:56:50]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.7632
+[15:56:50]   [4] Prop+MLP(Select): Val(Prop)=0.5278 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.7632
+[15:56:50] ==================== SPLIT 8 ====================
+[15:56:50][WARN] Split texas_split_0.6_0.2_8.npz not found. Generating random split.
+[15:56:50][SPLIT_INFO] n_train=109 | n_val=36
+[15:56:50] -- Repeat 1/5 --
+[15:56:50]     [MLP] Training for 200 epochs...
+[15:56:50]       Epoch 050 | Loss: 0.0054
+[15:56:50]       Epoch 100 | Loss: 0.0091
+[15:56:50]       Epoch 150 | Loss: 0.0053
+[15:56:50]       Epoch 200 | Loss: 0.0110
+[15:56:50]   [1] MLP Only: Val=0.8611, Test=0.9474
+[15:56:50][TUNING] Graph H=0.073 (Base=0.200) -> Mode=HETERO
+[15:56:53][predictclass:FEATS] Avg Max Feature Similarity: 0.5686
+[15:56:53][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.037, Neigh=0.000, Sim=0.140, Compat=0.164
+[15:56:53][predictclass:FEATS] Avg Max Feature Similarity: 0.5686
+[15:56:53][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.037, Neigh=0.000, Sim=0.140, Compat=0.164
+[15:56:53]   [2] Prop Only: Val=0.7222, Test=0.5526
+[15:56:55] Running Val-Refined:
+[15:56:55][predictclass:FEATS] Avg Max Feature Similarity: 0.5780
+[15:56:55][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.027, Neigh=0.001, Sim=0.130, Compat=0.203
+[15:56:55] Running Test-Refined:
+[15:56:55][predictclass:FEATS] Avg Max Feature Similarity: 0.5785
+[15:56:55][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.033, Neigh=0.000, Sim=0.130, Compat=0.161
+[15:56:55]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.9474
+[15:56:55]   [4] Prop+MLP(Select): Val(Prop)=0.7222 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.9474
+[15:56:55] -- Repeat 2/5 --
+[15:56:55]     [MLP] Training for 200 epochs...
+[15:56:55]       Epoch 050 | Loss: 0.0208
+[15:56:56]       Epoch 100 | Loss: 0.0149
+[15:56:56]       Epoch 150 | Loss: 0.0017
+[15:56:56]       Epoch 200 | Loss: 0.0023
+[15:56:56]   [1] MLP Only: Val=0.8611, Test=0.9474
+[15:56:56][TUNING] Graph H=0.073 (Base=0.200) -> Mode=HETERO
+[15:56:59][predictclass:FEATS] Avg Max Feature Similarity: 0.5686
+[15:56:59][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.018, Neigh=0.000, Sim=0.196, Compat=0.229
+[15:56:59][predictclass:FEATS] Avg Max Feature Similarity: 0.5686
+[15:56:59][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.018, Neigh=0.000, Sim=0.196, Compat=0.229
+[15:56:59]   [2] Prop Only: Val=0.5833, Test=0.5263
+[15:57:01] Running Val-Refined:
+[15:57:01][predictclass:FEATS] Avg Max Feature Similarity: 0.5785
+[15:57:01][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.079, Neigh=0.015, Sim=0.096, Compat=0.561
+[15:57:01] Running Test-Refined:
+[15:57:01][predictclass:FEATS] Avg Max Feature Similarity: 0.5761
+[15:57:01][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.107, Neigh=0.000, Sim=0.093, Compat=0.416
+[15:57:01]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.9474
+[15:57:01]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.9474
+[15:57:01] -- Repeat 3/5 --
+[15:57:01]     [MLP] Training for 200 epochs...
+[15:57:01]       Epoch 050 | Loss: 0.0192
+[15:57:01]       Epoch 100 | Loss: 0.0021
+[15:57:01]       Epoch 150 | Loss: 0.0048
+[15:57:01]       Epoch 200 | Loss: 0.0030
+[15:57:01]   [1] MLP Only: Val=0.8611, Test=0.9211
+[15:57:01][TUNING] Graph H=0.073 (Base=0.200) -> Mode=HETERO
+[15:57:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5686
+[15:57:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.064, Neigh=0.000, Sim=0.113, Compat=0.228
+[15:57:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5686
+[15:57:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.064, Neigh=0.000, Sim=0.113, Compat=0.228
+[15:57:04]   [2] Prop Only: Val=0.7222, Test=0.5263
+[15:57:07] Running Val-Refined:
+[15:57:07][predictclass:FEATS] Avg Max Feature Similarity: 0.5781
+[15:57:07][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.040, Neigh=0.004, Sim=0.105, Compat=0.281
+[15:57:07] Running Test-Refined:
+[15:57:07][predictclass:FEATS] Avg Max Feature Similarity: 0.5742
+[15:57:07][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.065, Neigh=0.004, Sim=0.106, Compat=0.224
+[15:57:07]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.9211
+[15:57:07]   [4] Prop+MLP(Select): Val(Prop)=0.7222 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.9211
+[15:57:07] -- Repeat 4/5 --
+[15:57:07]     [MLP] Training for 200 epochs...
+[15:57:07]       Epoch 050 | Loss: 0.0267
+[15:57:07]       Epoch 100 | Loss: 0.0148
+[15:57:07]       Epoch 150 | Loss: 0.0072
+[15:57:07]       Epoch 200 | Loss: 0.0025
+[15:57:07]   [1] MLP Only: Val=0.8611, Test=0.9474
+[15:57:07][TUNING] Graph H=0.073 (Base=0.200) -> Mode=HETERO
+[15:57:10][predictclass:FEATS] Avg Max Feature Similarity: 0.5686
+[15:57:10][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.086, Neigh=0.000, Sim=0.148, Compat=0.203
+[15:57:10][predictclass:FEATS] Avg Max Feature Similarity: 0.5686
+[15:57:10][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.086, Neigh=0.000, Sim=0.148, Compat=0.203
+[15:57:10]   [2] Prop Only: Val=0.7222, Test=0.5263
+[15:57:13] Running Val-Refined:
+[15:57:13][predictclass:FEATS] Avg Max Feature Similarity: 0.5794
+[15:57:13][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.161, Neigh=0.004, Sim=0.043, Compat=0.237
+[15:57:13] Running Test-Refined:
+[15:57:13][predictclass:FEATS] Avg Max Feature Similarity: 0.5753
+[15:57:13][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.216, Neigh=0.004, Sim=0.042, Compat=0.197
+[15:57:13]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.9474
+[15:57:13]   [4] Prop+MLP(Select): Val(Prop)=0.7222 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.9474
+[15:57:13] -- Repeat 5/5 --
+[15:57:13]     [MLP] Training for 200 epochs...
+[15:57:13]       Epoch 050 | Loss: 0.0553
+[15:57:13]       Epoch 100 | Loss: 0.0075
+[15:57:13]       Epoch 150 | Loss: 0.0031
+[15:57:13]       Epoch 200 | Loss: 0.0018
+[15:57:13]   [1] MLP Only: Val=0.8889, Test=0.9474
+[15:57:13][TUNING] Graph H=0.073 (Base=0.200) -> Mode=HETERO
+[15:57:16][predictclass:FEATS] Avg Max Feature Similarity: 0.5686
+[15:57:16][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.040, Neigh=0.000, Sim=0.151, Compat=0.431
+[15:57:16][predictclass:FEATS] Avg Max Feature Similarity: 0.5686
+[15:57:16][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.040, Neigh=0.000, Sim=0.151, Compat=0.431
+[15:57:16]   [2] Prop Only: Val=0.6944, Test=0.5263
+[15:57:19] Running Val-Refined:
+[15:57:19][predictclass:FEATS] Avg Max Feature Similarity: 0.5794
+[15:57:19][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.047, Neigh=0.003, Sim=0.191, Compat=0.547
+[15:57:19] Running Test-Refined:
+[15:57:19][predictclass:FEATS] Avg Max Feature Similarity: 0.5746
+[15:57:19][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.055, Neigh=0.000, Sim=0.187, Compat=0.451
+[15:57:19]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.9474
+[15:57:19]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.9474
+[15:57:19] ==================== SPLIT 9 ====================
+[15:57:19][WARN] Split texas_split_0.6_0.2_9.npz not found. Generating random split.
+[15:57:19][SPLIT_INFO] n_train=109 | n_val=36
+[15:57:19] -- Repeat 1/5 --
+[15:57:19]     [MLP] Training for 200 epochs...
+[15:57:19]       Epoch 050 | Loss: 0.0144
+[15:57:19]       Epoch 100 | Loss: 0.0017
+[15:57:19]       Epoch 150 | Loss: 0.0016
+[15:57:19]       Epoch 200 | Loss: 0.0036
+[15:57:19]   [1] MLP Only: Val=0.9167, Test=0.8684
+[15:57:19][TUNING] Graph H=0.131 (Base=0.250) -> Mode=HETERO
+[15:57:22][predictclass:FEATS] Avg Max Feature Similarity: 0.5639
+[15:57:22][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.084, Neigh=0.000, Sim=0.089, Compat=0.243
+[15:57:22][predictclass:FEATS] Avg Max Feature Similarity: 0.5639
+[15:57:22][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.084, Neigh=0.000, Sim=0.089, Compat=0.243
+[15:57:22]   [2] Prop Only: Val=0.6389, Test=0.5789
+[15:57:24] Running Val-Refined:
+[15:57:24][predictclass:FEATS] Avg Max Feature Similarity: 0.5722
+[15:57:24][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.109, Neigh=0.000, Sim=0.059, Compat=0.226
+[15:57:24] Running Test-Refined:
+[15:57:24][predictclass:FEATS] Avg Max Feature Similarity: 0.5755
+[15:57:24][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.125, Neigh=0.002, Sim=0.057, Compat=0.187
+[15:57:24]   [3] MLP+Refined: Val(Ref)=0.6389 vs Val(MLP)=0.9167 -> Chosen: MLP. Test=0.8684
+[15:57:24]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.9167 -> Chosen: MLP. Test=0.8684
+[15:57:24] -- Repeat 2/5 --
+[15:57:24]     [MLP] Training for 200 epochs...
+[15:57:24]       Epoch 050 | Loss: 0.0211
+[15:57:24]       Epoch 100 | Loss: 0.0063
+[15:57:24]       Epoch 150 | Loss: 0.0022
+[15:57:24]       Epoch 200 | Loss: 0.0049
+[15:57:24]   [1] MLP Only: Val=0.9167, Test=0.8947
+[15:57:24][TUNING] Graph H=0.131 (Base=0.250) -> Mode=HETERO
+[15:57:27][predictclass:FEATS] Avg Max Feature Similarity: 0.5639
+[15:57:27][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.137, Neigh=0.000, Sim=0.039, Compat=0.370
+[15:57:27][predictclass:FEATS] Avg Max Feature Similarity: 0.5639
+[15:57:27][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.137, Neigh=0.000, Sim=0.039, Compat=0.370
+[15:57:27]   [2] Prop Only: Val=0.6389, Test=0.6053
+[15:57:29] Running Val-Refined:
+[15:57:29][predictclass:FEATS] Avg Max Feature Similarity: 0.5728
+[15:57:29][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.149, Neigh=0.002, Sim=0.251, Compat=0.347
+[15:57:29] Running Test-Refined:
+[15:57:29][predictclass:FEATS] Avg Max Feature Similarity: 0.5755
+[15:57:29][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.174, Neigh=0.023, Sim=0.241, Compat=0.406
+[15:57:29]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.9167 -> Chosen: MLP. Test=0.8947
+[15:57:29]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.9167 -> Chosen: MLP. Test=0.8947
+[15:57:29] -- Repeat 3/5 --
+[15:57:29]     [MLP] Training for 200 epochs...
+[15:57:29]       Epoch 050 | Loss: 0.0156
+[15:57:29]       Epoch 100 | Loss: 0.0055
+[15:57:29]       Epoch 150 | Loss: 0.0030
+[15:57:29]       Epoch 200 | Loss: 0.0013
+[15:57:29]   [1] MLP Only: Val=0.8889, Test=0.8947
+[15:57:29][TUNING] Graph H=0.131 (Base=0.250) -> Mode=HETERO
+[15:57:32][predictclass:FEATS] Avg Max Feature Similarity: 0.5639
+[15:57:32][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.120, Neigh=0.000, Sim=0.131, Compat=0.394
+[15:57:32][predictclass:FEATS] Avg Max Feature Similarity: 0.5639
+[15:57:32][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.120, Neigh=0.000, Sim=0.131, Compat=0.394
+[15:57:32]   [2] Prop Only: Val=0.6389, Test=0.6053
+[15:57:34] Running Val-Refined:
+[15:57:34][predictclass:FEATS] Avg Max Feature Similarity: 0.5714
+[15:57:34][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.058, Neigh=0.000, Sim=0.216, Compat=0.181
+[15:57:34] Running Test-Refined:
+[15:57:34][predictclass:FEATS] Avg Max Feature Similarity: 0.5776
+[15:57:34][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.076, Neigh=0.010, Sim=0.209, Compat=0.203
+[15:57:34]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.8947
+[15:57:34]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.8947
+[15:57:34] -- Repeat 4/5 --
+[15:57:34]     [MLP] Training for 200 epochs...
+[15:57:34]       Epoch 050 | Loss: 0.0083
+[15:57:34]       Epoch 100 | Loss: 0.0056
+[15:57:35]       Epoch 150 | Loss: 0.0031
+[15:57:35]       Epoch 200 | Loss: 0.0025
+[15:57:35]   [1] MLP Only: Val=0.8889, Test=0.8684
+[15:57:35][TUNING] Graph H=0.131 (Base=0.250) -> Mode=HETERO
+[15:57:37][predictclass:FEATS] Avg Max Feature Similarity: 0.5639
+[15:57:37][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.052, Neigh=0.000, Sim=0.263, Compat=0.181
+[15:57:37][predictclass:FEATS] Avg Max Feature Similarity: 0.5639
+[15:57:37][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.052, Neigh=0.000, Sim=0.263, Compat=0.181
+[15:57:37]   [2] Prop Only: Val=0.6667, Test=0.5526
+[15:57:40] Running Val-Refined:
+[15:57:40][predictclass:FEATS] Avg Max Feature Similarity: 0.5726
+[15:57:40][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.130, Neigh=0.000, Sim=0.207, Compat=0.322
+[15:57:40] Running Test-Refined:
+[15:57:40][predictclass:FEATS] Avg Max Feature Similarity: 0.5743
+[15:57:40][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.131, Neigh=0.001, Sim=0.198, Compat=0.353
+[15:57:40]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.8684
+[15:57:40]   [4] Prop+MLP(Select): Val(Prop)=0.6667 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.8684
+[15:57:40] -- Repeat 5/5 --
+[15:57:40]     [MLP] Training for 200 epochs...
+[15:57:40]       Epoch 050 | Loss: 0.0173
+[15:57:40]       Epoch 100 | Loss: 0.0019
+[15:57:40]       Epoch 150 | Loss: 0.0025
+[15:57:40]       Epoch 200 | Loss: 0.0043
+[15:57:40]   [1] MLP Only: Val=0.8889, Test=0.8947
+[15:57:40][TUNING] Graph H=0.131 (Base=0.250) -> Mode=HETERO
+[15:57:42][predictclass:FEATS] Avg Max Feature Similarity: 0.5639
+[15:57:42][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.104, Neigh=0.000, Sim=0.023, Compat=0.329
+[15:57:43][predictclass:FEATS] Avg Max Feature Similarity: 0.5639
+[15:57:43][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.104, Neigh=0.000, Sim=0.023, Compat=0.329
+[15:57:43]   [2] Prop Only: Val=0.6389, Test=0.6053
+[15:57:45] Running Val-Refined:
+[15:57:45][predictclass:FEATS] Avg Max Feature Similarity: 0.5731
+[15:57:45][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.087, Neigh=0.000, Sim=0.023, Compat=0.324
+[15:57:45] Running Test-Refined:
+[15:57:45][predictclass:FEATS] Avg Max Feature Similarity: 0.5755
+[15:57:45][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.104, Neigh=0.019, Sim=0.022, Compat=0.315
+[15:57:45]   [3] MLP+Refined: Val(Ref)=0.6944 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.8947
+[15:57:45]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.8947
+[15:57:45][SUMMARY] 
+==================================================
+ FINAL SUMMARY (texas)
+==================================================
+[1] MLP Only:          0.8105 ± 0.0812
+[2] Prop Only:         0.5784 ± 0.0635
+[3] MLP + Refined:     0.8105 ± 0.0812
+    -> Refinement Chosen: 0/50 (0.0%)
+[4] Prop + MLP(Select):0.8105 ± 0.0812
+    -> Switched to MLP:   50/50 (100.0%)
+

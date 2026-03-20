@@ -1,0 +1,19 @@
+{
+  "main_paper": [
+    "table_main_results.csv (rendered main result table)",
+    "table_gain_over_mlp.csv (compact version)",
+    "fig_gain_by_dataset.png",
+    "fig_uncertain_vs_gain.png",
+    "case-study table excerpt (from table_case_study_draft.csv)"
+  ],
+  "appendix": [
+    "table_regime_analysis.csv full version",
+    "fig_threshold_regime_clustering.png",
+    "full table_case_study_draft.csv and per-node interpretations"
+  ],
+  "rebuttal_supporting": [
+    "fig_case_study_outcomes.png",
+    "zero-changed / fallback stats from manuscript_threshold_weight_stability_local_cycle.json",
+    "sign-test fields in table_gain_over_mlp.csv"
+  ]
+}

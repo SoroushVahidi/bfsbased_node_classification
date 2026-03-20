@@ -1,0 +1,1244 @@
+[02:47:54][RUN] [START] Full Investigation for DATASET_KEY=texas
+[02:47:54] ==================== SPLIT 0 ====================
+[02:47:54][WARN] Split texas_split_0.6_0.2_0.npz not found. Generating random split.
+[02:47:54][SPLIT_INFO] n_train=109 | n_val=36
+[02:47:54] -- Repeat 1/5 --
+[02:47:54]     [MLP] Training for 200 epochs...
+[02:47:54]       Epoch 050 | Loss: 0.0177
+[02:47:54]       Epoch 100 | Loss: 0.0031
+[02:47:54]       Epoch 150 | Loss: 0.0130
+[02:47:55]       Epoch 200 | Loss: 0.0096
+[02:47:55]   [1] MLP Only: Val=0.7500, Test=0.8421
+[02:47:55][TUNING] Graph H=0.077 (Base=0.250) -> Mode=HETERO
+[02:47:58][predictclass:FEATS] Avg Max Feature Similarity: 0.5663
+[02:47:58][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.174, Neigh=0.000, Sim=0.019, Compat=0.110
+[02:47:58][predictclass:FEATS] Avg Max Feature Similarity: 0.5663
+[02:47:58][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.174, Neigh=0.000, Sim=0.019, Compat=0.110
+[02:47:58]   [2] Prop Only: Val=0.6389, Test=0.6053
+[02:48:01] Running Val-Refined:
+[02:48:01][predictclass:FEATS] Avg Max Feature Similarity: 0.5803
+[02:48:01][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.223, Neigh=0.000, Sim=0.136, Compat=0.407
+[02:48:01] Running Test-Refined:
+[02:48:01][predictclass:FEATS] Avg Max Feature Similarity: 0.5715
+[02:48:01][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.244, Neigh=0.005, Sim=0.152, Compat=0.340
+[02:48:01]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8421
+[02:48:01]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8421
+[02:48:01][texas:TEST-GATED-MLP-PROP run=0 rep=0:SUMMARY] Gate mode=learned | val_supervised=22 | val_gate_acc=0.8181818181818182 | test_acc(gated)=0.7368 | test_acc(mlp)=0.8421 | test_acc(prop)=0.6053 | frac_mlp=0.421
+[02:48:01][texas:TEST-GATED-MLP-PROP run=0 rep=0:COEF] Gate coefficients (standardized): mlp_max_prob=+2.234, mlp_margin=-2.583, mlp_pred_class=+0.080, prop_max_score=-6.918, prop_margin=+6.793, prop_pred_class=+0.000, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+1.680, node_degree=+6.147, support_labeled_neighbors=-2.231, neighbor_class_entropy=-0.216, similarity_gap=-1.317, compatibility_gap=+0.326, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:48:01]   [5] Gated MLP+Prop: Test=0.7368 | GateValAcc=0.8181818181818182 | FracMLP=0.421
+[02:48:01] -- Repeat 2/5 --
+[02:48:01]     [MLP] Training for 200 epochs...
+[02:48:01]       Epoch 050 | Loss: 0.0184
+[02:48:01]       Epoch 100 | Loss: 0.0280
+[02:48:01]       Epoch 150 | Loss: 0.0075
+[02:48:01]       Epoch 200 | Loss: 0.0057
+[02:48:01]   [1] MLP Only: Val=0.8056, Test=0.8421
+[02:48:01][TUNING] Graph H=0.077 (Base=0.250) -> Mode=HETERO
+[02:48:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5663
+[02:48:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.200, Neigh=0.027, Sim=0.082, Compat=0.443
+[02:48:05][predictclass:FEATS] Avg Max Feature Similarity: 0.5663
+[02:48:05][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.200, Neigh=0.027, Sim=0.082, Compat=0.443
+[02:48:05]   [2] Prop Only: Val=0.6111, Test=0.6053
+[02:48:07] Running Val-Refined:
+[02:48:07][predictclass:FEATS] Avg Max Feature Similarity: 0.5752
+[02:48:07][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.181, Neigh=0.001, Sim=0.261, Compat=0.378
+[02:48:07] Running Test-Refined:
+[02:48:07][predictclass:FEATS] Avg Max Feature Similarity: 0.5726
+[02:48:07][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.195, Neigh=0.017, Sim=0.287, Compat=0.269
+[02:48:07]   [3] MLP+Refined: Val(Ref)=0.6389 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8421
+[02:48:07]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8421
+[02:48:08][texas:TEST-GATED-MLP-PROP run=0 rep=1:SUMMARY] Gate mode=learned | val_supervised=21 | val_gate_acc=0.8571428571428571 | test_acc(gated)=0.7895 | test_acc(mlp)=0.8421 | test_acc(prop)=0.6053 | frac_mlp=0.737
+[02:48:08][texas:TEST-GATED-MLP-PROP run=0 rep=1:COEF] Gate coefficients (standardized): mlp_max_prob=+1.996, mlp_margin=+0.606, mlp_pred_class=+1.263, prop_max_score=-2.537, prop_margin=+6.131, prop_pred_class=-1.719, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=-0.519, node_degree=+3.638, support_labeled_neighbors=-2.636, neighbor_class_entropy=-0.106, similarity_gap=+0.736, compatibility_gap=-3.345, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:48:08]   [5] Gated MLP+Prop: Test=0.7895 | GateValAcc=0.8571428571428571 | FracMLP=0.737
+[02:48:08] -- Repeat 3/5 --
+[02:48:08]     [MLP] Training for 200 epochs...
+[02:48:08]       Epoch 050 | Loss: 0.0177
+[02:48:08]       Epoch 100 | Loss: 0.0033
+[02:48:08]       Epoch 150 | Loss: 0.0046
+[02:48:08]       Epoch 200 | Loss: 0.0062
+[02:48:08]   [1] MLP Only: Val=0.7500, Test=0.8158
+[02:48:08][TUNING] Graph H=0.077 (Base=0.250) -> Mode=HETERO
+[02:48:11][predictclass:FEATS] Avg Max Feature Similarity: 0.5663
+[02:48:11][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.089, Neigh=0.020, Sim=0.152, Compat=0.244
+[02:48:11][predictclass:FEATS] Avg Max Feature Similarity: 0.5663
+[02:48:11][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.089, Neigh=0.020, Sim=0.152, Compat=0.244
+[02:48:11]   [2] Prop Only: Val=0.6111, Test=0.6053
+[02:48:14] Running Val-Refined:
+[02:48:14][predictclass:FEATS] Avg Max Feature Similarity: 0.5787
+[02:48:14][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.161, Neigh=0.000, Sim=0.154, Compat=0.361
+[02:48:14] Running Test-Refined:
+[02:48:14][predictclass:FEATS] Avg Max Feature Similarity: 0.5728
+[02:48:14][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.155, Neigh=0.002, Sim=0.168, Compat=0.305
+[02:48:14]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8158
+[02:48:14]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8158
+[02:48:14][texas:TEST-GATED-MLP-PROP run=0 rep=2:SUMMARY] Gate mode=learned | val_supervised=23 | val_gate_acc=0.782608695652174 | test_acc(gated)=0.7895 | test_acc(mlp)=0.8158 | test_acc(prop)=0.6053 | frac_mlp=0.684
+[02:48:14][texas:TEST-GATED-MLP-PROP run=0 rep=2:COEF] Gate coefficients (standardized): mlp_max_prob=+3.179, mlp_margin=-4.644, mlp_pred_class=+0.024, prop_max_score=-3.822, prop_margin=+5.787, prop_pred_class=-1.864, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+2.829, node_degree=+2.713, support_labeled_neighbors=+0.033, neighbor_class_entropy=-0.617, similarity_gap=-0.100, compatibility_gap=-1.107, deferred_count=-0.000, reconsidered_in_refinement=-0.000
+[02:48:14]   [5] Gated MLP+Prop: Test=0.7895 | GateValAcc=0.782608695652174 | FracMLP=0.684
+[02:48:14] -- Repeat 4/5 --
+[02:48:14]     [MLP] Training for 200 epochs...
+[02:48:14]       Epoch 050 | Loss: 0.0117
+[02:48:14]       Epoch 100 | Loss: 0.0033
+[02:48:14]       Epoch 150 | Loss: 0.0031
+[02:48:14]       Epoch 200 | Loss: 0.0082
+[02:48:14]   [1] MLP Only: Val=0.7778, Test=0.8158
+[02:48:14][TUNING] Graph H=0.077 (Base=0.250) -> Mode=HETERO
+[02:48:18][predictclass:FEATS] Avg Max Feature Similarity: 0.5663
+[02:48:18][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.078, Neigh=0.000, Sim=0.157, Compat=0.168
+[02:48:18][predictclass:FEATS] Avg Max Feature Similarity: 0.5663
+[02:48:18][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.078, Neigh=0.000, Sim=0.157, Compat=0.168
+[02:48:18]   [2] Prop Only: Val=0.6389, Test=0.6316
+[02:48:20] Running Val-Refined:
+[02:48:20][predictclass:FEATS] Avg Max Feature Similarity: 0.5764
+[02:48:20][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.145, Neigh=0.004, Sim=0.081, Compat=0.142
+[02:48:20] Running Test-Refined:
+[02:48:20][predictclass:FEATS] Avg Max Feature Similarity: 0.5746
+[02:48:20][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.135, Neigh=0.008, Sim=0.087, Compat=0.135
+[02:48:20]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.8158
+[02:48:20]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.8158
+[02:48:21][texas:TEST-GATED-MLP-PROP run=0 rep=3:SUMMARY] Gate mode=learned | val_supervised=21 | val_gate_acc=0.7142857142857143 | test_acc(gated)=0.7368 | test_acc(mlp)=0.8158 | test_acc(prop)=0.6316 | frac_mlp=0.605
+[02:48:21][texas:TEST-GATED-MLP-PROP run=0 rep=3:COEF] Gate coefficients (standardized): mlp_max_prob=+1.115, mlp_margin=-1.006, mlp_pred_class=+0.259, prop_max_score=-5.239, prop_margin=+6.253, prop_pred_class=-0.000, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+0.516, node_degree=-2.136, support_labeled_neighbors=+5.598, neighbor_class_entropy=-1.523, similarity_gap=-0.076, compatibility_gap=-1.328, deferred_count=+0.000, reconsidered_in_refinement=+0.000
+[02:48:21]   [5] Gated MLP+Prop: Test=0.7368 | GateValAcc=0.7142857142857143 | FracMLP=0.605
+[02:48:21] -- Repeat 5/5 --
+[02:48:21]     [MLP] Training for 200 epochs...
+[02:48:21]       Epoch 050 | Loss: 0.0068
+[02:48:21]       Epoch 100 | Loss: 0.0139
+[02:48:21]       Epoch 150 | Loss: 0.0041
+[02:48:21]       Epoch 200 | Loss: 0.0049
+[02:48:21]   [1] MLP Only: Val=0.7500, Test=0.8421
+[02:48:21][TUNING] Graph H=0.077 (Base=0.250) -> Mode=HETERO
+[02:48:24][predictclass:FEATS] Avg Max Feature Similarity: 0.5663
+[02:48:24][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.164, Neigh=0.000, Sim=0.018, Compat=0.196
+[02:48:24][predictclass:FEATS] Avg Max Feature Similarity: 0.5663
+[02:48:24][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.164, Neigh=0.000, Sim=0.018, Compat=0.196
+[02:48:24]   [2] Prop Only: Val=0.6111, Test=0.6053
+[02:48:27] Running Val-Refined:
+[02:48:27][predictclass:FEATS] Avg Max Feature Similarity: 0.5799
+[02:48:27][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.218, Neigh=0.013, Sim=0.075, Compat=0.297
+[02:48:27] Running Test-Refined:
+[02:48:27][predictclass:FEATS] Avg Max Feature Similarity: 0.5729
+[02:48:27][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.211, Neigh=0.010, Sim=0.081, Compat=0.262
+[02:48:27]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8421
+[02:48:27]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8421
+[02:48:27][texas:TEST-GATED-MLP-PROP run=0 rep=4:SUMMARY] Gate mode=learned | val_supervised=23 | val_gate_acc=0.8260869565217391 | test_acc(gated)=0.7632 | test_acc(mlp)=0.8421 | test_acc(prop)=0.6053 | frac_mlp=0.632
+[02:48:27][texas:TEST-GATED-MLP-PROP run=0 rep=4:COEF] Gate coefficients (standardized): mlp_max_prob=+2.097, mlp_margin=-2.163, mlp_pred_class=-0.044, prop_max_score=-3.226, prop_margin=+4.756, prop_pred_class=-1.631, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+1.154, node_degree=+6.348, support_labeled_neighbors=-4.500, neighbor_class_entropy=-0.353, similarity_gap=-1.400, compatibility_gap=-1.181, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:48:27]   [5] Gated MLP+Prop: Test=0.7632 | GateValAcc=0.8260869565217391 | FracMLP=0.632
+[02:48:27] ==================== SPLIT 1 ====================
+[02:48:27][WARN] Split texas_split_0.6_0.2_1.npz not found. Generating random split.
+[02:48:27][SPLIT_INFO] n_train=109 | n_val=36
+[02:48:27] -- Repeat 1/5 --
+[02:48:27]     [MLP] Training for 200 epochs...
+[02:48:27]       Epoch 050 | Loss: 0.0115
+[02:48:27]       Epoch 100 | Loss: 0.0031
+[02:48:27]       Epoch 150 | Loss: 0.0040
+[02:48:27]       Epoch 200 | Loss: 0.0021
+[02:48:27]   [1] MLP Only: Val=0.7500, Test=0.7368
+[02:48:27][TUNING] Graph H=0.073 (Base=0.250) -> Mode=HETERO
+[02:48:30][predictclass:FEATS] Avg Max Feature Similarity: 0.5675
+[02:48:30][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.130, Neigh=0.000, Sim=0.058, Compat=0.277
+[02:48:30][predictclass:FEATS] Avg Max Feature Similarity: 0.5675
+[02:48:30][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.130, Neigh=0.000, Sim=0.058, Compat=0.277
+[02:48:30]   [2] Prop Only: Val=0.5556, Test=0.6053
+[02:48:33] Running Val-Refined:
+[02:48:33][predictclass:FEATS] Avg Max Feature Similarity: 0.5753
+[02:48:33][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.138, Neigh=0.000, Sim=0.049, Compat=0.324
+[02:48:33] Running Test-Refined:
+[02:48:33][predictclass:FEATS] Avg Max Feature Similarity: 0.5729
+[02:48:33][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.103, Neigh=0.000, Sim=0.044, Compat=0.349
+[02:48:33]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.7368
+[02:48:33]   [4] Prop+MLP(Select): Val(Prop)=0.5556 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.7368
+[02:48:33][texas:TEST-GATED-MLP-PROP run=1 rep=0:SUMMARY] Gate mode=learned | val_supervised=15 | val_gate_acc=1.0 | test_acc(gated)=0.7632 | test_acc(mlp)=0.7368 | test_acc(prop)=0.6053 | frac_mlp=0.605
+[02:48:33][texas:TEST-GATED-MLP-PROP run=1 rep=0:COEF] Gate coefficients (standardized): mlp_max_prob=+1.273, mlp_margin=+0.445, mlp_pred_class=-5.159, prop_max_score=+4.984, prop_margin=+2.041, prop_pred_class=-1.763, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+1.185, node_degree=-0.709, support_labeled_neighbors=+1.817, neighbor_class_entropy=+0.236, similarity_gap=+2.111, compatibility_gap=-3.472, deferred_count=-0.000, reconsidered_in_refinement=-0.000
+[02:48:33]   [5] Gated MLP+Prop: Test=0.7632 | GateValAcc=1.0 | FracMLP=0.605
+[02:48:33] -- Repeat 2/5 --
+[02:48:33]     [MLP] Training for 200 epochs...
+[02:48:33]       Epoch 050 | Loss: 0.0108
+[02:48:33]       Epoch 100 | Loss: 0.0049
+[02:48:33]       Epoch 150 | Loss: 0.0085
+[02:48:34]       Epoch 200 | Loss: 0.0054
+[02:48:34]   [1] MLP Only: Val=0.7500, Test=0.7632
+[02:48:34][TUNING] Graph H=0.073 (Base=0.250) -> Mode=HETERO
+[02:48:37][predictclass:FEATS] Avg Max Feature Similarity: 0.5675
+[02:48:37][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.059, Neigh=0.000, Sim=0.082, Compat=0.268
+[02:48:37][predictclass:FEATS] Avg Max Feature Similarity: 0.5675
+[02:48:37][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.059, Neigh=0.000, Sim=0.082, Compat=0.268
+[02:48:37]   [2] Prop Only: Val=0.5556, Test=0.6053
+[02:48:40] Running Val-Refined:
+[02:48:40][predictclass:FEATS] Avg Max Feature Similarity: 0.5758
+[02:48:40][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.224, Neigh=0.000, Sim=0.071, Compat=0.399
+[02:48:40] Running Test-Refined:
+[02:48:40][predictclass:FEATS] Avg Max Feature Similarity: 0.5734
+[02:48:40][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.218, Neigh=0.005, Sim=0.068, Compat=0.454
+[02:48:40]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.7632
+[02:48:40]   [4] Prop+MLP(Select): Val(Prop)=0.5556 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.7632
+[02:48:40][texas:TEST-GATED-MLP-PROP run=1 rep=1:SUMMARY] Gate mode=learned | val_supervised=11 | val_gate_acc=1.0 | test_acc(gated)=0.7105 | test_acc(mlp)=0.7632 | test_acc(prop)=0.6053 | frac_mlp=0.684
+[02:48:40][texas:TEST-GATED-MLP-PROP run=1 rep=1:COEF] Gate coefficients (standardized): mlp_max_prob=-0.904, mlp_margin=+3.284, mlp_pred_class=-4.762, prop_max_score=+3.449, prop_margin=-3.729, prop_pred_class=-0.391, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=-0.521, node_degree=+0.467, support_labeled_neighbors=-0.772, neighbor_class_entropy=+2.528, similarity_gap=+2.033, compatibility_gap=+1.798, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:48:40]   [5] Gated MLP+Prop: Test=0.7105 | GateValAcc=1.0 | FracMLP=0.684
+[02:48:40] -- Repeat 3/5 --
+[02:48:40]     [MLP] Training for 200 epochs...
+[02:48:40]       Epoch 050 | Loss: 0.0122
+[02:48:40]       Epoch 100 | Loss: 0.0081
+[02:48:40]       Epoch 150 | Loss: 0.0037
+[02:48:40]       Epoch 200 | Loss: 0.0010
+[02:48:40]   [1] MLP Only: Val=0.6944, Test=0.7368
+[02:48:40][TUNING] Graph H=0.073 (Base=0.250) -> Mode=HETERO
+[02:48:44][predictclass:FEATS] Avg Max Feature Similarity: 0.5675
+[02:48:44][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.178, Neigh=0.000, Sim=0.074, Compat=0.263
+[02:48:44][predictclass:FEATS] Avg Max Feature Similarity: 0.5675
+[02:48:44][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.178, Neigh=0.000, Sim=0.074, Compat=0.263
+[02:48:44]   [2] Prop Only: Val=0.5556, Test=0.5789
+[02:48:47] Running Val-Refined:
+[02:48:47][predictclass:FEATS] Avg Max Feature Similarity: 0.5775
+[02:48:47][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.062, Neigh=0.000, Sim=0.127, Compat=0.231
+[02:48:47] Running Test-Refined:
+[02:48:47][predictclass:FEATS] Avg Max Feature Similarity: 0.5730
+[02:48:47][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.041, Neigh=0.000, Sim=0.115, Compat=0.166
+[02:48:47]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.6944 -> Chosen: MLP. Test=0.7368
+[02:48:47]   [4] Prop+MLP(Select): Val(Prop)=0.5556 vs Val(MLP)=0.6944 -> Chosen: MLP. Test=0.7368
+[02:48:47][texas:TEST-GATED-MLP-PROP run=1 rep=2:SUMMARY] Gate mode=learned | val_supervised=15 | val_gate_acc=1.0 | test_acc(gated)=0.6842 | test_acc(mlp)=0.7368 | test_acc(prop)=0.5789 | frac_mlp=0.526
+[02:48:47][texas:TEST-GATED-MLP-PROP run=1 rep=2:COEF] Gate coefficients (standardized): mlp_max_prob=+2.439, mlp_margin=-0.882, mlp_pred_class=-4.894, prop_max_score=+3.590, prop_margin=-2.054, prop_pred_class=-1.998, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+2.282, node_degree=+2.832, support_labeled_neighbors=+1.096, neighbor_class_entropy=-0.196, similarity_gap=-1.424, compatibility_gap=-0.202, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:48:47]   [5] Gated MLP+Prop: Test=0.6842 | GateValAcc=1.0 | FracMLP=0.526
+[02:48:47] -- Repeat 4/5 --
+[02:48:47]     [MLP] Training for 200 epochs...
+[02:48:47]       Epoch 050 | Loss: 0.0136
+[02:48:47]       Epoch 100 | Loss: 0.0063
+[02:48:47]       Epoch 150 | Loss: 0.0040
+[02:48:47]       Epoch 200 | Loss: 0.0012
+[02:48:47]   [1] MLP Only: Val=0.6944, Test=0.7632
+[02:48:47][TUNING] Graph H=0.073 (Base=0.250) -> Mode=HETERO
+[02:48:50][predictclass:FEATS] Avg Max Feature Similarity: 0.5675
+[02:48:50][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.039, Neigh=0.000, Sim=0.085, Compat=0.195
+[02:48:50][predictclass:FEATS] Avg Max Feature Similarity: 0.5675
+[02:48:50][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.039, Neigh=0.000, Sim=0.085, Compat=0.195
+[02:48:51]   [2] Prop Only: Val=0.6111, Test=0.6316
+[02:48:54] Running Val-Refined:
+[02:48:54][predictclass:FEATS] Avg Max Feature Similarity: 0.5753
+[02:48:54][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.164, Neigh=0.000, Sim=0.062, Compat=0.353
+[02:48:54] Running Test-Refined:
+[02:48:54][predictclass:FEATS] Avg Max Feature Similarity: 0.5731
+[02:48:54][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.149, Neigh=0.018, Sim=0.056, Compat=0.324
+[02:48:54]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.6944 -> Chosen: MLP. Test=0.7632
+[02:48:54]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.6944 -> Chosen: MLP. Test=0.7632
+[02:48:54][texas:TEST-GATED-MLP-PROP run=1 rep=3:SUMMARY] Gate mode=learned | val_supervised=15 | val_gate_acc=1.0 | test_acc(gated)=0.7105 | test_acc(mlp)=0.7632 | test_acc(prop)=0.6316 | frac_mlp=0.526
+[02:48:54][texas:TEST-GATED-MLP-PROP run=1 rep=3:COEF] Gate coefficients (standardized): mlp_max_prob=+3.251, mlp_margin=-1.757, mlp_pred_class=-3.712, prop_max_score=+6.699, prop_margin=-1.170, prop_pred_class=+3.365, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+3.063, node_degree=-1.636, support_labeled_neighbors=+2.673, neighbor_class_entropy=-3.498, similarity_gap=+1.582, compatibility_gap=+0.009, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:48:54]   [5] Gated MLP+Prop: Test=0.7105 | GateValAcc=1.0 | FracMLP=0.526
+[02:48:54] -- Repeat 5/5 --
+[02:48:54]     [MLP] Training for 200 epochs...
+[02:48:54]       Epoch 050 | Loss: 0.0056
+[02:48:54]       Epoch 100 | Loss: 0.0086
+[02:48:54]       Epoch 150 | Loss: 0.0030
+[02:48:54]       Epoch 200 | Loss: 0.0043
+[02:48:54]   [1] MLP Only: Val=0.6667, Test=0.6842
+[02:48:54][TUNING] Graph H=0.073 (Base=0.250) -> Mode=HETERO
+[02:48:57][predictclass:FEATS] Avg Max Feature Similarity: 0.5675
+[02:48:58][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.052, Neigh=0.000, Sim=0.123, Compat=0.305
+[02:48:58][predictclass:FEATS] Avg Max Feature Similarity: 0.5675
+[02:48:58][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.052, Neigh=0.000, Sim=0.123, Compat=0.305
+[02:48:58]   [2] Prop Only: Val=0.5278, Test=0.6053
+[02:49:01] Running Val-Refined:
+[02:49:01][predictclass:FEATS] Avg Max Feature Similarity: 0.5768
+[02:49:01][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.065, Neigh=0.000, Sim=0.130, Compat=0.362
+[02:49:01] Running Test-Refined:
+[02:49:01][predictclass:FEATS] Avg Max Feature Similarity: 0.5732
+[02:49:01][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.051, Neigh=0.000, Sim=0.113, Compat=0.278
+[02:49:01]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.6667 -> Chosen: MLP. Test=0.6842
+[02:49:01]   [4] Prop+MLP(Select): Val(Prop)=0.5278 vs Val(MLP)=0.6667 -> Chosen: MLP. Test=0.6842
+[02:49:01][texas:TEST-GATED-MLP-PROP run=1 rep=4:SUMMARY] Gate mode=learned | val_supervised=13 | val_gate_acc=1.0 | test_acc(gated)=0.7105 | test_acc(mlp)=0.6842 | test_acc(prop)=0.6053 | frac_mlp=0.658
+[02:49:01][texas:TEST-GATED-MLP-PROP run=1 rep=4:COEF] Gate coefficients (standardized): mlp_max_prob=+2.260, mlp_margin=+1.313, mlp_pred_class=-3.145, prop_max_score=+4.852, prop_margin=-1.116, prop_pred_class=-1.780, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+2.619, node_degree=-0.467, support_labeled_neighbors=+0.410, neighbor_class_entropy=+2.843, similarity_gap=+0.432, compatibility_gap=+0.154, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:49:01]   [5] Gated MLP+Prop: Test=0.7105 | GateValAcc=1.0 | FracMLP=0.658
+[02:49:01] ==================== SPLIT 2 ====================
+[02:49:01][WARN] Split texas_split_0.6_0.2_2.npz not found. Generating random split.
+[02:49:01][SPLIT_INFO] n_train=109 | n_val=36
+[02:49:01] -- Repeat 1/5 --
+[02:49:01]     [MLP] Training for 200 epochs...
+[02:49:01]       Epoch 050 | Loss: 0.0240
+[02:49:01]       Epoch 100 | Loss: 0.0114
+[02:49:01]       Epoch 150 | Loss: 0.0028
+[02:49:01]       Epoch 200 | Loss: 0.0041
+[02:49:01]   [1] MLP Only: Val=0.8611, Test=0.8421
+[02:49:01][TUNING] Graph H=0.175 (Base=0.200) -> Mode=HETERO
+[02:49:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5678
+[02:49:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.032, Neigh=0.000, Sim=0.039, Compat=0.173
+[02:49:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5678
+[02:49:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.032, Neigh=0.000, Sim=0.039, Compat=0.173
+[02:49:04]   [2] Prop Only: Val=0.5833, Test=0.5789
+[02:49:07] Running Val-Refined:
+[02:49:07][predictclass:FEATS] Avg Max Feature Similarity: 0.5755
+[02:49:07][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.056, Neigh=0.001, Sim=0.233, Compat=0.224
+[02:49:07] Running Test-Refined:
+[02:49:07][predictclass:FEATS] Avg Max Feature Similarity: 0.5751
+[02:49:07][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.062, Neigh=0.012, Sim=0.215, Compat=0.152
+[02:49:07]   [3] MLP+Refined: Val(Ref)=0.6389 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8421
+[02:49:07]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8421
+[02:49:07][texas:TEST-GATED-MLP-PROP run=2 rep=0:SUMMARY] Gate mode=learned | val_supervised=14 | val_gate_acc=1.0 | test_acc(gated)=0.7895 | test_acc(mlp)=0.8421 | test_acc(prop)=0.5789 | frac_mlp=0.632
+[02:49:07][texas:TEST-GATED-MLP-PROP run=2 rep=0:COEF] Gate coefficients (standardized): mlp_max_prob=+3.197, mlp_margin=-2.732, mlp_pred_class=+1.990, prop_max_score=-2.245, prop_margin=-3.560, prop_pred_class=+0.456, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+3.427, node_degree=+5.867, support_labeled_neighbors=-2.010, neighbor_class_entropy=-2.422, similarity_gap=+2.530, compatibility_gap=+2.760, deferred_count=+0.000, reconsidered_in_refinement=+0.000
+[02:49:07]   [5] Gated MLP+Prop: Test=0.7895 | GateValAcc=1.0 | FracMLP=0.632
+[02:49:07] -- Repeat 2/5 --
+[02:49:07]     [MLP] Training for 200 epochs...
+[02:49:07]       Epoch 050 | Loss: 0.0316
+[02:49:07]       Epoch 100 | Loss: 0.0042
+[02:49:07]       Epoch 150 | Loss: 0.0039
+[02:49:07]       Epoch 200 | Loss: 0.0046
+[02:49:07]   [1] MLP Only: Val=0.8056, Test=0.8421
+[02:49:07][TUNING] Graph H=0.175 (Base=0.200) -> Mode=HETERO
+[02:49:11][predictclass:FEATS] Avg Max Feature Similarity: 0.5678
+[02:49:11][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.083, Neigh=0.000, Sim=0.024, Compat=0.322
+[02:49:11][predictclass:FEATS] Avg Max Feature Similarity: 0.5678
+[02:49:11][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.083, Neigh=0.000, Sim=0.024, Compat=0.322
+[02:49:11]   [2] Prop Only: Val=0.5833, Test=0.5789
+[02:49:14] Running Val-Refined:
+[02:49:14][predictclass:FEATS] Avg Max Feature Similarity: 0.5778
+[02:49:14][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.156, Neigh=0.022, Sim=0.174, Compat=0.187
+[02:49:14] Running Test-Refined:
+[02:49:14][predictclass:FEATS] Avg Max Feature Similarity: 0.5755
+[02:49:14][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.182, Neigh=0.001, Sim=0.161, Compat=0.091
+[02:49:14]   [3] MLP+Refined: Val(Ref)=0.6389 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8421
+[02:49:14]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8421
+[02:49:14][texas:TEST-GATED-MLP-PROP run=2 rep=1:SUMMARY] Gate mode=learned | val_supervised=14 | val_gate_acc=1.0 | test_acc(gated)=0.8421 | test_acc(mlp)=0.8421 | test_acc(prop)=0.5789 | frac_mlp=0.684
+[02:49:14][texas:TEST-GATED-MLP-PROP run=2 rep=1:COEF] Gate coefficients (standardized): mlp_max_prob=+1.476, mlp_margin=+1.732, mlp_pred_class=+3.697, prop_max_score=-1.935, prop_margin=-1.851, prop_pred_class=+0.744, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+1.470, node_degree=-0.097, support_labeled_neighbors=-0.153, neighbor_class_entropy=-0.855, similarity_gap=+0.708, compatibility_gap=+0.812, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:49:14]   [5] Gated MLP+Prop: Test=0.8421 | GateValAcc=1.0 | FracMLP=0.684
+[02:49:14] -- Repeat 3/5 --
+[02:49:14]     [MLP] Training for 200 epochs...
+[02:49:14]       Epoch 050 | Loss: 0.0183
+[02:49:14]       Epoch 100 | Loss: 0.0048
+[02:49:14]       Epoch 150 | Loss: 0.0027
+[02:49:14]       Epoch 200 | Loss: 0.0024
+[02:49:14]   [1] MLP Only: Val=0.7778, Test=0.8421
+[02:49:14][TUNING] Graph H=0.175 (Base=0.200) -> Mode=HETERO
+[02:49:18][predictclass:FEATS] Avg Max Feature Similarity: 0.5678
+[02:49:18][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.046, Neigh=0.000, Sim=0.081, Compat=0.293
+[02:49:18][predictclass:FEATS] Avg Max Feature Similarity: 0.5678
+[02:49:18][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.046, Neigh=0.000, Sim=0.081, Compat=0.293
+[02:49:18]   [2] Prop Only: Val=0.5833, Test=0.5789
+[02:49:22] Running Val-Refined:
+[02:49:22][predictclass:FEATS] Avg Max Feature Similarity: 0.5765
+[02:49:22][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.200, Neigh=0.031, Sim=0.139, Compat=0.320
+[02:49:22] Running Test-Refined:
+[02:49:22][predictclass:FEATS] Avg Max Feature Similarity: 0.5760
+[02:49:22][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.161, Neigh=0.025, Sim=0.129, Compat=0.269
+[02:49:22]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.8421
+[02:49:22]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.8421
+[02:49:22][texas:TEST-GATED-MLP-PROP run=2 rep=2:SUMMARY] Gate mode=learned | val_supervised=15 | val_gate_acc=1.0 | test_acc(gated)=0.9211 | test_acc(mlp)=0.8421 | test_acc(prop)=0.5789 | frac_mlp=0.842
+[02:49:22][texas:TEST-GATED-MLP-PROP run=2 rep=2:COEF] Gate coefficients (standardized): mlp_max_prob=+1.822, mlp_margin=+1.755, mlp_pred_class=+2.457, prop_max_score=-1.893, prop_margin=-0.678, prop_pred_class=+1.476, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+2.077, node_degree=-1.061, support_labeled_neighbors=-0.563, neighbor_class_entropy=+0.852, similarity_gap=+0.767, compatibility_gap=+1.217, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:49:22]   [5] Gated MLP+Prop: Test=0.9211 | GateValAcc=1.0 | FracMLP=0.842
+[02:49:22] -- Repeat 4/5 --
+[02:49:22]     [MLP] Training for 200 epochs...
+[02:49:22]       Epoch 050 | Loss: 0.0272
+[02:49:22]       Epoch 100 | Loss: 0.0041
+[02:49:22]       Epoch 150 | Loss: 0.0091
+[02:49:22]       Epoch 200 | Loss: 0.0041
+[02:49:22]   [1] MLP Only: Val=0.8333, Test=0.8947
+[02:49:22][TUNING] Graph H=0.175 (Base=0.200) -> Mode=HETERO
+[02:49:26][predictclass:FEATS] Avg Max Feature Similarity: 0.5678
+[02:49:26][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.064, Neigh=0.000, Sim=0.217, Compat=0.351
+[02:49:26][predictclass:FEATS] Avg Max Feature Similarity: 0.5678
+[02:49:26][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.064, Neigh=0.000, Sim=0.217, Compat=0.351
+[02:49:26]   [2] Prop Only: Val=0.5833, Test=0.6053
+[02:49:29] Running Val-Refined:
+[02:49:29][predictclass:FEATS] Avg Max Feature Similarity: 0.5748
+[02:49:29][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.052, Neigh=0.002, Sim=0.069, Compat=0.316
+[02:49:29] Running Test-Refined:
+[02:49:29][predictclass:FEATS] Avg Max Feature Similarity: 0.5759
+[02:49:29][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.029, Neigh=0.001, Sim=0.065, Compat=0.355
+[02:49:29]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.8947
+[02:49:29]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.8947
+[02:49:29][texas:TEST-GATED-MLP-PROP run=2 rep=3:SUMMARY] Gate mode=learned | val_supervised=15 | val_gate_acc=1.0 | test_acc(gated)=0.8421 | test_acc(mlp)=0.8947 | test_acc(prop)=0.6053 | frac_mlp=0.632
+[02:49:29][texas:TEST-GATED-MLP-PROP run=2 rep=3:COEF] Gate coefficients (standardized): mlp_max_prob=+1.878, mlp_margin=+0.101, mlp_pred_class=-0.021, prop_max_score=-3.715, prop_margin=-0.777, prop_pred_class=+0.393, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+1.589, node_degree=+5.045, support_labeled_neighbors=-3.102, neighbor_class_entropy=-1.515, similarity_gap=+0.433, compatibility_gap=+3.204, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:49:29]   [5] Gated MLP+Prop: Test=0.8421 | GateValAcc=1.0 | FracMLP=0.632
+[02:49:29] -- Repeat 5/5 --
+[02:49:29]     [MLP] Training for 200 epochs...
+[02:49:29]       Epoch 050 | Loss: 0.0212
+[02:49:29]       Epoch 100 | Loss: 0.0069
+[02:49:29]       Epoch 150 | Loss: 0.0024
+[02:49:29]       Epoch 200 | Loss: 0.0026
+[02:49:29]   [1] MLP Only: Val=0.7500, Test=0.8158
+[02:49:29][TUNING] Graph H=0.175 (Base=0.200) -> Mode=HETERO
+[02:49:33][predictclass:FEATS] Avg Max Feature Similarity: 0.5678
+[02:49:33][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.059, Neigh=0.000, Sim=0.190, Compat=0.181
+[02:49:33][predictclass:FEATS] Avg Max Feature Similarity: 0.5678
+[02:49:33][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.059, Neigh=0.000, Sim=0.190, Compat=0.181
+[02:49:33]   [2] Prop Only: Val=0.5833, Test=0.5789
+[02:49:36] Running Val-Refined:
+[02:49:36][predictclass:FEATS] Avg Max Feature Similarity: 0.5757
+[02:49:36][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.068, Neigh=0.000, Sim=0.183, Compat=0.292
+[02:49:36] Running Test-Refined:
+[02:49:36][predictclass:FEATS] Avg Max Feature Similarity: 0.5792
+[02:49:36][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.029, Neigh=0.000, Sim=0.167, Compat=0.322
+[02:49:36]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8158
+[02:49:36]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8158
+[02:49:36][texas:TEST-GATED-MLP-PROP run=2 rep=4:SUMMARY] Gate mode=learned | val_supervised=16 | val_gate_acc=1.0 | test_acc(gated)=0.7632 | test_acc(mlp)=0.8158 | test_acc(prop)=0.5789 | frac_mlp=0.579
+[02:49:36][texas:TEST-GATED-MLP-PROP run=2 rep=4:COEF] Gate coefficients (standardized): mlp_max_prob=+2.822, mlp_margin=+0.523, mlp_pred_class=+0.356, prop_max_score=-4.752, prop_margin=+0.422, prop_pred_class=-0.450, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+2.984, node_degree=+4.220, support_labeled_neighbors=-0.174, neighbor_class_entropy=-3.455, similarity_gap=+3.176, compatibility_gap=-0.813, deferred_count=+0.000, reconsidered_in_refinement=+0.000
+[02:49:36]   [5] Gated MLP+Prop: Test=0.7632 | GateValAcc=1.0 | FracMLP=0.579
+[02:49:36] ==================== SPLIT 3 ====================
+[02:49:36][WARN] Split texas_split_0.6_0.2_3.npz not found. Generating random split.
+[02:49:36][SPLIT_INFO] n_train=109 | n_val=36
+[02:49:36] -- Repeat 1/5 --
+[02:49:36]     [MLP] Training for 200 epochs...
+[02:49:36]       Epoch 050 | Loss: 0.0161
+[02:49:36]       Epoch 100 | Loss: 0.0116
+[02:49:36]       Epoch 150 | Loss: 0.0103
+[02:49:36]       Epoch 200 | Loss: 0.0017
+[02:49:36]   [1] MLP Only: Val=0.7500, Test=0.8684
+[02:49:36][TUNING] Graph H=0.206 (Base=0.200) -> Mode=HETERO
+[02:49:40][predictclass:FEATS] Avg Max Feature Similarity: 0.5677
+[02:49:40][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.189, Neigh=0.000, Sim=0.268, Compat=0.113
+[02:49:40][predictclass:FEATS] Avg Max Feature Similarity: 0.5677
+[02:49:40][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.189, Neigh=0.000, Sim=0.268, Compat=0.113
+[02:49:40]   [2] Prop Only: Val=0.5278, Test=0.4737
+[02:49:44] Running Val-Refined:
+[02:49:44][predictclass:FEATS] Avg Max Feature Similarity: 0.5781
+[02:49:44][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.195, Neigh=0.039, Sim=0.044, Compat=0.177
+[02:49:44] Running Test-Refined:
+[02:49:44][predictclass:FEATS] Avg Max Feature Similarity: 0.5748
+[02:49:44][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.192, Neigh=0.037, Sim=0.046, Compat=0.205
+[02:49:44]   [3] MLP+Refined: Val(Ref)=0.5278 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8684
+[02:49:44]   [4] Prop+MLP(Select): Val(Prop)=0.5278 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8684
+[02:49:44][texas:TEST-GATED-MLP-PROP run=3 rep=0:SUMMARY] Gate mode=learned | val_supervised=12 | val_gate_acc=1.0 | test_acc(gated)=0.7105 | test_acc(mlp)=0.8684 | test_acc(prop)=0.4737 | frac_mlp=0.789
+[02:49:44][texas:TEST-GATED-MLP-PROP run=3 rep=0:COEF] Gate coefficients (standardized): mlp_max_prob=+0.756, mlp_margin=-0.759, mlp_pred_class=+3.913, prop_max_score=-2.711, prop_margin=-2.010, prop_pred_class=+1.709, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+1.580, node_degree=+0.444, support_labeled_neighbors=+1.175, neighbor_class_entropy=-0.951, similarity_gap=+0.258, compatibility_gap=+1.766, deferred_count=-0.000, reconsidered_in_refinement=-0.000
+[02:49:44]   [5] Gated MLP+Prop: Test=0.7105 | GateValAcc=1.0 | FracMLP=0.789
+[02:49:44] -- Repeat 2/5 --
+[02:49:44]     [MLP] Training for 200 epochs...
+[02:49:44]       Epoch 050 | Loss: 0.0180
+[02:49:44]       Epoch 100 | Loss: 0.0038
+[02:49:44]       Epoch 150 | Loss: 0.0033
+[02:49:44]       Epoch 200 | Loss: 0.0041
+[02:49:44]   [1] MLP Only: Val=0.7222, Test=0.8158
+[02:49:44][TUNING] Graph H=0.206 (Base=0.200) -> Mode=HETERO
+[02:49:48][predictclass:FEATS] Avg Max Feature Similarity: 0.5677
+[02:49:48][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.144, Neigh=0.016, Sim=0.126, Compat=0.135
+[02:49:48][predictclass:FEATS] Avg Max Feature Similarity: 0.5677
+[02:49:48][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.144, Neigh=0.016, Sim=0.126, Compat=0.135
+[02:49:48]   [2] Prop Only: Val=0.5278, Test=0.5526
+[02:49:51] Running Val-Refined:
+[02:49:51][predictclass:FEATS] Avg Max Feature Similarity: 0.5770
+[02:49:51][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.151, Neigh=0.005, Sim=0.091, Compat=0.264
+[02:49:51] Running Test-Refined:
+[02:49:51][predictclass:FEATS] Avg Max Feature Similarity: 0.5747
+[02:49:51][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.255, Neigh=0.053, Sim=0.094, Compat=0.191
+[02:49:51]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.7222 -> Chosen: MLP. Test=0.8158
+[02:49:51]   [4] Prop+MLP(Select): Val(Prop)=0.5278 vs Val(MLP)=0.7222 -> Chosen: MLP. Test=0.8158
+[02:49:51][texas:TEST-GATED-MLP-PROP run=3 rep=1:SUMMARY] Gate mode=learned | val_supervised=15 | val_gate_acc=1.0 | test_acc(gated)=0.7105 | test_acc(mlp)=0.8158 | test_acc(prop)=0.5526 | frac_mlp=0.789
+[02:49:51][texas:TEST-GATED-MLP-PROP run=3 rep=1:COEF] Gate coefficients (standardized): mlp_max_prob=+1.220, mlp_margin=-0.582, mlp_pred_class=+3.759, prop_max_score=+0.537, prop_margin=-2.006, prop_pred_class=+0.875, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+1.008, node_degree=-1.780, support_labeled_neighbors=-3.430, neighbor_class_entropy=+1.217, similarity_gap=-0.416, compatibility_gap=+1.739, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:49:51]   [5] Gated MLP+Prop: Test=0.7105 | GateValAcc=1.0 | FracMLP=0.789
+[02:49:51] -- Repeat 3/5 --
+[02:49:51]     [MLP] Training for 200 epochs...
+[02:49:51]       Epoch 050 | Loss: 0.0154
+[02:49:51]       Epoch 100 | Loss: 0.0043
+[02:49:52]       Epoch 150 | Loss: 0.0065
+[02:49:52]       Epoch 200 | Loss: 0.0039
+[02:49:52]   [1] MLP Only: Val=0.6667, Test=0.8684
+[02:49:52][TUNING] Graph H=0.206 (Base=0.200) -> Mode=HETERO
+[02:49:56][predictclass:FEATS] Avg Max Feature Similarity: 0.5677
+[02:49:56][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.194, Neigh=0.046, Sim=0.046, Compat=0.132
+[02:49:56][predictclass:FEATS] Avg Max Feature Similarity: 0.5677
+[02:49:56][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.194, Neigh=0.046, Sim=0.046, Compat=0.132
+[02:49:56]   [2] Prop Only: Val=0.5000, Test=0.5526
+[02:49:59] Running Val-Refined:
+[02:49:59][predictclass:FEATS] Avg Max Feature Similarity: 0.5771
+[02:49:59][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.134, Neigh=0.000, Sim=0.062, Compat=0.272
+[02:49:59] Running Test-Refined:
+[02:49:59][predictclass:FEATS] Avg Max Feature Similarity: 0.5755
+[02:49:59][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.147, Neigh=0.028, Sim=0.064, Compat=0.259
+[02:49:59]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.6667 -> Chosen: MLP. Test=0.8684
+[02:49:59]   [4] Prop+MLP(Select): Val(Prop)=0.5000 vs Val(MLP)=0.6667 -> Chosen: MLP. Test=0.8684
+[02:49:59][texas:TEST-GATED-MLP-PROP run=3 rep=2:SUMMARY] Gate mode=learned | val_supervised=14 | val_gate_acc=1.0 | test_acc(gated)=0.7632 | test_acc(mlp)=0.8684 | test_acc(prop)=0.5526 | frac_mlp=0.684
+[02:49:59][texas:TEST-GATED-MLP-PROP run=3 rep=2:COEF] Gate coefficients (standardized): mlp_max_prob=+1.650, mlp_margin=+1.761, mlp_pred_class=+6.632, prop_max_score=-3.112, prop_margin=-0.004, prop_pred_class=-0.979, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+1.549, node_degree=+0.089, support_labeled_neighbors=-1.677, neighbor_class_entropy=+0.985, similarity_gap=-3.267, compatibility_gap=+0.305, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:49:59]   [5] Gated MLP+Prop: Test=0.7632 | GateValAcc=1.0 | FracMLP=0.684
+[02:49:59] -- Repeat 4/5 --
+[02:49:59]     [MLP] Training for 200 epochs...
+[02:49:59]       Epoch 050 | Loss: 0.0190
+[02:49:59]       Epoch 100 | Loss: 0.0083
+[02:49:59]       Epoch 150 | Loss: 0.0033
+[02:49:59]       Epoch 200 | Loss: 0.0165
+[02:49:59]   [1] MLP Only: Val=0.7222, Test=0.8684
+[02:49:59][TUNING] Graph H=0.206 (Base=0.200) -> Mode=HETERO
+[02:50:03][predictclass:FEATS] Avg Max Feature Similarity: 0.5677
+[02:50:03][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.182, Neigh=0.000, Sim=0.047, Compat=0.162
+[02:50:03][predictclass:FEATS] Avg Max Feature Similarity: 0.5677
+[02:50:03][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.182, Neigh=0.000, Sim=0.047, Compat=0.162
+[02:50:03]   [2] Prop Only: Val=0.5278, Test=0.5000
+[02:50:06] Running Val-Refined:
+[02:50:06][predictclass:FEATS] Avg Max Feature Similarity: 0.5768
+[02:50:06][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.162, Neigh=0.035, Sim=0.006, Compat=0.110
+[02:50:06] Running Test-Refined:
+[02:50:06][predictclass:FEATS] Avg Max Feature Similarity: 0.5755
+[02:50:06][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.187, Neigh=0.023, Sim=0.006, Compat=0.107
+[02:50:06]   [3] MLP+Refined: Val(Ref)=0.5000 vs Val(MLP)=0.7222 -> Chosen: MLP. Test=0.8684
+[02:50:06]   [4] Prop+MLP(Select): Val(Prop)=0.5278 vs Val(MLP)=0.7222 -> Chosen: MLP. Test=0.8684
+[02:50:06][texas:TEST-GATED-MLP-PROP run=3 rep=3:SUMMARY] Gate mode=learned | val_supervised=15 | val_gate_acc=1.0 | test_acc(gated)=0.8421 | test_acc(mlp)=0.8684 | test_acc(prop)=0.5000 | frac_mlp=0.789
+[02:50:06][texas:TEST-GATED-MLP-PROP run=3 rep=3:COEF] Gate coefficients (standardized): mlp_max_prob=+3.847, mlp_margin=-1.037, mlp_pred_class=+7.104, prop_max_score=+1.512, prop_margin=+1.781, prop_pred_class=-1.202, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+3.932, node_degree=+0.863, support_labeled_neighbors=-5.152, neighbor_class_entropy=+0.233, similarity_gap=-2.807, compatibility_gap=-1.293, deferred_count=+0.000, reconsidered_in_refinement=+0.000
+[02:50:06]   [5] Gated MLP+Prop: Test=0.8421 | GateValAcc=1.0 | FracMLP=0.789
+[02:50:06] -- Repeat 5/5 --
+[02:50:06]     [MLP] Training for 200 epochs...
+[02:50:06]       Epoch 050 | Loss: 0.0190
+[02:50:06]       Epoch 100 | Loss: 0.0042
+[02:50:06]       Epoch 150 | Loss: 0.0037
+[02:50:07]       Epoch 200 | Loss: 0.0027
+[02:50:07]   [1] MLP Only: Val=0.6944, Test=0.8947
+[02:50:07][TUNING] Graph H=0.206 (Base=0.200) -> Mode=HETERO
+[02:50:10][predictclass:FEATS] Avg Max Feature Similarity: 0.5677
+[02:50:10][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.183, Neigh=0.000, Sim=0.197, Compat=0.072
+[02:50:10][predictclass:FEATS] Avg Max Feature Similarity: 0.5677
+[02:50:10][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.183, Neigh=0.000, Sim=0.197, Compat=0.072
+[02:50:10]   [2] Prop Only: Val=0.6389, Test=0.5789
+[02:50:13] Running Val-Refined:
+[02:50:13][predictclass:FEATS] Avg Max Feature Similarity: 0.5745
+[02:50:13][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.090, Neigh=0.012, Sim=0.028, Compat=0.284
+[02:50:13] Running Test-Refined:
+[02:50:13][predictclass:FEATS] Avg Max Feature Similarity: 0.5787
+[02:50:13][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.089, Neigh=0.011, Sim=0.029, Compat=0.286
+[02:50:13]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.6944 -> Chosen: MLP. Test=0.8947
+[02:50:13]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.6944 -> Chosen: MLP. Test=0.8947
+[02:50:13][texas:TEST-GATED-MLP-PROP run=3 rep=4:SUMMARY] Gate mode=learned | val_supervised=16 | val_gate_acc=1.0 | test_acc(gated)=0.9211 | test_acc(mlp)=0.8947 | test_acc(prop)=0.5789 | frac_mlp=0.763
+[02:50:13][texas:TEST-GATED-MLP-PROP run=3 rep=4:COEF] Gate coefficients (standardized): mlp_max_prob=+3.082, mlp_margin=+3.032, mlp_pred_class=+4.429, prop_max_score=+3.550, prop_margin=-0.154, prop_pred_class=-0.857, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+3.195, node_degree=-0.349, support_labeled_neighbors=+0.010, neighbor_class_entropy=+0.808, similarity_gap=+1.698, compatibility_gap=+1.462, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:50:13]   [5] Gated MLP+Prop: Test=0.9211 | GateValAcc=1.0 | FracMLP=0.763
+[02:50:13] ==================== SPLIT 4 ====================
+[02:50:13][WARN] Split texas_split_0.6_0.2_4.npz not found. Generating random split.
+[02:50:13][SPLIT_INFO] n_train=109 | n_val=36
+[02:50:13] -- Repeat 1/5 --
+[02:50:13]     [MLP] Training for 200 epochs...
+[02:50:13]       Epoch 050 | Loss: 0.0266
+[02:50:13]       Epoch 100 | Loss: 0.0152
+[02:50:14]       Epoch 150 | Loss: 0.0053
+[02:50:14]       Epoch 200 | Loss: 0.0054
+[02:50:14]   [1] MLP Only: Val=0.8333, Test=0.7368
+[02:50:14][TUNING] Graph H=0.078 (Base=0.200) -> Mode=HETERO
+[02:50:17][predictclass:FEATS] Avg Max Feature Similarity: 0.5741
+[02:50:17][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.115, Neigh=0.000, Sim=0.059, Compat=0.183
+[02:50:17][predictclass:FEATS] Avg Max Feature Similarity: 0.5741
+[02:50:17][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.115, Neigh=0.000, Sim=0.059, Compat=0.183
+[02:50:17]   [2] Prop Only: Val=0.5556, Test=0.4474
+[02:50:20] Running Val-Refined:
+[02:50:20][predictclass:FEATS] Avg Max Feature Similarity: 0.5764
+[02:50:20][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.141, Neigh=0.001, Sim=0.229, Compat=0.247
+[02:50:20] Running Test-Refined:
+[02:50:20][predictclass:FEATS] Avg Max Feature Similarity: 0.5820
+[02:50:20][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.121, Neigh=0.000, Sim=0.218, Compat=0.344
+[02:50:20]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.7368
+[02:50:20]   [4] Prop+MLP(Select): Val(Prop)=0.5556 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.7368
+[02:50:20][texas:TEST-GATED-MLP-PROP run=4 rep=0:SUMMARY] Gate mode=learned | val_supervised=12 | val_gate_acc=1.0 | test_acc(gated)=0.5789 | test_acc(mlp)=0.7368 | test_acc(prop)=0.4474 | frac_mlp=0.474
+[02:50:20][texas:TEST-GATED-MLP-PROP run=4 rep=0:COEF] Gate coefficients (standardized): mlp_max_prob=-1.317, mlp_margin=-1.321, mlp_pred_class=-1.677, prop_max_score=-1.101, prop_margin=-2.714, prop_pred_class=+0.200, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=-1.074, node_degree=+0.793, support_labeled_neighbors=-1.633, neighbor_class_entropy=-1.397, similarity_gap=+2.488, compatibility_gap=+0.491, deferred_count=-0.000, reconsidered_in_refinement=-0.000
+[02:50:20]   [5] Gated MLP+Prop: Test=0.5789 | GateValAcc=1.0 | FracMLP=0.474
+[02:50:20] -- Repeat 2/5 --
+[02:50:20]     [MLP] Training for 200 epochs...
+[02:50:21]       Epoch 050 | Loss: 0.0111
+[02:50:21]       Epoch 100 | Loss: 0.0026
+[02:50:21]       Epoch 150 | Loss: 0.0176
+[02:50:21]       Epoch 200 | Loss: 0.0010
+[02:50:21]   [1] MLP Only: Val=0.8056, Test=0.6842
+[02:50:21][TUNING] Graph H=0.078 (Base=0.200) -> Mode=HETERO
+[02:50:24][predictclass:FEATS] Avg Max Feature Similarity: 0.5741
+[02:50:24][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.082, Neigh=0.000, Sim=0.015, Compat=0.183
+[02:50:24][predictclass:FEATS] Avg Max Feature Similarity: 0.5741
+[02:50:24][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.082, Neigh=0.000, Sim=0.015, Compat=0.183
+[02:50:24]   [2] Prop Only: Val=0.5833, Test=0.5000
+[02:50:28] Running Val-Refined:
+[02:50:28][predictclass:FEATS] Avg Max Feature Similarity: 0.5769
+[02:50:28][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.200, Neigh=0.004, Sim=0.034, Compat=0.343
+[02:50:28] Running Test-Refined:
+[02:50:28][predictclass:FEATS] Avg Max Feature Similarity: 0.5816
+[02:50:28][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.177, Neigh=0.000, Sim=0.033, Compat=0.292
+[02:50:28]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.6842
+[02:50:28]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.6842
+[02:50:28][texas:TEST-GATED-MLP-PROP run=4 rep=1:SUMMARY] Gate mode=learned | val_supervised=10 | val_gate_acc=1.0 | test_acc(gated)=0.7368 | test_acc(mlp)=0.6842 | test_acc(prop)=0.5000 | frac_mlp=0.816
+[02:50:28][texas:TEST-GATED-MLP-PROP run=4 rep=1:COEF] Gate coefficients (standardized): mlp_max_prob=+2.296, mlp_margin=+1.703, mlp_pred_class=+1.792, prop_max_score=+1.375, prop_margin=+1.400, prop_pred_class=-2.376, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+2.156, node_degree=-1.596, support_labeled_neighbors=+0.998, neighbor_class_entropy=-0.689, similarity_gap=-2.865, compatibility_gap=-0.783, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:50:28]   [5] Gated MLP+Prop: Test=0.7368 | GateValAcc=1.0 | FracMLP=0.816
+[02:50:28] -- Repeat 3/5 --
+[02:50:28]     [MLP] Training for 200 epochs...
+[02:50:28]       Epoch 050 | Loss: 0.0097
+[02:50:28]       Epoch 100 | Loss: 0.0074
+[02:50:28]       Epoch 150 | Loss: 0.0043
+[02:50:28]       Epoch 200 | Loss: 0.0020
+[02:50:28]   [1] MLP Only: Val=0.7500, Test=0.7105
+[02:50:28][TUNING] Graph H=0.078 (Base=0.200) -> Mode=HETERO
+[02:50:32][predictclass:FEATS] Avg Max Feature Similarity: 0.5741
+[02:50:32][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.154, Neigh=0.000, Sim=0.055, Compat=0.352
+[02:50:32][predictclass:FEATS] Avg Max Feature Similarity: 0.5741
+[02:50:32][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.154, Neigh=0.000, Sim=0.055, Compat=0.352
+[02:50:32]   [2] Prop Only: Val=0.5833, Test=0.4474
+[02:50:35] Running Val-Refined:
+[02:50:35][predictclass:FEATS] Avg Max Feature Similarity: 0.5765
+[02:50:35][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.101, Neigh=0.001, Sim=0.061, Compat=0.208
+[02:50:35] Running Test-Refined:
+[02:50:35][predictclass:FEATS] Avg Max Feature Similarity: 0.5828
+[02:50:35][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.088, Neigh=0.000, Sim=0.059, Compat=0.171
+[02:50:35]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.7105
+[02:50:35]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.7105
+[02:50:35][texas:TEST-GATED-MLP-PROP run=4 rep=2:SUMMARY] Gate mode=learned | val_supervised=12 | val_gate_acc=1.0 | test_acc(gated)=0.6579 | test_acc(mlp)=0.7105 | test_acc(prop)=0.4474 | frac_mlp=0.579
+[02:50:35][texas:TEST-GATED-MLP-PROP run=4 rep=2:COEF] Gate coefficients (standardized): mlp_max_prob=+1.643, mlp_margin=+0.852, mlp_pred_class=-0.682, prop_max_score=-2.242, prop_margin=-1.398, prop_pred_class=-2.657, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+1.349, node_degree=+0.607, support_labeled_neighbors=+1.096, neighbor_class_entropy=+0.299, similarity_gap=-2.022, compatibility_gap=+1.434, deferred_count=-0.000, reconsidered_in_refinement=-0.000
+[02:50:35]   [5] Gated MLP+Prop: Test=0.6579 | GateValAcc=1.0 | FracMLP=0.579
+[02:50:35] -- Repeat 4/5 --
+[02:50:35]     [MLP] Training for 200 epochs...
+[02:50:35]       Epoch 050 | Loss: 0.0228
+[02:50:35]       Epoch 100 | Loss: 0.0029
+[02:50:35]       Epoch 150 | Loss: 0.0181
+[02:50:35]       Epoch 200 | Loss: 0.0026
+[02:50:35]   [1] MLP Only: Val=0.8611, Test=0.8158
+[02:50:35][TUNING] Graph H=0.078 (Base=0.200) -> Mode=HETERO
+[02:50:39][predictclass:FEATS] Avg Max Feature Similarity: 0.5741
+[02:50:39][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.067, Neigh=0.000, Sim=0.048, Compat=0.220
+[02:50:39][predictclass:FEATS] Avg Max Feature Similarity: 0.5741
+[02:50:39][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.067, Neigh=0.000, Sim=0.048, Compat=0.220
+[02:50:39]   [2] Prop Only: Val=0.6111, Test=0.5000
+[02:50:42] Running Val-Refined:
+[02:50:42][predictclass:FEATS] Avg Max Feature Similarity: 0.5762
+[02:50:42][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.276, Neigh=0.018, Sim=0.285, Compat=0.327
+[02:50:42] Running Test-Refined:
+[02:50:42][predictclass:FEATS] Avg Max Feature Similarity: 0.5816
+[02:50:42][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.239, Neigh=0.001, Sim=0.271, Compat=0.386
+[02:50:42]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8158
+[02:50:42]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8158
+[02:50:42][texas:TEST-GATED-MLP-PROP run=4 rep=3:SUMMARY] Gate mode=learned | val_supervised=11 | val_gate_acc=1.0 | test_acc(gated)=0.7895 | test_acc(mlp)=0.8158 | test_acc(prop)=0.5000 | frac_mlp=0.895
+[02:50:42][texas:TEST-GATED-MLP-PROP run=4 rep=3:COEF] Gate coefficients (standardized): mlp_max_prob=+0.810, mlp_margin=+1.352, mlp_pred_class=+1.112, prop_max_score=+0.166, prop_margin=+1.482, prop_pred_class=-2.790, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+0.564, node_degree=-2.705, support_labeled_neighbors=+0.696, neighbor_class_entropy=+1.258, similarity_gap=+0.274, compatibility_gap=-2.203, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:50:42]   [5] Gated MLP+Prop: Test=0.7895 | GateValAcc=1.0 | FracMLP=0.895
+[02:50:42] -- Repeat 5/5 --
+[02:50:42]     [MLP] Training for 200 epochs...
+[02:50:42]       Epoch 050 | Loss: 0.0177
+[02:50:42]       Epoch 100 | Loss: 0.0177
+[02:50:43]       Epoch 150 | Loss: 0.0105
+[02:50:43]       Epoch 200 | Loss: 0.0032
+[02:50:43]   [1] MLP Only: Val=0.8611, Test=0.7105
+[02:50:43][TUNING] Graph H=0.078 (Base=0.200) -> Mode=HETERO
+[02:50:46][predictclass:FEATS] Avg Max Feature Similarity: 0.5741
+[02:50:46][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.063, Neigh=0.000, Sim=0.057, Compat=0.420
+[02:50:46][predictclass:FEATS] Avg Max Feature Similarity: 0.5741
+[02:50:46][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.063, Neigh=0.000, Sim=0.057, Compat=0.420
+[02:50:46]   [2] Prop Only: Val=0.6111, Test=0.4737
+[02:50:49] Running Val-Refined:
+[02:50:50][predictclass:FEATS] Avg Max Feature Similarity: 0.5780
+[02:50:50][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.209, Neigh=0.002, Sim=0.112, Compat=0.399
+[02:50:50] Running Test-Refined:
+[02:50:50][predictclass:FEATS] Avg Max Feature Similarity: 0.5811
+[02:50:50][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.184, Neigh=0.000, Sim=0.109, Compat=0.371
+[02:50:50]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.7105
+[02:50:50]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.7105
+[02:50:50][texas:TEST-GATED-MLP-PROP run=4 rep=4:SUMMARY] Gate mode=learned | val_supervised=13 | val_gate_acc=1.0 | test_acc(gated)=0.6316 | test_acc(mlp)=0.7105 | test_acc(prop)=0.4737 | frac_mlp=0.658
+[02:50:50][texas:TEST-GATED-MLP-PROP run=4 rep=4:COEF] Gate coefficients (standardized): mlp_max_prob=+1.164, mlp_margin=-0.202, mlp_pred_class=+0.627, prop_max_score=+0.477, prop_margin=-1.988, prop_pred_class=-3.428, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+1.105, node_degree=-4.063, support_labeled_neighbors=-0.009, neighbor_class_entropy=+0.440, similarity_gap=+7.915, compatibility_gap=-0.058, deferred_count=+0.000, reconsidered_in_refinement=+0.000
+[02:50:50]   [5] Gated MLP+Prop: Test=0.6316 | GateValAcc=1.0 | FracMLP=0.658
+[02:50:50] ==================== SPLIT 5 ====================
+[02:50:50][WARN] Split texas_split_0.6_0.2_5.npz not found. Generating random split.
+[02:50:50][SPLIT_INFO] n_train=109 | n_val=36
+[02:50:50] -- Repeat 1/5 --
+[02:50:50]     [MLP] Training for 200 epochs...
+[02:50:50]       Epoch 050 | Loss: 0.0112
+[02:50:50]       Epoch 100 | Loss: 0.0052
+[02:50:50]       Epoch 150 | Loss: 0.0020
+[02:50:50]       Epoch 200 | Loss: 0.0010
+[02:50:50]   [1] MLP Only: Val=0.8889, Test=0.7368
+[02:50:50][TUNING] Graph H=0.096 (Base=0.250) -> Mode=HETERO
+[02:50:53][predictclass:FEATS] Avg Max Feature Similarity: 0.5691
+[02:50:53][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.153, Neigh=0.000, Sim=0.116, Compat=0.401
+[02:50:53][predictclass:FEATS] Avg Max Feature Similarity: 0.5691
+[02:50:53][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.153, Neigh=0.000, Sim=0.116, Compat=0.401
+[02:50:53]   [2] Prop Only: Val=0.6944, Test=0.6053
+[02:50:56] Running Val-Refined:
+[02:50:56][predictclass:FEATS] Avg Max Feature Similarity: 0.5756
+[02:50:56][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.190, Neigh=0.004, Sim=0.097, Compat=0.300
+[02:50:56] Running Test-Refined:
+[02:50:56][predictclass:FEATS] Avg Max Feature Similarity: 0.5787
+[02:50:56][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.188, Neigh=0.006, Sim=0.102, Compat=0.299
+[02:50:56]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.7368
+[02:50:56]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.7368
+[02:50:56][texas:TEST-GATED-MLP-PROP run=5 rep=0:SUMMARY] Gate mode=learned | val_supervised=11 | val_gate_acc=1.0 | test_acc(gated)=0.7105 | test_acc(mlp)=0.7368 | test_acc(prop)=0.6053 | frac_mlp=0.921
+[02:50:56][texas:TEST-GATED-MLP-PROP run=5 rep=0:COEF] Gate coefficients (standardized): mlp_max_prob=+0.555, mlp_margin=+2.158, mlp_pred_class=-2.028, prop_max_score=-0.790, prop_margin=+3.307, prop_pred_class=-2.485, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+0.786, node_degree=-0.182, support_labeled_neighbors=-1.138, neighbor_class_entropy=+1.182, similarity_gap=+2.644, compatibility_gap=+1.055, deferred_count=+0.000, reconsidered_in_refinement=+0.000
+[02:50:56]   [5] Gated MLP+Prop: Test=0.7105 | GateValAcc=1.0 | FracMLP=0.921
+[02:50:56] -- Repeat 2/5 --
+[02:50:56]     [MLP] Training for 200 epochs...
+[02:50:56]       Epoch 050 | Loss: 0.0073
+[02:50:56]       Epoch 100 | Loss: 0.0016
+[02:50:56]       Epoch 150 | Loss: 0.0036
+[02:50:56]       Epoch 200 | Loss: 0.0036
+[02:50:56]   [1] MLP Only: Val=0.8611, Test=0.7105
+[02:50:56][TUNING] Graph H=0.096 (Base=0.250) -> Mode=HETERO
+[02:51:00][predictclass:FEATS] Avg Max Feature Similarity: 0.5691
+[02:51:00][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.040, Neigh=0.000, Sim=0.051, Compat=0.164
+[02:51:00][predictclass:FEATS] Avg Max Feature Similarity: 0.5691
+[02:51:00][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.040, Neigh=0.000, Sim=0.051, Compat=0.164
+[02:51:00]   [2] Prop Only: Val=0.6944, Test=0.5789
+[02:51:02] Running Val-Refined:
+[02:51:02][predictclass:FEATS] Avg Max Feature Similarity: 0.5752
+[02:51:02][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.159, Neigh=0.000, Sim=0.199, Compat=0.420
+[02:51:02] Running Test-Refined:
+[02:51:02][predictclass:FEATS] Avg Max Feature Similarity: 0.5788
+[02:51:02][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.135, Neigh=0.000, Sim=0.192, Compat=0.446
+[02:51:02]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.7105
+[02:51:02]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.7105
+[02:51:03][texas:TEST-GATED-MLP-PROP run=5 rep=1:SUMMARY] Gate mode=learned | val_supervised=12 | val_gate_acc=1.0 | test_acc(gated)=0.7105 | test_acc(mlp)=0.7105 | test_acc(prop)=0.5789 | frac_mlp=0.816
+[02:51:03][texas:TEST-GATED-MLP-PROP run=5 rep=1:COEF] Gate coefficients (standardized): mlp_max_prob=-0.011, mlp_margin=+1.999, mlp_pred_class=+1.182, prop_max_score=-1.772, prop_margin=-1.965, prop_pred_class=+1.981, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+0.202, node_degree=+2.960, support_labeled_neighbors=+3.482, neighbor_class_entropy=-0.063, similarity_gap=+4.167, compatibility_gap=+1.740, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:51:03]   [5] Gated MLP+Prop: Test=0.7105 | GateValAcc=1.0 | FracMLP=0.816
+[02:51:03] -- Repeat 3/5 --
+[02:51:03]     [MLP] Training for 200 epochs...
+[02:51:03]       Epoch 050 | Loss: 0.0056
+[02:51:03]       Epoch 100 | Loss: 0.0030
+[02:51:03]       Epoch 150 | Loss: 0.0165
+[02:51:03]       Epoch 200 | Loss: 0.0045
+[02:51:03]   [1] MLP Only: Val=0.8889, Test=0.7368
+[02:51:03][TUNING] Graph H=0.096 (Base=0.250) -> Mode=HETERO
+[02:51:06][predictclass:FEATS] Avg Max Feature Similarity: 0.5691
+[02:51:06][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.107, Neigh=0.000, Sim=0.255, Compat=0.275
+[02:51:06][predictclass:FEATS] Avg Max Feature Similarity: 0.5691
+[02:51:06][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.107, Neigh=0.000, Sim=0.255, Compat=0.275
+[02:51:06]   [2] Prop Only: Val=0.6944, Test=0.6053
+[02:51:09] Running Val-Refined:
+[02:51:09][predictclass:FEATS] Avg Max Feature Similarity: 0.5737
+[02:51:09][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.112, Neigh=0.000, Sim=0.128, Compat=0.185
+[02:51:09] Running Test-Refined:
+[02:51:09][predictclass:FEATS] Avg Max Feature Similarity: 0.5787
+[02:51:09][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.128, Neigh=0.005, Sim=0.133, Compat=0.181
+[02:51:09]   [3] MLP+Refined: Val(Ref)=0.6944 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.7368
+[02:51:09]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.7368
+[02:51:09][texas:TEST-GATED-MLP-PROP run=5 rep=2:SUMMARY] Gate mode=learned | val_supervised=9 | val_gate_acc=1.0 | test_acc(gated)=0.6842 | test_acc(mlp)=0.7368 | test_acc(prop)=0.6053 | frac_mlp=0.711
+[02:51:09][texas:TEST-GATED-MLP-PROP run=5 rep=2:COEF] Gate coefficients (standardized): mlp_max_prob=+1.331, mlp_margin=+0.150, mlp_pred_class=+0.228, prop_max_score=-2.068, prop_margin=-2.411, prop_pred_class=-3.408, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+1.645, node_degree=+1.960, support_labeled_neighbors=+2.266, neighbor_class_entropy=+1.557, similarity_gap=+0.511, compatibility_gap=-1.101, deferred_count=-0.000, reconsidered_in_refinement=-0.000
+[02:51:09]   [5] Gated MLP+Prop: Test=0.6842 | GateValAcc=1.0 | FracMLP=0.711
+[02:51:09] -- Repeat 4/5 --
+[02:51:09]     [MLP] Training for 200 epochs...
+[02:51:09]       Epoch 050 | Loss: 0.0098
+[02:51:09]       Epoch 100 | Loss: 0.0040
+[02:51:09]       Epoch 150 | Loss: 0.0068
+[02:51:09]       Epoch 200 | Loss: 0.0060
+[02:51:09]   [1] MLP Only: Val=0.8611, Test=0.7368
+[02:51:09][TUNING] Graph H=0.096 (Base=0.250) -> Mode=HETERO
+[02:51:13][predictclass:FEATS] Avg Max Feature Similarity: 0.5691
+[02:51:13][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.076, Neigh=0.000, Sim=0.004, Compat=0.380
+[02:51:13][predictclass:FEATS] Avg Max Feature Similarity: 0.5691
+[02:51:13][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.076, Neigh=0.000, Sim=0.004, Compat=0.380
+[02:51:13]   [2] Prop Only: Val=0.6944, Test=0.6053
+[02:51:16] Running Val-Refined:
+[02:51:16][predictclass:FEATS] Avg Max Feature Similarity: 0.5774
+[02:51:16][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.090, Neigh=0.000, Sim=0.035, Compat=0.228
+[02:51:16] Running Test-Refined:
+[02:51:16][predictclass:FEATS] Avg Max Feature Similarity: 0.5792
+[02:51:16][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.091, Neigh=0.002, Sim=0.035, Compat=0.246
+[02:51:16]   [3] MLP+Refined: Val(Ref)=0.7222 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.7368
+[02:51:16]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.7368
+[02:51:16][texas:TEST-GATED-MLP-PROP run=5 rep=3:SUMMARY] Gate mode=learned | val_supervised=12 | val_gate_acc=1.0 | test_acc(gated)=0.7368 | test_acc(mlp)=0.7368 | test_acc(prop)=0.6053 | frac_mlp=0.974
+[02:51:16][texas:TEST-GATED-MLP-PROP run=5 rep=3:COEF] Gate coefficients (standardized): mlp_max_prob=+1.770, mlp_margin=+2.847, mlp_pred_class=+2.614, prop_max_score=-2.683, prop_margin=+4.508, prop_pred_class=-3.755, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+1.621, node_degree=+0.093, support_labeled_neighbors=-1.787, neighbor_class_entropy=-0.295, similarity_gap=+3.532, compatibility_gap=-2.514, deferred_count=-0.000, reconsidered_in_refinement=-0.000
+[02:51:16]   [5] Gated MLP+Prop: Test=0.7368 | GateValAcc=1.0 | FracMLP=0.974
+[02:51:16] -- Repeat 5/5 --
+[02:51:16]     [MLP] Training for 200 epochs...
+[02:51:16]       Epoch 050 | Loss: 0.0073
+[02:51:16]       Epoch 100 | Loss: 0.0056
+[02:51:16]       Epoch 150 | Loss: 0.0028
+[02:51:16]       Epoch 200 | Loss: 0.0030
+[02:51:16]   [1] MLP Only: Val=0.8611, Test=0.7895
+[02:51:16][TUNING] Graph H=0.096 (Base=0.250) -> Mode=HETERO
+[02:51:19][predictclass:FEATS] Avg Max Feature Similarity: 0.5691
+[02:51:19][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.126, Neigh=0.000, Sim=0.228, Compat=0.299
+[02:51:19][predictclass:FEATS] Avg Max Feature Similarity: 0.5691
+[02:51:19][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.126, Neigh=0.000, Sim=0.228, Compat=0.299
+[02:51:19]   [2] Prop Only: Val=0.6944, Test=0.5526
+[02:51:22] Running Val-Refined:
+[02:51:22][predictclass:FEATS] Avg Max Feature Similarity: 0.5760
+[02:51:22][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.131, Neigh=0.000, Sim=0.218, Compat=0.305
+[02:51:22] Running Test-Refined:
+[02:51:22][predictclass:FEATS] Avg Max Feature Similarity: 0.5792
+[02:51:22][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.129, Neigh=0.003, Sim=0.226, Compat=0.319
+[02:51:22]   [3] MLP+Refined: Val(Ref)=0.7222 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.7895
+[02:51:22]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.7895
+[02:51:23][texas:TEST-GATED-MLP-PROP run=5 rep=4:SUMMARY] Gate mode=learned | val_supervised=10 | val_gate_acc=1.0 | test_acc(gated)=0.7368 | test_acc(mlp)=0.7895 | test_acc(prop)=0.5526 | frac_mlp=0.842
+[02:51:23][texas:TEST-GATED-MLP-PROP run=5 rep=4:COEF] Gate coefficients (standardized): mlp_max_prob=+1.167, mlp_margin=+1.654, mlp_pred_class=+1.591, prop_max_score=+0.685, prop_margin=+0.719, prop_pred_class=+0.811, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+1.432, node_degree=-0.562, support_labeled_neighbors=+1.276, neighbor_class_entropy=+2.986, similarity_gap=+3.195, compatibility_gap=-0.087, deferred_count=+0.000, reconsidered_in_refinement=+0.000
+[02:51:23]   [5] Gated MLP+Prop: Test=0.7368 | GateValAcc=1.0 | FracMLP=0.842
+[02:51:23] ==================== SPLIT 6 ====================
+[02:51:23][WARN] Split texas_split_0.6_0.2_6.npz not found. Generating random split.
+[02:51:23][SPLIT_INFO] n_train=109 | n_val=36
+[02:51:23] -- Repeat 1/5 --
+[02:51:23]     [MLP] Training for 200 epochs...
+[02:51:23]       Epoch 050 | Loss: 0.0240
+[02:51:23]       Epoch 100 | Loss: 0.0036
+[02:51:23]       Epoch 150 | Loss: 0.0139
+[02:51:23]       Epoch 200 | Loss: 0.0028
+[02:51:23]   [1] MLP Only: Val=0.7500, Test=0.8684
+[02:51:23][TUNING] Graph H=0.117 (Base=0.250) -> Mode=HETERO
+[02:51:26][predictclass:FEATS] Avg Max Feature Similarity: 0.5681
+[02:51:26][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.038, Neigh=0.000, Sim=0.229, Compat=0.429
+[02:51:26][predictclass:FEATS] Avg Max Feature Similarity: 0.5681
+[02:51:26][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.038, Neigh=0.000, Sim=0.229, Compat=0.429
+[02:51:26]   [2] Prop Only: Val=0.5833, Test=0.6316
+[02:51:30] Running Val-Refined:
+[02:51:30][predictclass:FEATS] Avg Max Feature Similarity: 0.5783
+[02:51:30][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.033, Neigh=0.009, Sim=0.214, Compat=0.196
+[02:51:30] Running Test-Refined:
+[02:51:30][predictclass:FEATS] Avg Max Feature Similarity: 0.5783
+[02:51:30][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.022, Neigh=0.007, Sim=0.214, Compat=0.192
+[02:51:30]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8684
+[02:51:30]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.7500 -> Chosen: MLP. Test=0.8684
+[02:51:30][texas:TEST-GATED-MLP-PROP run=6 rep=0:SUMMARY] Gate mode=learned | val_supervised=20 | val_gate_acc=0.9 | test_acc(gated)=0.8421 | test_acc(mlp)=0.8684 | test_acc(prop)=0.6316 | frac_mlp=0.789
+[02:51:30][texas:TEST-GATED-MLP-PROP run=6 rep=0:COEF] Gate coefficients (standardized): mlp_max_prob=-1.750, mlp_margin=+2.849, mlp_pred_class=+1.067, prop_max_score=-6.225, prop_margin=-0.110, prop_pred_class=-2.884, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=-1.411, node_degree=-0.384, support_labeled_neighbors=+0.521, neighbor_class_entropy=-0.707, similarity_gap=-2.018, compatibility_gap=+5.729, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:51:30]   [5] Gated MLP+Prop: Test=0.8421 | GateValAcc=0.9 | FracMLP=0.789
+[02:51:30] -- Repeat 2/5 --
+[02:51:30]     [MLP] Training for 200 epochs...
+[02:51:30]       Epoch 050 | Loss: 0.0174
+[02:51:30]       Epoch 100 | Loss: 0.0106
+[02:51:30]       Epoch 150 | Loss: 0.0032
+[02:51:30]       Epoch 200 | Loss: 0.0125
+[02:51:30]   [1] MLP Only: Val=0.8333, Test=0.8421
+[02:51:30][TUNING] Graph H=0.117 (Base=0.250) -> Mode=HETERO
+[02:51:34][predictclass:FEATS] Avg Max Feature Similarity: 0.5681
+[02:51:34][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.041, Neigh=0.000, Sim=0.010, Compat=0.446
+[02:51:34][predictclass:FEATS] Avg Max Feature Similarity: 0.5681
+[02:51:34][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.041, Neigh=0.000, Sim=0.010, Compat=0.446
+[02:51:34]   [2] Prop Only: Val=0.6111, Test=0.6316
+[02:51:37] Running Val-Refined:
+[02:51:37][predictclass:FEATS] Avg Max Feature Similarity: 0.5776
+[02:51:37][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.095, Neigh=0.008, Sim=0.076, Compat=0.201
+[02:51:37] Running Test-Refined:
+[02:51:37][predictclass:FEATS] Avg Max Feature Similarity: 0.5776
+[02:51:37][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.095, Neigh=0.005, Sim=0.077, Compat=0.126
+[02:51:37]   [3] MLP+Refined: Val(Ref)=0.6944 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.8421
+[02:51:37]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.8421
+[02:51:37][texas:TEST-GATED-MLP-PROP run=6 rep=1:SUMMARY] Gate mode=learned | val_supervised=18 | val_gate_acc=0.9444444444444444 | test_acc(gated)=0.7895 | test_acc(mlp)=0.8421 | test_acc(prop)=0.6316 | frac_mlp=0.842
+[02:51:37][texas:TEST-GATED-MLP-PROP run=6 rep=1:COEF] Gate coefficients (standardized): mlp_max_prob=-4.079, mlp_margin=+8.729, mlp_pred_class=+0.835, prop_max_score=-4.553, prop_margin=+0.366, prop_pred_class=-4.215, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=-4.269, node_degree=+0.635, support_labeled_neighbors=-2.736, neighbor_class_entropy=-0.837, similarity_gap=-2.492, compatibility_gap=+3.842, deferred_count=-0.000, reconsidered_in_refinement=-0.000
+[02:51:37]   [5] Gated MLP+Prop: Test=0.7895 | GateValAcc=0.9444444444444444 | FracMLP=0.842
+[02:51:37] -- Repeat 3/5 --
+[02:51:37]     [MLP] Training for 200 epochs...
+[02:51:37]       Epoch 050 | Loss: 0.0172
+[02:51:37]       Epoch 100 | Loss: 0.0082
+[02:51:37]       Epoch 150 | Loss: 0.0055
+[02:51:37]       Epoch 200 | Loss: 0.0023
+[02:51:37]   [1] MLP Only: Val=0.7778, Test=0.8947
+[02:51:37][TUNING] Graph H=0.117 (Base=0.250) -> Mode=HETERO
+[02:51:41][predictclass:FEATS] Avg Max Feature Similarity: 0.5681
+[02:51:41][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.055, Neigh=0.000, Sim=0.165, Compat=0.458
+[02:51:41][predictclass:FEATS] Avg Max Feature Similarity: 0.5681
+[02:51:41][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.055, Neigh=0.000, Sim=0.165, Compat=0.458
+[02:51:41]   [2] Prop Only: Val=0.5833, Test=0.6316
+[02:51:43] Running Val-Refined:
+[02:51:43][predictclass:FEATS] Avg Max Feature Similarity: 0.5789
+[02:51:43][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.038, Neigh=0.001, Sim=0.239, Compat=0.391
+[02:51:43] Running Test-Refined:
+[02:51:43][predictclass:FEATS] Avg Max Feature Similarity: 0.5771
+[02:51:43][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.070, Neigh=0.017, Sim=0.247, Compat=0.311
+[02:51:43]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.8947
+[02:51:43]   [4] Prop+MLP(Select): Val(Prop)=0.5833 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.8947
+[02:51:44][texas:TEST-GATED-MLP-PROP run=6 rep=2:SUMMARY] Gate mode=learned | val_supervised=19 | val_gate_acc=0.9473684210526315 | test_acc(gated)=0.8947 | test_acc(mlp)=0.8947 | test_acc(prop)=0.6316 | frac_mlp=0.763
+[02:51:44][texas:TEST-GATED-MLP-PROP run=6 rep=2:COEF] Gate coefficients (standardized): mlp_max_prob=-1.455, mlp_margin=+4.582, mlp_pred_class=+0.658, prop_max_score=-3.475, prop_margin=-1.935, prop_pred_class=-3.492, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=-1.572, node_degree=+0.532, support_labeled_neighbors=+0.042, neighbor_class_entropy=-3.240, similarity_gap=-1.840, compatibility_gap=+4.812, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:51:44]   [5] Gated MLP+Prop: Test=0.8947 | GateValAcc=0.9473684210526315 | FracMLP=0.763
+[02:51:44] -- Repeat 4/5 --
+[02:51:44]     [MLP] Training for 200 epochs...
+[02:51:44]       Epoch 050 | Loss: 0.0202
+[02:51:44]       Epoch 100 | Loss: 0.0202
+[02:51:44]       Epoch 150 | Loss: 0.0162
+[02:51:44]       Epoch 200 | Loss: 0.0059
+[02:51:44]   [1] MLP Only: Val=0.8333, Test=0.8947
+[02:51:44][TUNING] Graph H=0.117 (Base=0.250) -> Mode=HETERO
+[02:51:47][predictclass:FEATS] Avg Max Feature Similarity: 0.5681
+[02:51:47][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.026, Neigh=0.000, Sim=0.230, Compat=0.329
+[02:51:47][predictclass:FEATS] Avg Max Feature Similarity: 0.5681
+[02:51:47][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.026, Neigh=0.000, Sim=0.230, Compat=0.329
+[02:51:47]   [2] Prop Only: Val=0.6111, Test=0.5789
+[02:51:49] Running Val-Refined:
+[02:51:49][predictclass:FEATS] Avg Max Feature Similarity: 0.5790
+[02:51:49][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.062, Neigh=0.001, Sim=0.101, Compat=0.322
+[02:51:49] Running Test-Refined:
+[02:51:49][predictclass:FEATS] Avg Max Feature Similarity: 0.5772
+[02:51:49][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.020, Neigh=0.015, Sim=0.103, Compat=0.316
+[02:51:49]   [3] MLP+Refined: Val(Ref)=0.6944 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.8947
+[02:51:49]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.8947
+[02:51:49][texas:TEST-GATED-MLP-PROP run=6 rep=3:SUMMARY] Gate mode=learned | val_supervised=16 | val_gate_acc=1.0 | test_acc(gated)=0.8158 | test_acc(mlp)=0.8947 | test_acc(prop)=0.5789 | frac_mlp=0.579
+[02:51:49][texas:TEST-GATED-MLP-PROP run=6 rep=3:COEF] Gate coefficients (standardized): mlp_max_prob=-0.958, mlp_margin=+1.702, mlp_pred_class=-0.883, prop_max_score=+0.308, prop_margin=+0.963, prop_pred_class=-1.304, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=-1.430, node_degree=-2.352, support_labeled_neighbors=+1.593, neighbor_class_entropy=-0.369, similarity_gap=-3.632, compatibility_gap=+1.351, deferred_count=+0.000, reconsidered_in_refinement=+0.000
+[02:51:49]   [5] Gated MLP+Prop: Test=0.8158 | GateValAcc=1.0 | FracMLP=0.579
+[02:51:49] -- Repeat 5/5 --
+[02:51:49]     [MLP] Training for 200 epochs...
+[02:51:49]       Epoch 050 | Loss: 0.0211
+[02:51:49]       Epoch 100 | Loss: 0.0115
+[02:51:49]       Epoch 150 | Loss: 0.0118
+[02:51:49]       Epoch 200 | Loss: 0.0024
+[02:51:49]   [1] MLP Only: Val=0.8056, Test=0.8947
+[02:51:49][TUNING] Graph H=0.117 (Base=0.250) -> Mode=HETERO
+[02:51:52][predictclass:FEATS] Avg Max Feature Similarity: 0.5681
+[02:51:52][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.040, Neigh=0.000, Sim=0.089, Compat=0.487
+[02:51:52][predictclass:FEATS] Avg Max Feature Similarity: 0.5681
+[02:51:52][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.040, Neigh=0.000, Sim=0.089, Compat=0.487
+[02:51:52]   [2] Prop Only: Val=0.6111, Test=0.6316
+[02:51:55] Running Val-Refined:
+[02:51:55][predictclass:FEATS] Avg Max Feature Similarity: 0.5791
+[02:51:55][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.113, Neigh=0.007, Sim=0.265, Compat=0.340
+[02:51:55] Running Test-Refined:
+[02:51:55][predictclass:FEATS] Avg Max Feature Similarity: 0.5767
+[02:51:55][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.107, Neigh=0.005, Sim=0.266, Compat=0.273
+[02:51:55]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8947
+[02:51:55]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8947
+[02:51:55][texas:TEST-GATED-MLP-PROP run=6 rep=4:SUMMARY] Gate mode=learned | val_supervised=17 | val_gate_acc=1.0 | test_acc(gated)=0.8421 | test_acc(mlp)=0.8947 | test_acc(prop)=0.6316 | frac_mlp=0.763
+[02:51:55][texas:TEST-GATED-MLP-PROP run=6 rep=4:COEF] Gate coefficients (standardized): mlp_max_prob=-0.207, mlp_margin=+2.930, mlp_pred_class=+0.616, prop_max_score=-5.656, prop_margin=+1.738, prop_pred_class=-3.988, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=-0.163, node_degree=-0.005, support_labeled_neighbors=-0.226, neighbor_class_entropy=-2.591, similarity_gap=-3.508, compatibility_gap=+3.671, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:51:55]   [5] Gated MLP+Prop: Test=0.8421 | GateValAcc=1.0 | FracMLP=0.763
+[02:51:55] ==================== SPLIT 7 ====================
+[02:51:55][WARN] Split texas_split_0.6_0.2_7.npz not found. Generating random split.
+[02:51:55][SPLIT_INFO] n_train=109 | n_val=36
+[02:51:55] -- Repeat 1/5 --
+[02:51:55]     [MLP] Training for 200 epochs...
+[02:51:55]       Epoch 050 | Loss: 0.0147
+[02:51:55]       Epoch 100 | Loss: 0.0079
+[02:51:55]       Epoch 150 | Loss: 0.0051
+[02:51:55]       Epoch 200 | Loss: 0.0079
+[02:51:55]   [1] MLP Only: Val=0.8056, Test=0.9211
+[02:51:55][TUNING] Graph H=0.105 (Base=0.200) -> Mode=HETERO
+[02:51:58][predictclass:FEATS] Avg Max Feature Similarity: 0.5699
+[02:51:58][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.211, Neigh=0.000, Sim=0.132, Compat=0.192
+[02:51:58][predictclass:FEATS] Avg Max Feature Similarity: 0.5699
+[02:51:58][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.211, Neigh=0.000, Sim=0.132, Compat=0.192
+[02:51:58]   [2] Prop Only: Val=0.6111, Test=0.6316
+[02:52:01] Running Val-Refined:
+[02:52:01][predictclass:FEATS] Avg Max Feature Similarity: 0.5809
+[02:52:01][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.177, Neigh=0.000, Sim=0.075, Compat=0.189
+[02:52:01] Running Test-Refined:
+[02:52:01][predictclass:FEATS] Avg Max Feature Similarity: 0.5778
+[02:52:01][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.151, Neigh=0.000, Sim=0.073, Compat=0.279
+[02:52:01]   [3] MLP+Refined: Val(Ref)=0.6389 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.9211
+[02:52:01]   [4] Prop+MLP(Select): Val(Prop)=0.6111 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.9211
+[02:52:01][texas:TEST-GATED-MLP-PROP run=7 rep=0:SUMMARY] Gate mode=learned | val_supervised=13 | val_gate_acc=1.0 | test_acc(gated)=0.7632 | test_acc(mlp)=0.9211 | test_acc(prop)=0.6316 | frac_mlp=0.763
+[02:52:01][texas:TEST-GATED-MLP-PROP run=7 rep=0:COEF] Gate coefficients (standardized): mlp_max_prob=+0.460, mlp_margin=+2.616, mlp_pred_class=+4.494, prop_max_score=+3.872, prop_margin=+0.787, prop_pred_class=+3.195, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+0.649, node_degree=-3.235, support_labeled_neighbors=+1.736, neighbor_class_entropy=-3.110, similarity_gap=+0.974, compatibility_gap=-6.303, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:52:01]   [5] Gated MLP+Prop: Test=0.7632 | GateValAcc=1.0 | FracMLP=0.763
+[02:52:01] -- Repeat 2/5 --
+[02:52:01]     [MLP] Training for 200 epochs...
+[02:52:01]       Epoch 050 | Loss: 0.0166
+[02:52:01]       Epoch 100 | Loss: 0.0040
+[02:52:01]       Epoch 150 | Loss: 0.0054
+[02:52:01]       Epoch 200 | Loss: 0.0035
+[02:52:01]   [1] MLP Only: Val=0.8056, Test=0.8684
+[02:52:01][TUNING] Graph H=0.105 (Base=0.200) -> Mode=HETERO
+[02:52:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5699
+[02:52:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.048, Neigh=0.000, Sim=0.244, Compat=0.150
+[02:52:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5699
+[02:52:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.048, Neigh=0.000, Sim=0.244, Compat=0.150
+[02:52:04]   [2] Prop Only: Val=0.7778, Test=0.7368
+[02:52:07] Running Val-Refined:
+[02:52:07][predictclass:FEATS] Avg Max Feature Similarity: 0.5814
+[02:52:07][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.032, Neigh=0.000, Sim=0.036, Compat=0.276
+[02:52:07] Running Test-Refined:
+[02:52:07][predictclass:FEATS] Avg Max Feature Similarity: 0.5785
+[02:52:07][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.043, Neigh=0.000, Sim=0.036, Compat=0.388
+[02:52:07]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8684
+[02:52:07]   [4] Prop+MLP(Select): Val(Prop)=0.7778 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8684
+[02:52:07][texas:TEST-GATED-MLP-PROP run=7 rep=1:SUMMARY] Gate mode=learned | val_supervised=7 | val_gate_acc=1.0 | test_acc(gated)=0.7105 | test_acc(mlp)=0.8684 | test_acc(prop)=0.7368 | frac_mlp=0.500
+[02:52:07][texas:TEST-GATED-MLP-PROP run=7 rep=1:COEF] Gate coefficients (standardized): mlp_max_prob=-0.697, mlp_margin=+2.402, mlp_pred_class=+0.266, prop_max_score=+1.345, prop_margin=+1.908, prop_pred_class=+1.463, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=-1.254, node_degree=-1.507, support_labeled_neighbors=+1.119, neighbor_class_entropy=+1.409, similarity_gap=-3.323, compatibility_gap=-0.616, deferred_count=-0.000, reconsidered_in_refinement=-0.000
+[02:52:07]   [5] Gated MLP+Prop: Test=0.7105 | GateValAcc=1.0 | FracMLP=0.500
+[02:52:07] -- Repeat 3/5 --
+[02:52:07]     [MLP] Training for 200 epochs...
+[02:52:07]       Epoch 050 | Loss: 0.0230
+[02:52:07]       Epoch 100 | Loss: 0.0123
+[02:52:07]       Epoch 150 | Loss: 0.0025
+[02:52:07]       Epoch 200 | Loss: 0.0054
+[02:52:07]   [1] MLP Only: Val=0.8056, Test=0.8947
+[02:52:07][TUNING] Graph H=0.105 (Base=0.200) -> Mode=HETERO
+[02:52:10][predictclass:FEATS] Avg Max Feature Similarity: 0.5699
+[02:52:10][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.020, Neigh=0.000, Sim=0.106, Compat=0.261
+[02:52:10][predictclass:FEATS] Avg Max Feature Similarity: 0.5699
+[02:52:10][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.020, Neigh=0.000, Sim=0.106, Compat=0.261
+[02:52:10]   [2] Prop Only: Val=0.5556, Test=0.6053
+[02:52:13] Running Val-Refined:
+[02:52:13][predictclass:FEATS] Avg Max Feature Similarity: 0.5806
+[02:52:13][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.035, Neigh=0.001, Sim=0.272, Compat=0.190
+[02:52:13] Running Test-Refined:
+[02:52:13][predictclass:FEATS] Avg Max Feature Similarity: 0.5769
+[02:52:13][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.028, Neigh=0.002, Sim=0.242, Compat=0.274
+[02:52:13]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8947
+[02:52:13]   [4] Prop+MLP(Select): Val(Prop)=0.5556 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8947
+[02:52:13][texas:TEST-GATED-MLP-PROP run=7 rep=2:SUMMARY] Gate mode=learned | val_supervised=13 | val_gate_acc=1.0 | test_acc(gated)=0.8684 | test_acc(mlp)=0.8947 | test_acc(prop)=0.6053 | frac_mlp=0.921
+[02:52:13][texas:TEST-GATED-MLP-PROP run=7 rep=2:COEF] Gate coefficients (standardized): mlp_max_prob=-0.189, mlp_margin=+3.609, mlp_pred_class=+2.483, prop_max_score=-0.008, prop_margin=-0.739, prop_pred_class=+0.165, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=-0.218, node_degree=-2.180, support_labeled_neighbors=+4.171, neighbor_class_entropy=+1.462, similarity_gap=+1.255, compatibility_gap=-1.875, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:52:13]   [5] Gated MLP+Prop: Test=0.8684 | GateValAcc=1.0 | FracMLP=0.921
+[02:52:13] -- Repeat 4/5 --
+[02:52:13]     [MLP] Training for 200 epochs...
+[02:52:13]       Epoch 050 | Loss: 0.0200
+[02:52:13]       Epoch 100 | Loss: 0.0122
+[02:52:13]       Epoch 150 | Loss: 0.0061
+[02:52:13]       Epoch 200 | Loss: 0.0040
+[02:52:13]   [1] MLP Only: Val=0.8333, Test=0.8947
+[02:52:13][TUNING] Graph H=0.105 (Base=0.200) -> Mode=HETERO
+[02:52:16][predictclass:FEATS] Avg Max Feature Similarity: 0.5699
+[02:52:16][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.036, Neigh=0.000, Sim=0.067, Compat=0.247
+[02:52:16][predictclass:FEATS] Avg Max Feature Similarity: 0.5699
+[02:52:16][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.036, Neigh=0.000, Sim=0.067, Compat=0.247
+[02:52:16]   [2] Prop Only: Val=0.6944, Test=0.6053
+[02:52:19] Running Val-Refined:
+[02:52:19][predictclass:FEATS] Avg Max Feature Similarity: 0.5812
+[02:52:19][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.193, Neigh=0.000, Sim=0.272, Compat=0.219
+[02:52:19] Running Test-Refined:
+[02:52:19][predictclass:FEATS] Avg Max Feature Similarity: 0.5783
+[02:52:19][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.193, Neigh=0.001, Sim=0.270, Compat=0.338
+[02:52:19]   [3] MLP+Refined: Val(Ref)=0.6389 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.8947
+[02:52:19]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.8947
+[02:52:19][texas:TEST-GATED-MLP-PROP run=7 rep=3:SUMMARY] Gate mode=learned | val_supervised=7 | val_gate_acc=1.0 | test_acc(gated)=0.8158 | test_acc(mlp)=0.8947 | test_acc(prop)=0.6053 | frac_mlp=0.868
+[02:52:19][texas:TEST-GATED-MLP-PROP run=7 rep=3:COEF] Gate coefficients (standardized): mlp_max_prob=+0.743, mlp_margin=+1.372, mlp_pred_class=-0.620, prop_max_score=+0.119, prop_margin=+1.973, prop_pred_class=+1.428, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+0.357, node_degree=-2.156, support_labeled_neighbors=-2.122, neighbor_class_entropy=-1.054, similarity_gap=-1.245, compatibility_gap=+1.746, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:52:19]   [5] Gated MLP+Prop: Test=0.8158 | GateValAcc=1.0 | FracMLP=0.868
+[02:52:19] -- Repeat 5/5 --
+[02:52:19]     [MLP] Training for 200 epochs...
+[02:52:19]       Epoch 050 | Loss: 0.0176
+[02:52:19]       Epoch 100 | Loss: 0.0071
+[02:52:20]       Epoch 150 | Loss: 0.0071
+[02:52:20]       Epoch 200 | Loss: 0.0034
+[02:52:20]   [1] MLP Only: Val=0.7778, Test=0.8947
+[02:52:20][TUNING] Graph H=0.105 (Base=0.200) -> Mode=HETERO
+[02:52:23][predictclass:FEATS] Avg Max Feature Similarity: 0.5699
+[02:52:23][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.189, Neigh=0.000, Sim=0.265, Compat=0.211
+[02:52:23][predictclass:FEATS] Avg Max Feature Similarity: 0.5699
+[02:52:23][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.189, Neigh=0.000, Sim=0.265, Compat=0.211
+[02:52:23]   [2] Prop Only: Val=0.6667, Test=0.6316
+[02:52:26] Running Val-Refined:
+[02:52:26][predictclass:FEATS] Avg Max Feature Similarity: 0.5815
+[02:52:26][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.075, Neigh=0.000, Sim=0.093, Compat=0.222
+[02:52:26] Running Test-Refined:
+[02:52:26][predictclass:FEATS] Avg Max Feature Similarity: 0.5785
+[02:52:26][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.076, Neigh=0.001, Sim=0.085, Compat=0.330
+[02:52:26]   [3] MLP+Refined: Val(Ref)=0.6944 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.8947
+[02:52:26]   [4] Prop+MLP(Select): Val(Prop)=0.6667 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.8947
+[02:52:26][texas:TEST-GATED-MLP-PROP run=7 rep=4:SUMMARY] Gate mode=learned | val_supervised=12 | val_gate_acc=1.0 | test_acc(gated)=0.8684 | test_acc(mlp)=0.8947 | test_acc(prop)=0.6316 | frac_mlp=0.684
+[02:52:26][texas:TEST-GATED-MLP-PROP run=7 rep=4:COEF] Gate coefficients (standardized): mlp_max_prob=+2.019, mlp_margin=+2.798, mlp_pred_class=-2.415, prop_max_score=+3.469, prop_margin=-2.111, prop_pred_class=-3.807, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+1.865, node_degree=-3.348, support_labeled_neighbors=+3.758, neighbor_class_entropy=+2.116, similarity_gap=-3.579, compatibility_gap=+2.311, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:52:26]   [5] Gated MLP+Prop: Test=0.8684 | GateValAcc=1.0 | FracMLP=0.684
+[02:52:26] ==================== SPLIT 8 ====================
+[02:52:26][WARN] Split texas_split_0.6_0.2_8.npz not found. Generating random split.
+[02:52:26][SPLIT_INFO] n_train=109 | n_val=36
+[02:52:26] -- Repeat 1/5 --
+[02:52:26]     [MLP] Training for 200 epochs...
+[02:52:26]       Epoch 050 | Loss: 0.0092
+[02:52:26]       Epoch 100 | Loss: 0.0044
+[02:52:26]       Epoch 150 | Loss: 0.0096
+[02:52:26]       Epoch 200 | Loss: 0.0069
+[02:52:26]   [1] MLP Only: Val=0.7778, Test=0.8947
+[02:52:26][TUNING] Graph H=0.077 (Base=0.200) -> Mode=HETERO
+[02:52:30][predictclass:FEATS] Avg Max Feature Similarity: 0.5709
+[02:52:30][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.040, Neigh=0.000, Sim=0.142, Compat=0.161
+[02:52:30][predictclass:FEATS] Avg Max Feature Similarity: 0.5709
+[02:52:30][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.040, Neigh=0.000, Sim=0.142, Compat=0.161
+[02:52:30]   [2] Prop Only: Val=0.4167, Test=0.5789
+[02:52:33] Running Val-Refined:
+[02:52:33][predictclass:FEATS] Avg Max Feature Similarity: 0.5765
+[02:52:33][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.201, Neigh=0.002, Sim=0.118, Compat=0.191
+[02:52:33] Running Test-Refined:
+[02:52:33][predictclass:FEATS] Avg Max Feature Similarity: 0.5751
+[02:52:33][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.199, Neigh=0.009, Sim=0.115, Compat=0.297
+[02:52:33]   [3] MLP+Refined: Val(Ref)=0.5556 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.8947
+[02:52:33]   [4] Prop+MLP(Select): Val(Prop)=0.4167 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.8947
+[02:52:33][texas:TEST-GATED-MLP-PROP run=8 rep=0:SUMMARY] Gate mode=learned | val_supervised=15 | val_gate_acc=1.0 | test_acc(gated)=0.8947 | test_acc(mlp)=0.8947 | test_acc(prop)=0.5789 | frac_mlp=0.921
+[02:52:33][texas:TEST-GATED-MLP-PROP run=8 rep=0:COEF] Gate coefficients (standardized): mlp_max_prob=+1.830, mlp_margin=-2.902, mlp_pred_class=+0.430, prop_max_score=+0.102, prop_margin=-0.572, prop_pred_class=-0.918, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+1.713, node_degree=-0.337, support_labeled_neighbors=+0.546, neighbor_class_entropy=+0.948, similarity_gap=-3.054, compatibility_gap=-0.354, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:52:33]   [5] Gated MLP+Prop: Test=0.8947 | GateValAcc=1.0 | FracMLP=0.921
+[02:52:33] -- Repeat 2/5 --
+[02:52:33]     [MLP] Training for 200 epochs...
+[02:52:33]       Epoch 050 | Loss: 0.0306
+[02:52:33]       Epoch 100 | Loss: 0.0046
+[02:52:33]       Epoch 150 | Loss: 0.0038
+[02:52:33]       Epoch 200 | Loss: 0.0040
+[02:52:33]   [1] MLP Only: Val=0.7778, Test=0.9211
+[02:52:33][TUNING] Graph H=0.077 (Base=0.200) -> Mode=HETERO
+[02:52:37][predictclass:FEATS] Avg Max Feature Similarity: 0.5709
+[02:52:37][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.141, Neigh=0.000, Sim=0.050, Compat=0.404
+[02:52:37][predictclass:FEATS] Avg Max Feature Similarity: 0.5709
+[02:52:37][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.141, Neigh=0.000, Sim=0.050, Compat=0.404
+[02:52:37]   [2] Prop Only: Val=0.4722, Test=0.6316
+[02:52:40] Running Val-Refined:
+[02:52:40][predictclass:FEATS] Avg Max Feature Similarity: 0.5771
+[02:52:40][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.213, Neigh=0.000, Sim=0.150, Compat=0.315
+[02:52:40] Running Test-Refined:
+[02:52:40][predictclass:FEATS] Avg Max Feature Similarity: 0.5823
+[02:52:40][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.180, Neigh=0.002, Sim=0.147, Compat=0.427
+[02:52:40]   [3] MLP+Refined: Val(Ref)=0.5278 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.9211
+[02:52:40]   [4] Prop+MLP(Select): Val(Prop)=0.4722 vs Val(MLP)=0.7778 -> Chosen: MLP. Test=0.9211
+[02:52:40][texas:TEST-GATED-MLP-PROP run=8 rep=1:SUMMARY] Gate mode=learned | val_supervised=15 | val_gate_acc=1.0 | test_acc(gated)=0.9211 | test_acc(mlp)=0.9211 | test_acc(prop)=0.6316 | frac_mlp=0.921
+[02:52:40][texas:TEST-GATED-MLP-PROP run=8 rep=1:COEF] Gate coefficients (standardized): mlp_max_prob=+1.152, mlp_margin=+1.203, mlp_pred_class=+2.130, prop_max_score=-1.596, prop_margin=+1.901, prop_pred_class=-1.860, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+1.039, node_degree=-1.072, support_labeled_neighbors=-0.409, neighbor_class_entropy=+1.310, similarity_gap=-2.087, compatibility_gap=-2.161, deferred_count=-0.000, reconsidered_in_refinement=-0.000
+[02:52:40]   [5] Gated MLP+Prop: Test=0.9211 | GateValAcc=1.0 | FracMLP=0.921
+[02:52:40] -- Repeat 3/5 --
+[02:52:40]     [MLP] Training for 200 epochs...
+[02:52:40]       Epoch 050 | Loss: 0.0212
+[02:52:40]       Epoch 100 | Loss: 0.0037
+[02:52:40]       Epoch 150 | Loss: 0.0083
+[02:52:40]       Epoch 200 | Loss: 0.0047
+[02:52:40]   [1] MLP Only: Val=0.8056, Test=0.7895
+[02:52:40][TUNING] Graph H=0.077 (Base=0.200) -> Mode=HETERO
+[02:52:44][predictclass:FEATS] Avg Max Feature Similarity: 0.5709
+[02:52:44][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.271, Neigh=0.000, Sim=0.291, Compat=0.352
+[02:52:44][predictclass:FEATS] Avg Max Feature Similarity: 0.5709
+[02:52:44][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.271, Neigh=0.000, Sim=0.291, Compat=0.352
+[02:52:44]   [2] Prop Only: Val=0.5000, Test=0.6053
+[02:52:47] Running Val-Refined:
+[02:52:47][predictclass:FEATS] Avg Max Feature Similarity: 0.5778
+[02:52:47][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.180, Neigh=0.001, Sim=0.222, Compat=0.205
+[02:52:47] Running Test-Refined:
+[02:52:47][predictclass:FEATS] Avg Max Feature Similarity: 0.5793
+[02:52:47][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.127, Neigh=0.011, Sim=0.215, Compat=0.261
+[02:52:47]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.7895
+[02:52:47]   [4] Prop+MLP(Select): Val(Prop)=0.5000 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.7895
+[02:52:47][texas:TEST-GATED-MLP-PROP run=8 rep=2:SUMMARY] Gate mode=learned | val_supervised=15 | val_gate_acc=1.0 | test_acc(gated)=0.8421 | test_acc(mlp)=0.7895 | test_acc(prop)=0.6053 | frac_mlp=0.711
+[02:52:47][texas:TEST-GATED-MLP-PROP run=8 rep=2:COEF] Gate coefficients (standardized): mlp_max_prob=+1.472, mlp_margin=+1.178, mlp_pred_class=-0.692, prop_max_score=+1.716, prop_margin=-0.970, prop_pred_class=-1.875, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+1.785, node_degree=-0.395, support_labeled_neighbors=+1.130, neighbor_class_entropy=+1.510, similarity_gap=-2.541, compatibility_gap=-1.489, deferred_count=+0.000, reconsidered_in_refinement=+0.000
+[02:52:47]   [5] Gated MLP+Prop: Test=0.8421 | GateValAcc=1.0 | FracMLP=0.711
+[02:52:47] -- Repeat 4/5 --
+[02:52:47]     [MLP] Training for 200 epochs...
+[02:52:47]       Epoch 050 | Loss: 0.0193
+[02:52:47]       Epoch 100 | Loss: 0.0018
+[02:52:47]       Epoch 150 | Loss: 0.0029
+[02:52:47]       Epoch 200 | Loss: 0.0036
+[02:52:47]   [1] MLP Only: Val=0.8056, Test=0.8684
+[02:52:47][TUNING] Graph H=0.077 (Base=0.200) -> Mode=HETERO
+[02:52:50][predictclass:FEATS] Avg Max Feature Similarity: 0.5709
+[02:52:50][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.050, Neigh=0.000, Sim=0.244, Compat=0.274
+[02:52:50][predictclass:FEATS] Avg Max Feature Similarity: 0.5709
+[02:52:50][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.050, Neigh=0.000, Sim=0.244, Compat=0.274
+[02:52:50]   [2] Prop Only: Val=0.5278, Test=0.5789
+[02:52:54] Running Val-Refined:
+[02:52:54][predictclass:FEATS] Avg Max Feature Similarity: 0.5774
+[02:52:54][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.143, Neigh=0.002, Sim=0.279, Compat=0.143
+[02:52:54] Running Test-Refined:
+[02:52:54][predictclass:FEATS] Avg Max Feature Similarity: 0.5830
+[02:52:54][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.098, Neigh=0.010, Sim=0.267, Compat=0.188
+[02:52:54]   [3] MLP+Refined: Val(Ref)=0.6389 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8684
+[02:52:54]   [4] Prop+MLP(Select): Val(Prop)=0.5278 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.8684
+[02:52:54][texas:TEST-GATED-MLP-PROP run=8 rep=3:SUMMARY] Gate mode=learned | val_supervised=14 | val_gate_acc=1.0 | test_acc(gated)=0.8684 | test_acc(mlp)=0.8684 | test_acc(prop)=0.5789 | frac_mlp=0.895
+[02:52:54][texas:TEST-GATED-MLP-PROP run=8 rep=3:COEF] Gate coefficients (standardized): mlp_max_prob=+1.692, mlp_margin=+0.558, mlp_pred_class=+1.033, prop_max_score=-0.734, prop_margin=+0.543, prop_pred_class=-1.492, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+1.394, node_degree=+3.497, support_labeled_neighbors=-1.359, neighbor_class_entropy=-2.330, similarity_gap=-0.978, compatibility_gap=-1.884, deferred_count=-0.000, reconsidered_in_refinement=-0.000
+[02:52:54]   [5] Gated MLP+Prop: Test=0.8684 | GateValAcc=1.0 | FracMLP=0.895
+[02:52:54] -- Repeat 5/5 --
+[02:52:54]     [MLP] Training for 200 epochs...
+[02:52:54]       Epoch 050 | Loss: 0.0183
+[02:52:54]       Epoch 100 | Loss: 0.0075
+[02:52:54]       Epoch 150 | Loss: 0.0040
+[02:52:54]       Epoch 200 | Loss: 0.0034
+[02:52:54]   [1] MLP Only: Val=0.8889, Test=0.8158
+[02:52:54][TUNING] Graph H=0.077 (Base=0.200) -> Mode=HETERO
+[02:52:57][predictclass:FEATS] Avg Max Feature Similarity: 0.5709
+[02:52:57][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.077, Neigh=0.000, Sim=0.196, Compat=0.217
+[02:52:57][predictclass:FEATS] Avg Max Feature Similarity: 0.5709
+[02:52:57][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.077, Neigh=0.000, Sim=0.196, Compat=0.217
+[02:52:57]   [2] Prop Only: Val=0.4722, Test=0.6316
+[02:53:00] Running Val-Refined:
+[02:53:00][predictclass:FEATS] Avg Max Feature Similarity: 0.5774
+[02:53:00][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.129, Neigh=0.001, Sim=0.265, Compat=0.172
+[02:53:00] Running Test-Refined:
+[02:53:00][predictclass:FEATS] Avg Max Feature Similarity: 0.5777
+[02:53:00][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.110, Neigh=0.007, Sim=0.251, Compat=0.274
+[02:53:00]   [3] MLP+Refined: Val(Ref)=0.5278 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.8158
+[02:53:00]   [4] Prop+MLP(Select): Val(Prop)=0.4722 vs Val(MLP)=0.8889 -> Chosen: MLP. Test=0.8158
+[02:53:00][texas:TEST-GATED-MLP-PROP run=8 rep=4:SUMMARY] Gate mode=learned | val_supervised=17 | val_gate_acc=1.0 | test_acc(gated)=0.8421 | test_acc(mlp)=0.8158 | test_acc(prop)=0.6316 | frac_mlp=0.974
+[02:53:00][texas:TEST-GATED-MLP-PROP run=8 rep=4:COEF] Gate coefficients (standardized): mlp_max_prob=+0.930, mlp_margin=-0.439, mlp_pred_class=+1.956, prop_max_score=-0.140, prop_margin=-0.526, prop_pred_class=-1.125, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+0.873, node_degree=+1.392, support_labeled_neighbors=-1.724, neighbor_class_entropy=+0.058, similarity_gap=-1.447, compatibility_gap=-0.793, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:53:00]   [5] Gated MLP+Prop: Test=0.8421 | GateValAcc=1.0 | FracMLP=0.974
+[02:53:00] ==================== SPLIT 9 ====================
+[02:53:00][WARN] Split texas_split_0.6_0.2_9.npz not found. Generating random split.
+[02:53:00][SPLIT_INFO] n_train=109 | n_val=36
+[02:53:00] -- Repeat 1/5 --
+[02:53:00]     [MLP] Training for 200 epochs...
+[02:53:01]       Epoch 050 | Loss: 0.0163
+[02:53:01]       Epoch 100 | Loss: 0.0017
+[02:53:01]       Epoch 150 | Loss: 0.0009
+[02:53:01]       Epoch 200 | Loss: 0.0025
+[02:53:01]   [1] MLP Only: Val=0.8611, Test=0.8684
+[02:53:01][TUNING] Graph H=0.088 (Base=0.250) -> Mode=HETERO
+[02:53:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5717
+[02:53:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.125, Neigh=0.000, Sim=0.301, Compat=0.266
+[02:53:04][predictclass:FEATS] Avg Max Feature Similarity: 0.5717
+[02:53:04][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.125, Neigh=0.000, Sim=0.301, Compat=0.266
+[02:53:04]   [2] Prop Only: Val=0.6389, Test=0.6579
+[02:53:07] Running Val-Refined:
+[02:53:07][predictclass:FEATS] Avg Max Feature Similarity: 0.5794
+[02:53:07][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.082, Neigh=0.000, Sim=0.166, Compat=0.234
+[02:53:07] Running Test-Refined:
+[02:53:07][predictclass:FEATS] Avg Max Feature Similarity: 0.5767
+[02:53:07][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.116, Neigh=0.019, Sim=0.181, Compat=0.207
+[02:53:07]   [3] MLP+Refined: Val(Ref)=0.5833 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8684
+[02:53:07]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.8611 -> Chosen: MLP. Test=0.8684
+[02:53:07][texas:TEST-GATED-MLP-PROP run=9 rep=0:SUMMARY] Gate mode=learned | val_supervised=10 | val_gate_acc=1.0 | test_acc(gated)=0.8158 | test_acc(mlp)=0.8684 | test_acc(prop)=0.6579 | frac_mlp=0.579
+[02:53:07][texas:TEST-GATED-MLP-PROP run=9 rep=0:COEF] Gate coefficients (standardized): mlp_max_prob=+1.438, mlp_margin=-3.222, mlp_pred_class=-3.008, prop_max_score=+0.473, prop_margin=-1.207, prop_pred_class=-1.793, agree_mlp_prop=-0.000, confidence_gap_mlp_minus_prop=+1.526, node_degree=+1.738, support_labeled_neighbors=+2.983, neighbor_class_entropy=+0.727, similarity_gap=-2.927, compatibility_gap=-1.470, deferred_count=+0.000, reconsidered_in_refinement=+0.000
+[02:53:07]   [5] Gated MLP+Prop: Test=0.8158 | GateValAcc=1.0 | FracMLP=0.579
+[02:53:07] -- Repeat 2/5 --
+[02:53:07]     [MLP] Training for 200 epochs...
+[02:53:07]       Epoch 050 | Loss: 0.0100
+[02:53:07]       Epoch 100 | Loss: 0.0034
+[02:53:07]       Epoch 150 | Loss: 0.0030
+[02:53:07]       Epoch 200 | Loss: 0.0058
+[02:53:07]   [1] MLP Only: Val=0.8333, Test=0.9474
+[02:53:07][TUNING] Graph H=0.088 (Base=0.250) -> Mode=HETERO
+[02:53:10][predictclass:FEATS] Avg Max Feature Similarity: 0.5717
+[02:53:10][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.048, Neigh=0.000, Sim=0.086, Compat=0.240
+[02:53:10][predictclass:FEATS] Avg Max Feature Similarity: 0.5717
+[02:53:10][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.048, Neigh=0.000, Sim=0.086, Compat=0.240
+[02:53:10]   [2] Prop Only: Val=0.6389, Test=0.6579
+[02:53:13] Running Val-Refined:
+[02:53:13][predictclass:FEATS] Avg Max Feature Similarity: 0.5805
+[02:53:13][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.122, Neigh=0.000, Sim=0.216, Compat=0.224
+[02:53:13] Running Test-Refined:
+[02:53:13][predictclass:FEATS] Avg Max Feature Similarity: 0.5781
+[02:53:13][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.147, Neigh=0.016, Sim=0.212, Compat=0.229
+[02:53:13]   [3] MLP+Refined: Val(Ref)=0.6667 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.9474
+[02:53:13]   [4] Prop+MLP(Select): Val(Prop)=0.6389 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.9474
+[02:53:13][texas:TEST-GATED-MLP-PROP run=9 rep=1:SUMMARY] Gate mode=learned | val_supervised=11 | val_gate_acc=1.0 | test_acc(gated)=0.8421 | test_acc(mlp)=0.9474 | test_acc(prop)=0.6579 | frac_mlp=0.632
+[02:53:13][texas:TEST-GATED-MLP-PROP run=9 rep=1:COEF] Gate coefficients (standardized): mlp_max_prob=+1.323, mlp_margin=+0.413, mlp_pred_class=+0.757, prop_max_score=-1.122, prop_margin=-0.494, prop_pred_class=+0.838, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+1.589, node_degree=+2.535, support_labeled_neighbors=-0.630, neighbor_class_entropy=-2.262, similarity_gap=-2.617, compatibility_gap=-1.103, deferred_count=+0.000, reconsidered_in_refinement=-0.000
+[02:53:13]   [5] Gated MLP+Prop: Test=0.8421 | GateValAcc=1.0 | FracMLP=0.632
+[02:53:13] -- Repeat 3/5 --
+[02:53:13]     [MLP] Training for 200 epochs...
+[02:53:13]       Epoch 050 | Loss: 0.0091
+[02:53:13]       Epoch 100 | Loss: 0.0049
+[02:53:13]       Epoch 150 | Loss: 0.0064
+[02:53:13]       Epoch 200 | Loss: 0.0017
+[02:53:13]   [1] MLP Only: Val=0.8333, Test=0.9211
+[02:53:13][TUNING] Graph H=0.088 (Base=0.250) -> Mode=HETERO
+[02:53:16][predictclass:FEATS] Avg Max Feature Similarity: 0.5717
+[02:53:16][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.001, Neigh=0.000, Sim=0.177, Compat=0.301
+[02:53:16][predictclass:FEATS] Avg Max Feature Similarity: 0.5717
+[02:53:16][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.001, Neigh=0.000, Sim=0.177, Compat=0.301
+[02:53:16]   [2] Prop Only: Val=0.6944, Test=0.8158
+[02:53:19] Running Val-Refined:
+[02:53:19][predictclass:FEATS] Avg Max Feature Similarity: 0.5803
+[02:53:19][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.083, Neigh=0.005, Sim=0.250, Compat=0.351
+[02:53:19] Running Test-Refined:
+[02:53:19][predictclass:FEATS] Avg Max Feature Similarity: 0.5777
+[02:53:19][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.099, Neigh=0.004, Sim=0.264, Compat=0.342
+[02:53:19]   [3] MLP+Refined: Val(Ref)=0.6389 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.9211
+[02:53:19]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.9211
+[02:53:19][texas:TEST-GATED-MLP-PROP run=9 rep=2:SUMMARY] Gate mode=learned | val_supervised=13 | val_gate_acc=1.0 | test_acc(gated)=0.8684 | test_acc(mlp)=0.9211 | test_acc(prop)=0.8158 | frac_mlp=0.684
+[02:53:19][texas:TEST-GATED-MLP-PROP run=9 rep=2:COEF] Gate coefficients (standardized): mlp_max_prob=+1.113, mlp_margin=+1.519, mlp_pred_class=+0.380, prop_max_score=-3.760, prop_margin=+4.661, prop_pred_class=+1.460, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+0.656, node_degree=-1.109, support_labeled_neighbors=-0.665, neighbor_class_entropy=+0.052, similarity_gap=-3.064, compatibility_gap=-0.426, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:53:19]   [5] Gated MLP+Prop: Test=0.8684 | GateValAcc=1.0 | FracMLP=0.684
+[02:53:19] -- Repeat 4/5 --
+[02:53:19]     [MLP] Training for 200 epochs...
+[02:53:19]       Epoch 050 | Loss: 0.0091
+[02:53:19]       Epoch 100 | Loss: 0.0128
+[02:53:19]       Epoch 150 | Loss: 0.0023
+[02:53:19]       Epoch 200 | Loss: 0.0045
+[02:53:19]   [1] MLP Only: Val=0.8333, Test=0.8684
+[02:53:19][TUNING] Graph H=0.088 (Base=0.250) -> Mode=HETERO
+[02:53:22][predictclass:FEATS] Avg Max Feature Similarity: 0.5717
+[02:53:22][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.042, Neigh=0.000, Sim=0.207, Compat=0.143
+[02:53:22][predictclass:FEATS] Avg Max Feature Similarity: 0.5717
+[02:53:22][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.042, Neigh=0.000, Sim=0.207, Compat=0.143
+[02:53:22]   [2] Prop Only: Val=0.6944, Test=0.8158
+[02:53:25] Running Val-Refined:
+[02:53:25][predictclass:FEATS] Avg Max Feature Similarity: 0.5779
+[02:53:25][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.138, Neigh=0.001, Sim=0.249, Compat=0.308
+[02:53:25] Running Test-Refined:
+[02:53:25][predictclass:FEATS] Avg Max Feature Similarity: 0.5765
+[02:53:25][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.138, Neigh=0.000, Sim=0.260, Compat=0.363
+[02:53:25]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.8684
+[02:53:25]   [4] Prop+MLP(Select): Val(Prop)=0.6944 vs Val(MLP)=0.8333 -> Chosen: MLP. Test=0.8684
+[02:53:25][texas:TEST-GATED-MLP-PROP run=9 rep=3:SUMMARY] Gate mode=learned | val_supervised=9 | val_gate_acc=1.0 | test_acc(gated)=0.8947 | test_acc(mlp)=0.8684 | test_acc(prop)=0.8158 | frac_mlp=0.368
+[02:53:25][texas:TEST-GATED-MLP-PROP run=9 rep=3:COEF] Gate coefficients (standardized): mlp_max_prob=+1.200, mlp_margin=-0.560, mlp_pred_class=-3.291, prop_max_score=-2.433, prop_margin=+0.624, prop_pred_class=-3.503, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+1.322, node_degree=-0.158, support_labeled_neighbors=+1.642, neighbor_class_entropy=+0.328, similarity_gap=+3.228, compatibility_gap=+1.028, deferred_count=+0.000, reconsidered_in_refinement=+0.000
+[02:53:25]   [5] Gated MLP+Prop: Test=0.8947 | GateValAcc=1.0 | FracMLP=0.368
+[02:53:25] -- Repeat 5/5 --
+[02:53:25]     [MLP] Training for 200 epochs...
+[02:53:25]       Epoch 050 | Loss: 0.0195
+[02:53:25]       Epoch 100 | Loss: 0.0024
+[02:53:25]       Epoch 150 | Loss: 0.0024
+[02:53:25]       Epoch 200 | Loss: 0.0041
+[02:53:25]   [1] MLP Only: Val=0.8056, Test=0.9474
+[02:53:25][TUNING] Graph H=0.088 (Base=0.250) -> Mode=HETERO
+[02:53:29][predictclass:FEATS] Avg Max Feature Similarity: 0.5717
+[02:53:29][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.038, Neigh=0.000, Sim=0.026, Compat=0.205
+[02:53:29][predictclass:FEATS] Avg Max Feature Similarity: 0.5717
+[02:53:29][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.038, Neigh=0.000, Sim=0.026, Compat=0.205
+[02:53:29]   [2] Prop Only: Val=0.6667, Test=0.6842
+[02:53:31] Running Val-Refined:
+[02:53:31][predictclass:FEATS] Avg Max Feature Similarity: 0.5798
+[02:53:31][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.172, Neigh=0.013, Sim=0.216, Compat=0.515
+[02:53:31] Running Test-Refined:
+[02:53:31][predictclass:FEATS] Avg Max Feature Similarity: 0.5768
+[02:53:31][predictclass:DEBUG] Avg Term Magnitudes (First 5): Prior=0.205, Neigh=0.012, Sim=0.228, Compat=0.503
+[02:53:31]   [3] MLP+Refined: Val(Ref)=0.6111 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.9474
+[02:53:31]   [4] Prop+MLP(Select): Val(Prop)=0.6667 vs Val(MLP)=0.8056 -> Chosen: MLP. Test=0.9474
+[02:53:32][texas:TEST-GATED-MLP-PROP run=9 rep=4:SUMMARY] Gate mode=learned | val_supervised=13 | val_gate_acc=1.0 | test_acc(gated)=0.9474 | test_acc(mlp)=0.9474 | test_acc(prop)=0.6842 | frac_mlp=0.763
+[02:53:32][texas:TEST-GATED-MLP-PROP run=9 rep=4:COEF] Gate coefficients (standardized): mlp_max_prob=+1.886, mlp_margin=+1.336, mlp_pred_class=-1.143, prop_max_score=-2.006, prop_margin=-0.444, prop_pred_class=-0.458, agree_mlp_prop=+0.000, confidence_gap_mlp_minus_prop=+2.045, node_degree=-0.019, support_labeled_neighbors=+0.387, neighbor_class_entropy=-1.824, similarity_gap=+0.075, compatibility_gap=-2.037, deferred_count=-0.000, reconsidered_in_refinement=+0.000
+[02:53:32]   [5] Gated MLP+Prop: Test=0.9474 | GateValAcc=1.0 | FracMLP=0.763
+[02:53:32][SUMMARY] 
+==================================================
+ FINAL SUMMARY (texas)
+==================================================
+[1] MLP Only:          0.8295 ± 0.0712
+[2] Prop Only:         0.5989 ± 0.0715
+[3] MLP + Refined:     0.8295 ± 0.0712
+    -> Refinement Chosen: 0/50 (0.0%)
+[4] Prop + MLP(Select):0.8295 ± 0.0712
+    -> Switched to MLP:   50/50 (100.0%)
+[5] Gated MLP+Prop:    0.7884 ± 0.0819
+    -> Mean MLP assignment fraction: 0.717
+
