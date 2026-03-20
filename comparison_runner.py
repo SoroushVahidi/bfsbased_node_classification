@@ -350,6 +350,8 @@ def run_stage2_internal(
                         lr=0.01,
                         epochs=200,
                         log_file=None,
+                        val_indices=val_idx,
+                        patience=30,
                     )
                     tuning_time = time.perf_counter() - t0
                     max_probs, preds_mlp_all = mlp_probs.max(dim=1)
@@ -377,6 +379,7 @@ def run_stage2_internal(
                             "mlp_lr": 0.01,
                             "mlp_weight_decay": 5e-4,
                             "mlp_epochs": 200,
+                            "mlp_early_stopping_patience": 30,
                         }
                     )
                     records.append(rec)
@@ -841,7 +844,8 @@ def main():
     parser.add_argument(
         "--split-dir",
         default=None,
-        help="Optional directory containing GEO-GCN split .npz files.",
+        help="Path to directory containing GEO-GCN split .npz files. "
+             "Falls back to GEO_GCN_SPLIT_DIR env var, then auto-discovery.",
     )
     parser.add_argument(
         "--datasets",

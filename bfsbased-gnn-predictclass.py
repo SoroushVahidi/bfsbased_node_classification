@@ -249,16 +249,18 @@ def robust_random_search(
     is_hetero = h_val < (baseline + 0.05)
     
     if is_hetero:
-        # Heterophilic Strategy
-        a2_bounds = (-0.5, 0.1)  
-        a8_bounds = (0.5, 1.5)   
-        fallback_params = [0.1, -0.1, 0.1, 0.2, 0.1, 0.05, 0.5, 1.0] 
+        # Heterophilic Strategy: neighbor signal is unreliable, rely on similarity + compat
+        a2_bounds = (-0.5, 0.1)
+        a3_bounds = (0.0, 0.5)
+        a8_bounds = (0.5, 1.5)
+        fallback_params = [0.1, -0.1, 0.1, 0.2, 0.1, 0.05, 0.5, 1.0]
         mode_str = "HETERO"
     else:
-        # Homophilic Strategy
-        a2_bounds = (0.0, 1.0)
-        a8_bounds = (0.0, 0.6)
-        fallback_params = [0.1, 0.5, 0.1, 0.2, 0.1, 0.05, 0.6, 0.2]
+        # Homophilic Strategy: neighbor signal is strong; feature sim also matters for isolated nodes
+        a2_bounds = (1.0, 8.0)
+        a3_bounds = (0.0, 3.0)
+        a8_bounds = (0.0, 1.0)
+        fallback_params = [0.1, 5.0, 1.0, 0.1, 0.1, 0.05, 0.5, 0.5]
         mode_str = "HOMO"
 
     if log_file:
@@ -276,11 +278,11 @@ def robust_random_search(
         params = [
             rng.uniform(0.0, 0.5),           # a1: Prior
             rng.uniform(*a2_bounds),         # a2: Neighbor (Dynamic range)
-            rng.uniform(0.0, 0.5),           # a3: Similarity
-            rng.uniform(0.0, 0.5),           # a4: Degree
-            rng.uniform(0.0, 0.3),           # a5: Count
-            rng.uniform(0.0, 0.1),           # a6: Tie
-            rng.uniform(0.4, 0.9),           # a7: Centroid
+            rng.uniform(*a3_bounds),         # a3: Similarity (Dynamic range)
+            rng.uniform(0.0, 0.5),           # a4: Propagated-neighbor weight
+            rng.uniform(0.0, 0.3),           # a5: Train-neighbor weight
+            rng.uniform(0.0, 0.2),           # a6: Feature-sim weight in priority
+            rng.uniform(0.4, 0.9),           # a7: Centroid blend (train vs propagated)
             rng.uniform(*a8_bounds),         # a8: Compat (Dynamic range)
         ]
 
@@ -298,7 +300,8 @@ def robust_random_search(
 
         if not scores: continue
         
-        agg = np.mean(scores)
+        # Use trimmed mean for robustness against outlier folds
+        agg = _trimmed_mean(scores, trim=0.1)
         if agg > best_score:
             best_score = agg
             best_params = params
@@ -382,11 +385,14 @@ def predictclass(
         np.add.at(compat_cts, ([lbl2i[y_pred[i]] for i in v], [lbl2i[y_pred[i]] for i in u]), 1)
     compat = compat_cts / compat_cts.sum(axis=0, keepdims=True)
 
-    # Nbr Counts
+    # Nbr Counts: track train-labeled and propagated-labeled separately
     nbr_cts = np.zeros((N, C))
+    train_nbr_cnt = np.zeros(N, dtype=np.int32)  # count of train-labeled neighbors only
     for u in train_indices:
         c = lbl2i[y_pred[u]]
-        for v in neighbors[u]: nbr_cts[v, c] += 1
+        for v in neighbors[u]:
+            nbr_cts[v, c] += 1
+            train_nbr_cnt[v] += 1
             
     # Sim Matrix
     D = np.zeros((N, C))
@@ -404,18 +410,22 @@ def predictclass(
     # 5. Priority Queue
     pq = []
     def calc_prio(u):
-        # WScore: Label prop pressure
-        l_cnt = nbr_cts[u].sum()
-        w = 0.0
-        if l_cnt > 0:
-            # Simple heuristic: Fraction of labeled neighbors
-            w = l_cnt / max(deg[u], 1)
-        
-        # SScore: Similarity + MLP confidence
-        s = D[u].max()
-        if mlp_probs_np is not None: s += mlp_probs_np[u].max()
-        
-        return -(w*a4 + s), u
+        if deg[u] == 0:
+            return 0.0, u
+        labeled_cnt_u = float(nbr_cts[u].sum())
+        if labeled_cnt_u <= 0:
+            wscore = 0.0
+        else:
+            # Distinguish train-labeled (more reliable) from propagated-labeled neighbors
+            nt = float(train_nbr_cnt[u])
+            npg = max(labeled_cnt_u - nt, 0.0)
+            wscore = (a4 * npg + a5 * nt) / float(max(deg[u], 1))
+
+        # Feature similarity + MLP confidence for sscore
+        sscore = float(D[u].max())
+        if mlp_probs_np is not None: sscore += float(mlp_probs_np[u].max())
+
+        return -(wscore + a6 * sscore), u
 
     for u in range(N):
         if y_pred[u] == -1: heapq.heappush(pq, calc_prio(u))
@@ -526,31 +536,61 @@ class SimpleMLP(nn.Module):
         x = self.convs[-1](x)
         return x
 
-def train_mlp_and_predict(data, train_indices, hidden=64, layers=2, dropout=0.5, lr=0.01, epochs=200, log_file=None):
+def train_mlp_and_predict(data, train_indices, hidden=64, layers=2, dropout=0.5, lr=0.01, epochs=200, log_file=None,
+                          val_indices=None, patience=30):
     device = data.x.device
     input_dim = data.x.shape[1]
     num_classes = int(data.y.max().item()) + 1
     
     model = SimpleMLP(input_dim, hidden, num_classes, layers, dropout).to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=5e-4)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=lr * 0.01)
     loss_fn = nn.CrossEntropyLoss()
     
     train_mask = torch.zeros(data.num_nodes, dtype=torch.bool, device=device)
     train_mask[train_indices] = True
     
-    model.train()
+    # Early stopping state
+    best_state = None
+    best_val_acc = -1.0
+    bad_epochs = 0
+    
     if log_file:
         write_log(f"Starting MLP training for {epochs} epochs...", log_file, tag="MLP")
     
     for epoch in range(epochs):
+        model.train()
         optimizer.zero_grad()
         out = model(data.x)
         loss = loss_fn(out[train_mask], data.y[train_mask])
         loss.backward()
         optimizer.step()
+        scheduler.step()
         
         if log_file and (epoch + 1) % 50 == 0:
             write_log(f"Epoch {epoch+1:03d} | Loss: {loss.item():.4f}", log_file, tag="MLP")
+
+        # Early stopping on validation set
+        if val_indices is not None:
+            model.eval()
+            with torch.no_grad():
+                val_out = model(data.x)
+                val_preds = val_out.argmax(dim=1)
+                val_acc = float((val_preds[val_indices] == data.y[val_indices]).float().mean().item())
+            if val_acc > best_val_acc + 1e-4:
+                best_val_acc = val_acc
+                best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+                bad_epochs = 0
+            else:
+                bad_epochs += 1
+                if bad_epochs >= patience:
+                    if log_file:
+                        write_log(f"Early stopping at epoch {epoch+1} (best val={best_val_acc:.4f})", log_file, tag="MLP")
+                    break
+        
+    # Restore best model when using early stopping
+    if best_state is not None:
+        model.load_state_dict({k: v.to(device) for k, v in best_state.items()})
         
     model.eval()
     with torch.no_grad():
@@ -625,8 +665,9 @@ for run in range(num_iterations):
         torch.manual_seed(current_seed)
         np.random.seed(current_seed)
         
-        # 2. Train MLP
-        mlp_probs, _ = train_mlp_and_predict(data, train_idx, hidden=64, layers=2, dropout=0.5, epochs=200, log_file=LOG_FILE)
+        # 2. Train MLP (pass val_idx to enable early stopping)
+        mlp_probs, _ = train_mlp_and_predict(data, train_idx, hidden=64, layers=2, dropout=0.5, epochs=300, log_file=LOG_FILE,
+                                              val_indices=val_idx, patience=30)
         max_probs, preds_mlp_all = mlp_probs.max(dim=1)
 
         # 3. Tuning
