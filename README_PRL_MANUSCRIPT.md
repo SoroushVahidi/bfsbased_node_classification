@@ -19,6 +19,7 @@ This README lists **manuscript-ready** artifacts. Prefer these over older explor
 | **Correction behavior** | `tables/prl_final_additions/prl_correction_behavior_compact.csv` |
 | **Gate cross-run correlations** | `tables/prl_final_additions/prl_subsection3_crossrun_correlations.csv` |
 | **Figures (Δ vs MLP, gate stats)** | `figures/prl_final_additions/` |
+| **Graphical abstract (submission, separate from main PDF)** | `figures/prl_final_additions/graphical_abstract_prl.{pdf,png,svg}` — regenerate: `python3 scripts/prl_final_additions/make_graphical_abstract.py` |
 | **Threshold cross-run package** | `results_prl/` + `results_prl/README_threshold_sensitivity.md` |
 | **Canonical logs** | `logs/*_manuscript_final_validation*` |
 
