@@ -1,0 +1,28 @@
+{
+  "output_tag": "prl_resubmission_smoke_cora_s0_v3",
+  "generated_at": "2026-03-21T18:58:54",
+  "runs_file": "logs/prl_resubmission/comparison_runs_prl_resubmission_smoke_cora_s0_v3.jsonl",
+  "datasets": [
+    "cora"
+  ],
+  "methods": [
+    "appnp",
+    "gcn",
+    "mlp_only",
+    "selective_graph_correction",
+    "sgc_no_gate"
+  ],
+  "n_records_total": 5,
+  "n_records_successful": 5,
+  "splits": [
+    0
+  ],
+  "repeats": [
+    0
+  ],
+  "parameter_sources": [
+    "DEFAULT_MANUSCRIPT_MLP_KWARGS",
+    "feature_first_selective_weighted_correction_v1",
+    "small_val_grid_search"
+  ]
+}

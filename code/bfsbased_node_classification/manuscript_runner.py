@@ -45,15 +45,32 @@ def _get_repo_root() -> str:
 
 
 def _load_full_investigate_module():
-    """Dynamically load bfsbased-full-investigate-homophil.py."""
+    """
+    Dynamically load bfsbased-full-investigate-homophil.py without executing the
+    legacy notebook-style top-level experiment cells.
+    """
     here = _get_repo_root()
     path = os.path.join(here, "bfsbased-full-investigate-homophil.py")
-    spec = importlib.util.spec_from_file_location("bfs_full_investigate", path)
-    if spec is None or spec.loader is None:
-        raise ImportError(f"Could not load module from {path}")
-    mod = importlib.util.module_from_spec(spec)
-    setattr(mod, "DATASET_KEY", "texas")  # satisfy top-level dataset-load code
-    spec.loader.exec_module(mod)          # type: ignore[arg-type]
+    with open(path, "r", encoding="utf-8") as f:
+        source = f.read()
+
+    start_dataset_block = "dataset = load_dataset(DATASET_KEY, root)"
+    end_dataset_block = "# In[21]:"
+    legacy_run_block = 'LOG_DIR = "logs"'
+
+    if start_dataset_block in source and end_dataset_block in source:
+        a = source.index(start_dataset_block)
+        b = source.index(end_dataset_block, a)
+        source = source[:a] + "\n" + source[b:]
+    if legacy_run_block in source:
+        source = source[: source.index(legacy_run_block)]
+
+    mod = importlib.util.module_from_spec(
+        importlib.util.spec_from_loader("bfs_full_investigate", loader=None)
+    )
+    setattr(mod, "__file__", path)
+    setattr(mod, "DATASET_KEY", "texas")
+    exec(compile(source, path, "exec"), mod.__dict__)
     return mod
 
 
@@ -364,9 +381,19 @@ def run_manuscript_experiment(
                     rec = _build_record(**rec_kwargs, method="mlp_only")
                     t0 = time.perf_counter()
                     try:
+                        mlp_cfg = getattr(
+                            mod,
+                            "DEFAULT_MANUSCRIPT_MLP_KWARGS",
+                            {"hidden": 64, "layers": 2, "dropout": 0.5, "lr": 0.01, "epochs": 300},
+                        )
                         mlp_probs, _ = mod.train_mlp_and_predict(
-                            data, train_idx,
-                            hidden=64, layers=2, dropout=0.5, lr=0.01, epochs=300,
+                            data,
+                            train_idx,
+                            hidden=mlp_cfg["hidden"],
+                            layers=mlp_cfg["layers"],
+                            dropout=mlp_cfg["dropout"],
+                            lr=mlp_cfg["lr"],
+                            epochs=mlp_cfg["epochs"],
                             log_file=None,
                         )
                         mlp_time = time.perf_counter() - t0

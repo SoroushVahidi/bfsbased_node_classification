@@ -1221,6 +1221,17 @@ def _to_numpy_idx(idx):
     if isinstance(idx, torch.Tensor): return idx.cpu().numpy()
     return idx
 
+
+# Manuscript-facing defaults. The PRL story uses the same strong MLP as the
+# base classifier before any selective graph correction is applied.
+DEFAULT_MANUSCRIPT_MLP_KWARGS = {
+    "hidden": 64,
+    "layers": 2,
+    "dropout": 0.5,
+    "lr": 0.01,
+    "epochs": 300,
+}
+
 class SimpleMLP(nn.Module):
     def __init__(self, in_channels, hidden_channels, out_channels, num_layers=2, dropout=0.5):
         super(SimpleMLP, self).__init__()
@@ -1243,7 +1254,7 @@ class SimpleMLP(nn.Module):
         x = self.convs[-1](x)
         return x
 
-def train_mlp_and_predict(data, train_indices, hidden=64, layers=2, dropout=0.5, lr=0.01, epochs=200, log_file=None):
+def train_mlp_and_predict(data, train_indices, hidden=64, layers=2, dropout=0.5, lr=0.01, epochs=300, log_file=None):
     device = data.x.device
     input_dim = data.x.shape[1]
     num_classes = int(data.y.max().item()) + 1
@@ -1610,11 +1621,11 @@ def selective_graph_correction_predictclass(
         mlp_probs, _ = train_mlp_and_predict(
             data,
             train_indices,
-            hidden=64,
-            layers=2,
-            dropout=0.5,
-            lr=0.01,
-            epochs=200,
+            hidden=DEFAULT_MANUSCRIPT_MLP_KWARGS["hidden"],
+            layers=DEFAULT_MANUSCRIPT_MLP_KWARGS["layers"],
+            dropout=DEFAULT_MANUSCRIPT_MLP_KWARGS["dropout"],
+            lr=DEFAULT_MANUSCRIPT_MLP_KWARGS["lr"],
+            epochs=DEFAULT_MANUSCRIPT_MLP_KWARGS["epochs"],
             log_file=log_file,
         )
         mlp_train_runtime_sec = time.perf_counter() - t_mlp0
@@ -2014,7 +2025,14 @@ def gated_mlp_prop_predictclass(
     # 1) Base models
     if mlp_probs is None:
         mlp_probs, _ = train_mlp_and_predict(
-            data, train_indices, hidden=64, layers=2, dropout=0.5, lr=0.01, epochs=200, log_file=log_file
+            data,
+            train_indices,
+            hidden=DEFAULT_MANUSCRIPT_MLP_KWARGS["hidden"],
+            layers=DEFAULT_MANUSCRIPT_MLP_KWARGS["layers"],
+            dropout=DEFAULT_MANUSCRIPT_MLP_KWARGS["dropout"],
+            lr=DEFAULT_MANUSCRIPT_MLP_KWARGS["lr"],
+            epochs=DEFAULT_MANUSCRIPT_MLP_KWARGS["epochs"],
+            log_file=log_file,
         )
     mlp_probs_np = mlp_probs.detach().cpu().numpy()
     mlp_pred_all = np.argmax(mlp_probs_np, axis=1).astype(np.int64)

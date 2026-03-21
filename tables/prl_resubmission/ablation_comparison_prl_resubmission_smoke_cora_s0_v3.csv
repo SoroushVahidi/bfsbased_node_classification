@@ -1,0 +1,3 @@
+dataset,method,display_name,mean_test_acc,std_test_acc,delta_vs_default_sgc,wins_vs_default_sgc,losses_vs_default_sgc,ties_vs_default_sgc,n_runs
+cora,selective_graph_correction,Selective correction,0.7284,0.0000,+0.0000,0,0,1,1
+cora,sgc_no_gate,SGC without gate,0.7284,0.0000,+0.0000,0,0,1,1
