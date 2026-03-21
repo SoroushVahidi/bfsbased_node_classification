@@ -28,6 +28,13 @@ B) Branch preserve/wulver-full-filesystem-2026-03-21 — tarballs for the *paren
 C) Earlier preserve/* branches
    Smaller API uploads from prior steps (JOB1/JOB2/merged analysis) remain on their own branches.
 
-D) Not uploaded / GitHub limits
-   - Single archive of the full no-data tree (~49 MB) hit API limits in one request; use (2)+(3) instead.
-   - Secrets, tokens, and .git credentials are not included.
+D) Full no-data tree (includes large SGC JSON in logs/) — split upload
+   On branch preserve/wulver-full-filesystem-2026-03-21:
+     diagnosis/wulver_full_snapshot_2026-03-21/full_no_data/_push_all_no_data.tar.gz.part.00
+     diagnosis/wulver_full_snapshot_2026-03-21/full_no_data/_push_all_no_data.tar.gz.part.01
+   Rejoin:
+     cat _push_all_no_data.tar.gz.part.00 _push_all_no_data.tar.gz.part.01 > _push_all_no_data.tar.gz
+     # then extract as usual; should match the monolithic no-data snapshot
+
+E) Not included
+   - Secrets, tokens, and .git credentials.
