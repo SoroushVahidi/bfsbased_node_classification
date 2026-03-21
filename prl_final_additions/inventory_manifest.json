@@ -1,0 +1,244 @@
+{
+  "generated_at": "2026-03-21T15:23:49.997123",
+  "root": "/home/sv96/node_classification_manuscript",
+  "files": [
+    {
+      "path": "code/bfsbased_node_classification/manuscript_runner.py",
+      "bytes": 46431,
+      "mtime": 1774111644.699233
+    },
+    {
+      "path": "logs/case_studies_manuscript_final_validation_job2.md",
+      "bytes": 1476,
+      "mtime": 1774045933.2620745
+    },
+    {
+      "path": "logs/comparison_fairness_report_manuscript_final_validation.md",
+      "bytes": 1856,
+      "mtime": 1774112057.312557
+    },
+    {
+      "path": "logs/comparison_fairness_report_manuscript_final_validation_job2.md",
+      "bytes": 1093,
+      "mtime": 1774045933.1579437
+    },
+    {
+      "path": "logs/comparison_fairness_report_manuscript_final_validation_main.md",
+      "bytes": 1640,
+      "mtime": 1773971883.0083578
+    },
+    {
+      "path": "logs/comparison_runs_manuscript_final_validation.jsonl",
+      "bytes": 645317,
+      "mtime": 1774112057.27705
+    },
+    {
+      "path": "logs/comparison_runs_manuscript_final_validation.jsonl",
+      "bytes": 645317,
+      "mtime": 1774112057.27705
+    },
+    {
+      "path": "logs/comparison_runs_manuscript_final_validation_job1.jsonl",
+      "bytes": 500919,
+      "mtime": 1773971882.9845243
+    },
+    {
+      "path": "logs/comparison_runs_manuscript_final_validation_job1.jsonl",
+      "bytes": 500919,
+      "mtime": 1773971882.9845243
+    },
+    {
+      "path": "logs/comparison_runs_manuscript_final_validation_job2.jsonl",
+      "bytes": 144398,
+      "mtime": 1774045933.1337616
+    },
+    {
+      "path": "logs/comparison_runs_manuscript_final_validation_job2.jsonl",
+      "bytes": 144398,
+      "mtime": 1774045933.1337616
+    },
+    {
+      "path": "logs/comparison_runs_manuscript_final_validation_main.jsonl",
+      "bytes": 500919,
+      "mtime": 1773971882.9845243
+    },
+    {
+      "path": "logs/comparison_runs_manuscript_final_validation_main.jsonl",
+      "bytes": 500919,
+      "mtime": 1773971882.9845243
+    },
+    {
+      "path": "logs/comparison_summary_manuscript_final_validation.json",
+      "bytes": 30341,
+      "mtime": 1774112057.308082
+    },
+    {
+      "path": "logs/comparison_summary_manuscript_final_validation_job2.json",
+      "bytes": 6858,
+      "mtime": 1774045933.155534
+    },
+    {
+      "path": "logs/comparison_summary_manuscript_final_validation_main.json",
+      "bytes": 23603,
+      "mtime": 1773971883.002909
+    },
+    {
+      "path": "logs/correction_behavior_manuscript_final_validation_job2.csv",
+      "bytes": 393,
+      "mtime": 1774045933.1567428
+    },
+    {
+      "path": "logs/gain_over_mlp_manuscript_final_validation_job2.csv",
+      "bytes": 225,
+      "mtime": 1774045933.1560922
+    },
+    {
+      "path": "logs/manuscript_case_studies_final_validation.md",
+      "bytes": 4985,
+      "mtime": 1774112057.54332
+    },
+    {
+      "path": "logs/manuscript_case_studies_final_validation_main.md",
+      "bytes": 3618,
+      "mtime": 1773971883.1418543
+    },
+    {
+      "path": "logs/manuscript_correction_behavior_final_validation.csv",
+      "bytes": 1040,
+      "mtime": 1774112057.3101807
+    },
+    {
+      "path": "logs/manuscript_correction_behavior_final_validation_main.csv",
+      "bytes": 856,
+      "mtime": 1773971883.0057592
+    },
+    {
+      "path": "logs/manuscript_gain_over_mlp_final_validation.csv",
+      "bytes": 568,
+      "mtime": 1774112057.309166
+    },
+    {
+      "path": "logs/manuscript_gain_over_mlp_final_validation_main.csv",
+      "bytes": 469,
+      "mtime": 1773971883.0044973
+    },
+    {
+      "path": "logs/manuscript_regime_analysis_final_validation.csv",
+      "bytes": 927,
+      "mtime": 1774112057.3114376
+    },
+    {
+      "path": "logs/manuscript_regime_analysis_final_validation_main.csv",
+      "bytes": 793,
+      "mtime": 1773971883.0071216
+    },
+    {
+      "path": "logs/regime_analysis_manuscript_final_validation_job2.csv",
+      "bytes": 334,
+      "mtime": 1774045933.157306
+    },
+    {
+      "path": "results_prl/README_threshold_sensitivity.md",
+      "bytes": 2176,
+      "mtime": 1774120579.71593
+    },
+    {
+      "path": "results_prl/build_threshold_sensitivity_artifacts.py",
+      "bytes": 9177,
+      "mtime": 1774120616.417526
+    },
+    {
+      "path": "results_prl/fig_threshold_sensitivity_panels_crossruns.pdf",
+      "bytes": 26106,
+      "mtime": 1774120570.217118
+    },
+    {
+      "path": "results_prl/fig_threshold_sensitivity_panels_crossruns.png",
+      "bytes": 131521,
+      "mtime": 1774120569.603404
+    },
+    {
+      "path": "results_prl/fig_threshold_vs_delta_crossruns.pdf",
+      "bytes": 20178,
+      "mtime": 1774120568.113197
+    },
+    {
+      "path": "results_prl/fig_threshold_vs_delta_crossruns.png",
+      "bytes": 81240,
+      "mtime": 1774120567.708404
+    },
+    {
+      "path": "results_prl/fig_threshold_vs_uncertain_fraction_crossruns.pdf",
+      "bytes": 19423,
+      "mtime": 1774120567.113045
+    },
+    {
+      "path": "results_prl/fig_threshold_vs_uncertain_fraction_crossruns.png",
+      "bytes": 84114,
+      "mtime": 1774120565.699198
+    },
+    {
+      "path": "results_prl/threshold_sensitivity_crossruns.jsonl",
+      "bytes": 73875,
+      "mtime": 1774120555.540968
+    },
+    {
+      "path": "results_prl/threshold_sensitivity_mini_table_tertiles.csv",
+      "bytes": 1418,
+      "mtime": 1774120579.7154093
+    },
+    {
+      "path": "results_prl/threshold_sensitivity_summary.csv",
+      "bytes": 1350,
+      "mtime": 1774120602.8046927
+    },
+    {
+      "path": "results_prl/threshold_uncertainty_crossrun_summary.csv",
+      "bytes": 1350,
+      "mtime": 1774120555.6823597
+    },
+    {
+      "path": "run_metadata/job1_key_files.sha256",
+      "bytes": 684,
+      "mtime": 1773870757.4693985
+    },
+    {
+      "path": "run_metadata/job1_rerun_887233_patch_note.txt",
+      "bytes": 566,
+      "mtime": 1773938937.0138068
+    },
+    {
+      "path": "run_metadata/job1_run_command.sh",
+      "bytes": 608,
+      "mtime": 1773870757.4354756
+    },
+    {
+      "path": "run_metadata/job1_snapshot.json",
+      "bytes": 1514,
+      "mtime": 1773870801.6966841
+    },
+    {
+      "path": "run_metadata/job1_snapshot.txt",
+      "bytes": 1260,
+      "mtime": 1773870808.5612059
+    },
+    {
+      "path": "slurm/run_selective_validation_analysis.sbatch",
+      "bytes": 3880,
+      "mtime": 1773932110.1981149
+    },
+    {
+      "path": "slurm/run_selective_validation_large_controls.sbatch",
+      "bytes": 994,
+      "mtime": 1773932110.1983068
+    },
+    {
+      "path": "slurm/run_selective_validation_main_r3.sbatch",
+      "bytes": 4284,
+      "mtime": 1773932110.199196
+    }
+  ],
+  "counts": {
+    "total_files_listed": 47
+  }
+}

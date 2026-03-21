@@ -1,0 +1,52 @@
+{
+  "root": "/home/sv96/node_classification_manuscript",
+  "updated": "2026-03-21",
+  "canonical_final_validation": {
+    "gain_over_mlp": "logs/manuscript_gain_over_mlp_final_validation.csv",
+    "correction_behavior": "logs/manuscript_correction_behavior_final_validation.csv",
+    "regime_analysis": "logs/manuscript_regime_analysis_final_validation.csv",
+    "comparison_runs_jsonl": "logs/comparison_runs_manuscript_final_validation.jsonl",
+    "comparison_summary_json": "logs/comparison_summary_manuscript_final_validation.json",
+    "case_studies_md": "logs/manuscript_case_studies_final_validation.md",
+    "fairness_md": "logs/comparison_fairness_report_manuscript_final_validation.md"
+  },
+  "prl_generated_additions": {
+    "audit_report": "prl_final_additions/MANUSCRIPT_PRL_AUDIT.md",
+    "gap_analysis_csv": "prl_final_additions/prl_gap_analysis.csv",
+    "machine_inventory_legacy": "prl_final_additions/inventory_manifest.json",
+    "tables_merged_benchmark": "prl_final_additions/tables/prl_main_benchmark_merged.csv",
+    "tables_win_tie_loss": "prl_final_additions/tables/prl_split_win_tie_loss.csv",
+    "tables_correction_compact": "prl_final_additions/tables/prl_correction_behavior_compact.csv",
+    "key_numbers_json": "prl_final_additions/key_numbers.json",
+    "figure_delta_bar_pdf": "prl_final_additions/figures/fig_delta_vs_mlp_bar.pdf",
+    "figure_delta_bar_png": "prl_final_additions/figures/fig_delta_vs_mlp_bar.png",
+    "script_build_tables": "prl_final_additions/scripts/build_prl_tables.py",
+    "script_benchmark_figure": "prl_final_additions/scripts/generate_prl_benchmark_figure.py"
+  },
+  "threshold_crossrun_package": {
+    "readme": "results_prl/README_threshold_sensitivity.md",
+    "builder": "results_prl/build_threshold_sensitivity_artifacts.py",
+    "jsonl": "results_prl/threshold_sensitivity_crossruns.jsonl",
+    "summary_csvs": [
+      "results_prl/threshold_uncertainty_crossrun_summary.csv",
+      "results_prl/threshold_sensitivity_mini_table_tertiles.csv",
+      "results_prl/threshold_sensitivity_summary.csv"
+    ],
+    "figures": [
+      "results_prl/fig_threshold_vs_uncertain_fraction_crossruns.pdf",
+      "results_prl/fig_threshold_vs_delta_crossruns.pdf",
+      "results_prl/fig_threshold_sensitivity_panels_crossruns.pdf"
+    ]
+  },
+  "slurm_scripts_active": [
+    "slurm/run_selective_validation_main_r3.sbatch",
+    "slurm/run_selective_validation_large_controls.sbatch",
+    "slurm/run_selective_validation_analysis.sbatch"
+  ],
+  "manuscript_tex_in_repo": false,
+  "obsolete_or_superseded_hints": [
+    "logs/broken_job1_883410_backup_2026-03-19/",
+    "logs/*_final_validation_main.csv (use *_final_validation.csv where merged)",
+    "code/bfsbased_node_classification/diagnosis/preserve_* (archival duplicates of logs/)"
+  ]
+}

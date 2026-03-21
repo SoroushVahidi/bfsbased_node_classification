@@ -1,0 +1,60 @@
+{
+  "benchmark_delta_vs_mlp": {
+    "actor": "-0.0009",
+    "chameleon": "+0.0000",
+    "citeseer": "+0.0251",
+    "cora": "+0.0351",
+    "cornell": "+0.0000",
+    "pubmed": "+0.0117",
+    "squirrel": "+0.0002",
+    "texas": "+0.0009",
+    "wisconsin": "-0.0020"
+  },
+  "win_tie_loss": {
+    "actor": {
+      "sgc": "10",
+      "mlp": "16",
+      "ties": "4"
+    },
+    "chameleon": {
+      "sgc": "13",
+      "mlp": "13",
+      "ties": "4"
+    },
+    "citeseer": {
+      "sgc": "30",
+      "mlp": "0",
+      "ties": "0"
+    },
+    "cora": {
+      "sgc": "30",
+      "mlp": "0",
+      "ties": "0"
+    },
+    "cornell": {
+      "sgc": "5",
+      "mlp": "5",
+      "ties": "20"
+    },
+    "pubmed": {
+      "sgc": "30",
+      "mlp": "0",
+      "ties": "0"
+    },
+    "squirrel": {
+      "sgc": "14",
+      "mlp": "14",
+      "ties": "2"
+    },
+    "texas": {
+      "sgc": "5",
+      "mlp": "4",
+      "ties": "21"
+    },
+    "wisconsin": {
+      "sgc": "1",
+      "mlp": "3",
+      "ties": "26"
+    }
+  }
+}

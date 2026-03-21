@@ -1,7 +1,0 @@
-dataset,method,n_runs,n_runs_with_test_acc,mean_test_acc,std_test_acc,mean_total_runtime_sec,success_count,total_count,parameter_source_values,parameter_tuning_target_method_values
-texas,mlp_only,10,10,0.7891891956329345,0.05378309661320749,0.21533214549999685,10,10,['mlp_only_self_tuned'],['mlp_only']
-texas,prop_only,10,10,0.5648648648648649,0.10145040204931598,2.5629311641008825,10,10,['tuned_on_predictclass_then_reused'],['predictclass']
-texas,selective_graph_correction,10,10,0.7891891891891891,0.057713936497466554,0.00889727980538737,10,10,['validation_selected_threshold_and_weights'],['selective_graph_correction']
-chameleon,mlp_only,10,10,0.4594298303127289,0.014554863331189487,0.9504164853002294,10,10,['mlp_only_self_tuned'],['mlp_only']
-chameleon,prop_only,10,10,0.3894736842105263,0.03492561237126044,60.68983208900172,10,10,['tuned_on_predictclass_then_reused'],['predictclass']
-chameleon,selective_graph_correction,10,10,0.46118421052631575,0.014679884185245224,0.2886746121002943,10,10,['validation_selected_threshold_and_weights'],['selective_graph_correction']

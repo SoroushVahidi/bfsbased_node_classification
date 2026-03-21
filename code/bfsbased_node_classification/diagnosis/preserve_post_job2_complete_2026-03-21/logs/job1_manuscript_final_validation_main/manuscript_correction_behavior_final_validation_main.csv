@@ -1,0 +1,8 @@
+dataset,n_runs,avg_threshold_high,avg_b1,avg_b2,avg_b3,avg_b4,use_feature_knn,avg_uncertain_frac,avg_changed_of_uncertain_frac,zero_uncertain_runs,zero_changed_runs,acc_on_confident_mean,acc_on_uncertain_mean
+actor,30,0.161,1.033,0.600,0.000,0.570,no,0.186,0.219,0,0,see_diagnostics,see_diagnostics
+chameleon,30,0.125,1.033,0.527,0.000,0.663,no,0.068,0.225,0,1,see_diagnostics,see_diagnostics
+citeseer,30,0.569,1.000,0.400,0.000,0.900,no,0.212,0.243,0,0,see_diagnostics,see_diagnostics
+cora,30,0.592,1.000,0.400,0.000,0.900,no,0.207,0.227,0,0,see_diagnostics,see_diagnostics
+cornell,30,0.061,1.000,0.600,0.000,0.527,no,0.041,0.278,9,18,see_diagnostics,see_diagnostics
+texas,30,0.050,1.000,0.660,0.000,0.460,no,0.029,0.336,12,17,see_diagnostics,see_diagnostics
+wisconsin,30,0.067,1.000,0.553,0.000,0.593,no,0.024,0.217,11,21,see_diagnostics,see_diagnostics

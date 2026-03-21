@@ -1,0 +1,1 @@
+dataset,n_runs,avg_threshold_high,avg_b1,avg_b2,avg_b3,avg_b4,use_feature_knn,avg_uncertain_frac,avg_changed_of_uncertain_frac,zero_uncertain_runs,zero_changed_runs,acc_on_confident_mean,acc_on_uncertain_mean

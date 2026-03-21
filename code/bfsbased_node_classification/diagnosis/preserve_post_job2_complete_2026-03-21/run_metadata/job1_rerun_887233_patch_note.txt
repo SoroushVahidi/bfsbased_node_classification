@@ -1,0 +1,6 @@
+Patch note: JOB 1 rerun (887233)
+================================
+timestamp: 2026-03-19T12:48:57-04:00
+root_cause_summary: manuscript_runner.py called train_mlp_and_predict(...) with unsupported keyword args (val_indices=val_idx, patience=30), causing mlp_only to crash for all records.
+exact_fix_summary: removed val_indices=val_idx and patience=30 from the train_mlp_and_predict call in manuscript_runner.py (mlp_only block) so the call matches bfsbased-full-investigate-homophil.py signature.
+affected_file: code/bfsbased_node_classification/manuscript_runner.py

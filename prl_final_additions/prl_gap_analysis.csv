@@ -1,0 +1,9 @@
+item_id,topic,status,notes
+A,Main benchmark table,EXISTS AND SUFFICIENT,Canonical: logs/manuscript_gain_over_mlp_final_validation.csv; merged: prl_final_additions/tables/prl_main_benchmark_merged.csv
+B,Score weighting / correction behavior,EXISTS AND SUFFICIENT,logs/manuscript_correction_behavior_final_validation.csv; use_feature_knn=no all datasets
+C,Threshold sensitivity,EXISTS BUT NEEDS CLEANUP,results_prl/: cross-run co-variation only; README states not a true tau sweep; cite caveats
+D,Qualitative correction analysis,EXISTS BUT NEEDS CLEANUP,logs/manuscript_case_studies_final_validation.md; trim for 7 pages
+E,Statistical stability / win-tie-loss,EXISTS AND SUFFICIENT,30 paired comparisons per dataset in gain CSV; not formal significance tests unless added
+F,Compact material figure,EXISTS,prl_final_additions/figures/fig_delta_vs_mlp_bar.pdf; optional results_prl threshold panels for supplement
+G,Supplement appendix artifacts,OPTIONAL,JSONL full runs; fairness MD; threshold tertile CSVs; diagnosis preserve_* archives
+H,Reproducibility bundle,EXISTS BUT NEEDS CLEANUP,comparison_runs_manuscript_final_validation.jsonl + manuscript_runner.py; add env pin at submission if required

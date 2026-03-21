@@ -1,17 +1,19 @@
+# Python
 __pycache__/
 *.py[cod]
-*.pyo
-*.egg-info/
-dist/
-build/
-.eggs/
-*.egg
-.env
-.venv
+*$py.class
+.Python
+*.so
+.venv/
 venv/
-env/
-data/
-logs/
-*.npz
-*.pt
-*.pth
+.env
+
+# Redundant local bundles (source of truth is logs/code dirs)
+diagnosis_bundle*.tar.gz
+_push_*.tar.gz
+_push_*.tar.gz.part.*
+
+# Editor
+.idea/
+.vscode/
+*.swp

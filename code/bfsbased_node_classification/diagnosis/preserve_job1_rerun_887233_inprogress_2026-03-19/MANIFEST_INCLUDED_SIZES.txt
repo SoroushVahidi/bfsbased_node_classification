@@ -1,0 +1,9 @@
+-rw-r--r-- 1 sv96 sv96 1144 Mar 19 18:00 ./INPROGRESS_STATUS_README.md
+-rw-r--r-- 1 sv96 sv96 566 Mar 19 12:48 ./job1_rerun_887233_patch_note.txt
+-rw-r--r-- 1 sv96 sv96 296401 Mar 19 17:58 ./logs/comparison_runs_manuscript_final_validation_main.jsonl
+-rw-r--r-- 1 sv96 sv96 0 Mar 19 18:00 ./MANIFEST_INCLUDED_SIZES.txt
+-rw-r--r-- 1 sv96 sv96 276 Mar 19 18:00 ./MANIFEST_INCLUDED.txt
+-rw-r--r-- 1 sv96 sv96 46431 Mar 19 16:07 ./manuscript_runner.py
+-rw-r--r-- 1 sv96 sv96 4284 Mar 19 10:55 ./run_selective_validation_main_r3.sbatch
+-rw-r--r-- 1 sv96 sv96 1819 Mar 19 11:20 ./slurm/sv_main_r3_887233.err
+-rw-r--r-- 1 sv96 sv96 1398 Mar 19 11:19 ./slurm/sv_main_r3_887233.out

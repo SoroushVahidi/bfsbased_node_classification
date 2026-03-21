@@ -1,0 +1,3 @@
+#!/bin/bash
+set -euo pipefail
+cd '/mmfs1/home/sv96/node_classification_manuscript' && source /apps/easybuild/software/Anaconda3/2023.09-0/etc/profile.d/conda.sh && conda activate feedback-weighted-maximization && python3 '/mmfs1/home/sv96/node_classification_manuscript/code/bfsbased_node_classification/manuscript_runner.py' --datasets cora citeseer chameleon texas actor cornell wisconsin --splits 0 1 2 3 4 5 6 7 8 9 --repeats 3 --methods mlp_only prop_only selective_graph_correction --split-dir '/mmfs1/home/sv96/node_classification_manuscript/data/splits' --output-tag manuscript_final_validation_main

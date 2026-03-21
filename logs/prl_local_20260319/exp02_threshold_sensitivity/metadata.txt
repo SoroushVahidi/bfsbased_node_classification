@@ -1,9 +1,0 @@
-timestamp_utc: 2026-03-19T03:12:16.195192+00:00
-hostname: cursor
-pwd: /workspace
-python_version: Python 3.12.3
-key_script_names_used: comparison_runner.py, bfsbased-full-investigate-homophil.py
-dataset_list: ['cora', 'citeseer']
-split_list: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-repeat_count: 1
-important_hyperparameters_configs: threshold_grid=[0.03,0.05,0.08,0.12,0.18,0.25,0.35,0.50,0.65]; full weights; feature_knn=False; write_node_diagnostics=False
