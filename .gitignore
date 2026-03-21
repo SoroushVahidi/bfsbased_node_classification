@@ -1,17 +1,1 @@
-__pycache__/
-*.py[cod]
-*.pyo
-*.egg-info/
-dist/
-build/
-.eggs/
-*.egg
-.env
-.venv
-venv/
-env/
-data/
-logs/
-*.npz
-*.pt
-*.pth
+404: Not Found__pycache__/

@@ -1,0 +1,537 @@
+===== JOB SELF REPORT =====
+hostname: n0011
+date: 2026-03-18T17:59:59-04:00
+working_directory: /mmfs1/home/sv96
+python_executable: /home/sv96/.conda/envs/feedback-weighted-maximization/bin/python3
+python_version: 
+conda_default_env: feedback-weighted-maximization
+conda_prefix: /home/sv96/.conda/envs/feedback-weighted-maximization
+git_repo_dir: /mmfs1/home/sv96/node_classification_manuscript/code/bfsbased_node_classification
+main
+690c5179911294f264081500287d797b2a19eeb3
+provenance_github_ref: 4252d292c84ae5d0a5db55d6ae94a01a96009357
+provenance_blobs: 622036cab9ba33b34190ba88ef2ac88c52f5972e (bfsbased-full-investigate-homophil.py)
+provenance_blobs: 756447e7117a0b017a5f73e496ba05e28fd41272 (comparison_runner.py)
+datasets: cora citeseer chameleon texas actor cornell wisconsin
+splits: 0 1 2 3 4 5 6 7 8 9
+repeats: 3
+methods: mlp_only prop_only selective_graph_correction
+output_tag: manuscript_final_validation_main
+split_root: /mmfs1/home/sv96/node_classification_manuscript/data/splits
+data_root: /mmfs1/home/sv96/node_classification_manuscript/data
+logs_root: /mmfs1/home/sv96/node_classification_manuscript/logs
+SLURM_JOB_ID: 883410
+SLURM_JOB_NAME: sv_main_r3
+=============================
+[run] python3 /mmfs1/home/sv96/node_classification_manuscript/code/bfsbased_node_classification/manuscript_runner.py (output-tag: manuscript_final_validation_main)
+
+=== Split Coverage Check ===
+  cora        : FULL
+  citeseer    : FULL
+  chameleon   : FULL
+  texas       : FULL
+  actor       : FULL
+  cornell     : FULL
+  wisconsin   : FULL
+
+Datasets to run: ['cora', 'citeseer', 'chameleon', 'texas', 'actor', 'cornell', 'wisconsin']
+Methods: ['mlp_only', 'prop_only', 'selective_graph_correction']
+Split ids per dataset: varies (only available ids run)
+Repeats: 3
+
+Loading bfsbased-full-investigate-homophil module...
+[dataset] loaded texas | nodes=183 | edges=574
+
+✅ Loaded  dataset with 183 nodes, 574 edges
+   - Features: 1703
+   - Number of Classes: 5
+   - Number of Components: 1
+Logs written to logs/texas_full-investigate-v2_20260318_180037.txt
+
+============================================================
+Dataset: cora  (10 splits)
+============================================================
+  split=0  repeat=1/3  seed=133700
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=2/3  seed=133701
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=3/3  seed=133702
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=1/3  seed=133800
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=2/3  seed=133801
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=3/3  seed=133802
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=1/3  seed=133900
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=2/3  seed=133901
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=3/3  seed=133902
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=1/3  seed=134000
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=2/3  seed=134001
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=3/3  seed=134002
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=1/3  seed=134100
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=2/3  seed=134101
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=3/3  seed=134102
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=1/3  seed=134200
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=2/3  seed=134201
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=3/3  seed=134202
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=1/3  seed=134300
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=2/3  seed=134301
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=3/3  seed=134302
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=1/3  seed=134400
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=2/3  seed=134401
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=3/3  seed=134402
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=1/3  seed=134500
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=2/3  seed=134501
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=3/3  seed=134502
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=1/3  seed=134600
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=2/3  seed=134601
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=3/3  seed=134602
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+
+============================================================
+Dataset: citeseer  (10 splits)
+============================================================
+  split=0  repeat=1/3  seed=133700
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=2/3  seed=133701
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=3/3  seed=133702
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=1/3  seed=133800
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=2/3  seed=133801
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=3/3  seed=133802
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=1/3  seed=133900
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=2/3  seed=133901
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=3/3  seed=133902
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=1/3  seed=134000
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=2/3  seed=134001
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=3/3  seed=134002
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=1/3  seed=134100
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=2/3  seed=134101
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=3/3  seed=134102
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=1/3  seed=134200
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=2/3  seed=134201
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=3/3  seed=134202
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=1/3  seed=134300
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=2/3  seed=134301
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=3/3  seed=134302
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=1/3  seed=134400
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=2/3  seed=134401
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=3/3  seed=134402
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=1/3  seed=134500
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=2/3  seed=134501
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=3/3  seed=134502
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=1/3  seed=134600
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=2/3  seed=134601
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=3/3  seed=134602
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+
+============================================================
+Dataset: chameleon  (10 splits)
+============================================================
+  split=0  repeat=1/3  seed=133700
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=2/3  seed=133701
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=3/3  seed=133702
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=1/3  seed=133800
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=2/3  seed=133801
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=3/3  seed=133802
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=1/3  seed=133900
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=2/3  seed=133901
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=3/3  seed=133902
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=1/3  seed=134000
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=2/3  seed=134001
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=3/3  seed=134002
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=1/3  seed=134100
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=2/3  seed=134101
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=3/3  seed=134102
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=1/3  seed=134200
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=2/3  seed=134201
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=3/3  seed=134202
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=1/3  seed=134300
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=2/3  seed=134301
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=3/3  seed=134302
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=1/3  seed=134400
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=2/3  seed=134401
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=3/3  seed=134402
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=1/3  seed=134500
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=2/3  seed=134501
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=3/3  seed=134502
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=1/3  seed=134600
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=2/3  seed=134601
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=3/3  seed=134602
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+
+============================================================
+Dataset: texas  (10 splits)
+============================================================
+  split=0  repeat=1/3  seed=133700
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=2/3  seed=133701
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=3/3  seed=133702
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=1/3  seed=133800
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=2/3  seed=133801
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=3/3  seed=133802
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=1/3  seed=133900
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=2/3  seed=133901
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=3/3  seed=133902
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=1/3  seed=134000
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=2/3  seed=134001
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=3/3  seed=134002
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=1/3  seed=134100
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=2/3  seed=134101
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=3/3  seed=134102
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=1/3  seed=134200
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=2/3  seed=134201
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=3/3  seed=134202
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=1/3  seed=134300
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=2/3  seed=134301
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=3/3  seed=134302
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=1/3  seed=134400
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=2/3  seed=134401
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=3/3  seed=134402
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=1/3  seed=134500
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=2/3  seed=134501
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=3/3  seed=134502
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=1/3  seed=134600
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=2/3  seed=134601
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=3/3  seed=134602
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+
+============================================================
+Dataset: actor  (10 splits)
+============================================================
+  split=0  repeat=1/3  seed=133700
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=2/3  seed=133701
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=3/3  seed=133702
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=1/3  seed=133800
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=2/3  seed=133801
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=3/3  seed=133802
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=1/3  seed=133900
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=2/3  seed=133901
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=3/3  seed=133902
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=1/3  seed=134000
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=2/3  seed=134001
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=3/3  seed=134002
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=1/3  seed=134100
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=2/3  seed=134101
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=3/3  seed=134102
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=1/3  seed=134200
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=2/3  seed=134201
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=3/3  seed=134202
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=1/3  seed=134300
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=2/3  seed=134301
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=3/3  seed=134302
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=1/3  seed=134400
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=2/3  seed=134401
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=3/3  seed=134402
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=1/3  seed=134500
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=2/3  seed=134501
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=3/3  seed=134502
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=1/3  seed=134600
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=2/3  seed=134601
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=3/3  seed=134602
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+
+============================================================
+Dataset: cornell  (10 splits)
+============================================================
+  split=0  repeat=1/3  seed=133700
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=2/3  seed=133701
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=3/3  seed=133702
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=1/3  seed=133800
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=2/3  seed=133801
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=3/3  seed=133802
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=1/3  seed=133900
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=2/3  seed=133901
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=3/3  seed=133902
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=1/3  seed=134000
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=2/3  seed=134001
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=3/3  seed=134002
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=1/3  seed=134100
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=2/3  seed=134101
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=3/3  seed=134102
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=1/3  seed=134200
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=2/3  seed=134201
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=3/3  seed=134202
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=1/3  seed=134300
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=2/3  seed=134301
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=3/3  seed=134302
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=1/3  seed=134400
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=2/3  seed=134401
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=3/3  seed=134402
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=1/3  seed=134500
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=2/3  seed=134501
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=3/3  seed=134502
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=1/3  seed=134600
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=2/3  seed=134601
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=3/3  seed=134602
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+
+============================================================
+Dataset: wisconsin  (10 splits)
+============================================================
+  split=0  repeat=1/3  seed=133700
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=2/3  seed=133701
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=0  repeat=3/3  seed=133702
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=1/3  seed=133800
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=2/3  seed=133801
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=1  repeat=3/3  seed=133802
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=1/3  seed=133900
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=2/3  seed=133901
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=2  repeat=3/3  seed=133902
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=1/3  seed=134000
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=2/3  seed=134001
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=3  repeat=3/3  seed=134002
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=1/3  seed=134100
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=2/3  seed=134101
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=4  repeat=3/3  seed=134102
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=1/3  seed=134200
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=2/3  seed=134201
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=5  repeat=3/3  seed=134202
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=1/3  seed=134300
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=2/3  seed=134301
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=6  repeat=3/3  seed=134302
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=1/3  seed=134400
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=2/3  seed=134401
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=7  repeat=3/3  seed=134402
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=1/3  seed=134500
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=2/3  seed=134501
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=8  repeat=3/3  seed=134502
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=1/3  seed=134600
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=2/3  seed=134601
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+  split=9  repeat=3/3  seed=134602
+    [WARN] mlp_only failed: train_mlp_and_predict() got an unexpected keyword argument 'val_indices'
+
+Total runs completed: 420  Wall time: 5454.4s
+Raw records written to: logs/comparison_runs_manuscript_final_validation_main.jsonl
+Summary written to: logs/comparison_summary_manuscript_final_validation_main.json
+Gain-over-MLP table written to: logs/gain_over_mlp_manuscript_final_validation_main.csv
+Correction-behavior table written to: logs/correction_behavior_manuscript_final_validation_main.csv
+Regime-analysis table written to: logs/regime_analysis_manuscript_final_validation_main.csv
+Fairness report written to: logs/comparison_fairness_report_manuscript_final_validation_main.md
+
+======================================================================
+CORE RESULT TABLE (manuscript_final_validation_main)
+======================================================================
+Dataset                            mlp_only                    prop_only                          sgc
+--------------------------------------------------------------------------------
+actor                                  N/A             0.3213 ± 0.0189                         N/A
+chameleon                              N/A             0.3819 ± 0.0412                         N/A
+citeseer                               N/A             0.6815 ± 0.0377                         N/A
+cora                                   N/A             0.8142 ± 0.0261                         N/A
+cornell                                N/A             0.5009 ± 0.0887                         N/A
+texas                                  N/A             0.5703 ± 0.1055                         N/A
+wisconsin                              N/A             0.5386 ± 0.0874                         N/A
+======================================================================
+Case studies written to: logs/case_studies_manuscript_final_validation_main.md
+
+=== Output Artifacts ===
+  runs_path: logs/comparison_runs_manuscript_final_validation_main.jsonl
+  summary_path: logs/comparison_summary_manuscript_final_validation_main.json
+  fairness_path: logs/comparison_fairness_report_manuscript_final_validation_main.md
+  gain_path: logs/gain_over_mlp_manuscript_final_validation_main.csv
+  correction_path: logs/correction_behavior_manuscript_final_validation_main.csv
+  regime_path: logs/regime_analysis_manuscript_final_validation_main.csv
+  case_studies: logs/case_studies_manuscript_final_validation_main.md
+
+=== Manuscript Readiness Assessment ===
+  No SGC vs MLP comparison data yet.
+
+Note: Run with repeats=3 on Wulver for manuscript-quality stability estimates.
+Note: Case studies require per-node diagnostics JSON files in logs/.
+[rename] Normalizing gain/correction/regime/case-study filenames...
+[done] JOB 1 outputs normalized.

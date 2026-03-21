@@ -1,0 +1,3 @@
+dataset,n_runs,avg_threshold_high,avg_b1,avg_b2,avg_b3,avg_b4,use_feature_knn,avg_uncertain_frac,avg_changed_of_uncertain_frac,zero_uncertain_runs,zero_changed_runs,acc_on_confident_mean,acc_on_uncertain_mean
+pubmed,30,0.857,1.000,0.400,0.000,0.900,no,0.198,0.148,0,0,see_diagnostics,see_diagnostics
+squirrel,30,0.128,1.027,0.570,0.000,0.613,no,0.073,0.178,0,0,see_diagnostics,see_diagnostics

@@ -1,0 +1,8 @@
+dataset,num_nodes,num_edges,num_classes,avg_degree,homophily,mlp_mean,mlp_std,prop_mean,prop_std,sgc_mean,sgc_std,sgc_delta_vs_mlp,regime_note
+actor,7600,53411,5,7.03,0.218,N/A,N/A,0.3213,0.0189,N/A,N/A,N/A,heterophilic
+chameleon,2277,62792,5,27.58,0.231,N/A,N/A,0.3819,0.0412,N/A,N/A,N/A,heterophilic
+citeseer,3327,9104,6,2.74,0.736,N/A,N/A,0.6815,0.0377,N/A,N/A,N/A,homophilic
+cora,2708,10556,7,3.90,0.810,N/A,N/A,0.8142,0.0261,N/A,N/A,N/A,homophilic
+cornell,183,557,5,3.04,0.127,N/A,N/A,0.5009,0.0887,N/A,N/A,N/A,heterophilic
+texas,183,574,5,3.14,0.087,N/A,N/A,0.5703,0.1055,N/A,N/A,N/A,heterophilic
+wisconsin,251,916,5,3.65,0.192,N/A,N/A,0.5386,0.0874,N/A,N/A,N/A,heterophilic
