@@ -1,0 +1,301 @@
+{
+  "generated_at": "2026-03-21T20:03:49.601546+00:00",
+  "repo_root": "/mmfs1/home/sv96/bfsbased_node_classification_git",
+  "entries": [
+    {
+      "path": "figures/prl_final_additions/fig_delta_vs_mlp_bar.pdf",
+      "bytes": 16297,
+      "category": "figures"
+    },
+    {
+      "path": "figures/prl_final_additions/fig_delta_vs_mlp_bar.png",
+      "bytes": 53617,
+      "category": "figures"
+    },
+    {
+      "path": "figures/prl_final_additions/fig_gate_stats_priority_four.pdf",
+      "bytes": 16509,
+      "category": "figures"
+    },
+    {
+      "path": "figures/prl_final_additions/fig_gate_stats_priority_four.png",
+      "bytes": 56221,
+      "category": "figures"
+    },
+    {
+      "path": "logs/comparison_runs_manuscript_final_validation.jsonl",
+      "bytes": 645317,
+      "category": "logs"
+    },
+    {
+      "path": "logs/comparison_runs_manuscript_final_validation_job1.jsonl",
+      "bytes": 500919,
+      "category": "logs"
+    },
+    {
+      "path": "logs/comparison_runs_manuscript_final_validation_job2.jsonl",
+      "bytes": 144398,
+      "category": "logs"
+    },
+    {
+      "path": "logs/comparison_runs_manuscript_final_validation_main.jsonl",
+      "bytes": 500919,
+      "category": "logs"
+    },
+    {
+      "path": "logs/comparison_summary_manuscript_final_validation.json",
+      "bytes": 30341,
+      "category": "logs"
+    },
+    {
+      "path": "logs/manuscript_case_studies_final_validation.md",
+      "bytes": 4985,
+      "category": "logs"
+    },
+    {
+      "path": "logs/manuscript_case_studies_final_validation_main.md",
+      "bytes": 3618,
+      "category": "logs"
+    },
+    {
+      "path": "logs/manuscript_correction_behavior_final_validation.csv",
+      "bytes": 1040,
+      "category": "logs"
+    },
+    {
+      "path": "logs/manuscript_correction_behavior_final_validation_main.csv",
+      "bytes": 856,
+      "category": "logs"
+    },
+    {
+      "path": "logs/manuscript_gain_over_mlp_final_validation.csv",
+      "bytes": 568,
+      "category": "logs"
+    },
+    {
+      "path": "logs/manuscript_gain_over_mlp_final_validation_main.csv",
+      "bytes": 469,
+      "category": "logs"
+    },
+    {
+      "path": "logs/manuscript_regime_analysis_final_validation.csv",
+      "bytes": 927,
+      "category": "logs"
+    },
+    {
+      "path": "logs/manuscript_regime_analysis_final_validation_main.csv",
+      "bytes": 793,
+      "category": "logs"
+    },
+    {
+      "path": "prl_final_additions/MANUSCRIPT_PRL_AUDIT.md",
+      "bytes": 10341,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/figures/fig_delta_vs_mlp_bar.pdf",
+      "bytes": 16297,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/figures/fig_delta_vs_mlp_bar.png",
+      "bytes": 53617,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/figures/fig_gate_stats_priority_four.pdf",
+      "bytes": 16509,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/figures/fig_gate_stats_priority_four.png",
+      "bytes": 56221,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/inventory_manifest.json",
+      "bytes": 6700,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/key_numbers.json",
+      "bytes": 1005,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/prl_canonical_inventory.json",
+      "bytes": 2799,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/prl_gap_analysis.csv",
+      "bytes": 1197,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/prl_writing_numbers.md",
+      "bytes": 2173,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/scripts/build_all_prl_artifacts.py",
+      "bytes": 3997,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/scripts/build_prl_tables.py",
+      "bytes": 4248,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/scripts/compute_subsection3_crossrun_correlations.py",
+      "bytes": 2730,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/scripts/generate_correction_behavior_priority_figure.py",
+      "bytes": 2084,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/scripts/generate_prl_benchmark_figure.py",
+      "bytes": 1536,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/tables/prl_correction_behavior_compact.csv",
+      "bytes": 1040,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/tables/prl_main_benchmark_merged.csv",
+      "bytes": 665,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/tables/prl_split_win_tie_loss.csv",
+      "bytes": 218,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "prl_final_additions/tables/prl_subsection3_crossrun_correlations.csv",
+      "bytes": 502,
+      "category": "prl_final_additions"
+    },
+    {
+      "path": "reports/prl_final_additions/CLAIMS_AND_CAVEATS.md",
+      "bytes": 1440,
+      "category": "reports"
+    },
+    {
+      "path": "reports/prl_final_additions/PRL_PHASE1_AUDIT.md",
+      "bytes": 3226,
+      "category": "reports"
+    },
+    {
+      "path": "reports/prl_final_additions/PRL_PHASE2_GAP_ANALYSIS.md",
+      "bytes": 1533,
+      "category": "reports"
+    },
+    {
+      "path": "reports/prl_final_additions/PRL_RESULTS_SUBSECTION_3.md",
+      "bytes": 2010,
+      "category": "reports"
+    },
+    {
+      "path": "reports/prl_final_additions/artifact_inventory.csv",
+      "bytes": 4284,
+      "category": "reports"
+    },
+    {
+      "path": "reports/prl_final_additions/artifact_inventory.json",
+      "bytes": 8178,
+      "category": "reports"
+    },
+    {
+      "path": "results_prl/README_threshold_sensitivity.md",
+      "bytes": 2176,
+      "category": "results_prl"
+    },
+    {
+      "path": "results_prl/build_threshold_sensitivity_artifacts.py",
+      "bytes": 9177,
+      "category": "results_prl"
+    },
+    {
+      "path": "results_prl/fig_threshold_sensitivity_panels_crossruns.pdf",
+      "bytes": 26106,
+      "category": "results_prl"
+    },
+    {
+      "path": "results_prl/fig_threshold_sensitivity_panels_crossruns.png",
+      "bytes": 131521,
+      "category": "results_prl"
+    },
+    {
+      "path": "results_prl/fig_threshold_vs_delta_crossruns.pdf",
+      "bytes": 20178,
+      "category": "results_prl"
+    },
+    {
+      "path": "results_prl/fig_threshold_vs_delta_crossruns.png",
+      "bytes": 81240,
+      "category": "results_prl"
+    },
+    {
+      "path": "results_prl/fig_threshold_vs_uncertain_fraction_crossruns.pdf",
+      "bytes": 19423,
+      "category": "results_prl"
+    },
+    {
+      "path": "results_prl/fig_threshold_vs_uncertain_fraction_crossruns.png",
+      "bytes": 84114,
+      "category": "results_prl"
+    },
+    {
+      "path": "results_prl/threshold_sensitivity_crossruns.jsonl",
+      "bytes": 73875,
+      "category": "results_prl"
+    },
+    {
+      "path": "results_prl/threshold_sensitivity_mini_table_tertiles.csv",
+      "bytes": 1418,
+      "category": "results_prl"
+    },
+    {
+      "path": "results_prl/threshold_sensitivity_summary.csv",
+      "bytes": 1350,
+      "category": "results_prl"
+    },
+    {
+      "path": "results_prl/threshold_uncertainty_crossrun_summary.csv",
+      "bytes": 1350,
+      "category": "results_prl"
+    },
+    {
+      "path": "tables/prl_final_additions/prl_benchmark_summary.csv",
+      "bytes": 665,
+      "category": "tables"
+    },
+    {
+      "path": "tables/prl_final_additions/prl_correction_behavior_compact.csv",
+      "bytes": 1040,
+      "category": "tables"
+    },
+    {
+      "path": "tables/prl_final_additions/prl_main_benchmark_merged.csv",
+      "bytes": 665,
+      "category": "tables"
+    },
+    {
+      "path": "tables/prl_final_additions/prl_split_win_tie_loss.csv",
+      "bytes": 218,
+      "category": "tables"
+    },
+    {
+      "path": "tables/prl_final_additions/prl_subsection3_crossrun_correlations.csv",
+      "bytes": 502,
+      "category": "tables"
+    }
+  ]
+}

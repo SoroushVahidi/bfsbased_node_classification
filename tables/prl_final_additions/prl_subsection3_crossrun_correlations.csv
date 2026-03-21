@@ -1,0 +1,10 @@
+dataset,n_runs,corr_threshold_vs_uncertain_fraction,corr_threshold_vs_delta_vs_mlp,corr_uncertain_fraction_vs_delta_vs_mlp,corr_threshold_vs_changed_fraction_test
+actor,30,0.987,0.034,0.016,0.775
+chameleon,30,0.951,-0.149,-0.224,0.463
+citeseer,30,0.710,-0.208,-0.005,-0.225
+cora,30,0.824,-0.192,0.211,-0.169
+cornell,30,0.664,0.000,-0.086,-0.066
+pubmed,30,0.730,0.120,0.178,-0.133
+squirrel,30,0.978,-0.060,-0.002,0.422
+texas,30,-0.000,0.000,-0.227,0.000
+wisconsin,30,0.560,-0.748,-0.508,0.429

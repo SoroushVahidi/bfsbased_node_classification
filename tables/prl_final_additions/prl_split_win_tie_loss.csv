@@ -1,0 +1,10 @@
+dataset,sgc_wins,mlp_wins,ties,n_comparisons
+actor,10,16,4,30
+chameleon,13,13,4,30
+citeseer,30,0,0,30
+cora,30,0,0,30
+cornell,5,5,20,30
+pubmed,30,0,0,30
+squirrel,14,14,2,30
+texas,5,4,21,30
+wisconsin,1,3,26,30
