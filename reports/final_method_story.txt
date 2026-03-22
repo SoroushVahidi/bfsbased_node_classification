@@ -15,7 +15,7 @@ In our frozen **10-split** benchmark, SGC v1 is worse than the MLP alone on
 **Texas splits 4, 5, and 9** and on **Wisconsin split 8** (see
 `reports/safety_analysis.md`).
 
-WHAT FINAL V3 DOES DIFFERENTLY
+WHAT FINAL_V3 DOES DIFFERENTLY
 We introduce a per-node graph reliability score R(v) that gates correction:
 
   R(v) = (neighbor_concentration + MLP_graph_agreement + degree_signal) / 3

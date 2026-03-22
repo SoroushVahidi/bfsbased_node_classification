@@ -3,6 +3,10 @@
 This repository is the working code-and-artifact package for the current
 Pattern Recognition Letters (PRL) manuscript line.
 
+For the short PRL paper, **`FINAL_V3` is the canonical method/package**.
+Older `UG-SGC`, `V2`, and structural-upgrade materials remain in the repository
+as provenance, baselines, or supplementary evidence only.
+
 It contains both:
 
 - the newer frozen PRL submission package centered on **FINAL_V3**
@@ -11,6 +15,7 @@ It contains both:
   **uncertainty-gated selective graph correction** (`UG-SGC`) plus the newer
   structural extension (`UG-SGC-S`)
 
+External-reviewer / LLM guide: `ANALYSIS_GUIDE.md`  
 Manuscript-oriented index: `README_PRL_MANUSCRIPT.md`  
 Frozen table/figure refresh instructions: `scripts/README_REPRODUCE.md`
 
@@ -84,7 +89,8 @@ not yet a universally stronger replacement.
 
 - Manuscript artifact guide: `README_PRL_MANUSCRIPT.md`
 - Frozen-method analysis: `reports/final_method_v3_analysis.md`
-- PRL resubmission method spec: `reports/prl_resubmission/PRL_METHOD_SPEC.md`
+- PRL resubmission / legacy method spec:
+  `reports/prl_resubmission/PRL_METHOD_SPEC.md`
 - Repo readiness audit: `reports/prl_resubmission/REPO_READINESS_AUDIT.md`
 - Current run/job status: `reports/prl_resubmission/RUN_STATUS.md`
 - Structural-upgrade smoke note:
@@ -124,6 +130,7 @@ python3 code/bfsbased_node_classification/run_final_evaluation.py \
 
 ## Reading guidance for external analysis
 
+- Start with `ANALYSIS_GUIDE.md` if you want the fastest orientation.
 - Start with `README_PRL_MANUSCRIPT.md`.
 - Treat `reports/prl_resubmission/RUN_STATUS.md` as the source of truth for
   which structural-upgrade jobs are complete versus still running.

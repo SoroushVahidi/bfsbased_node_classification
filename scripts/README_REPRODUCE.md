@@ -15,6 +15,8 @@ This regenerates:
 - `tables/main_results_prl.md` and `tables/main_results_prl.csv`
 - `tables/experimental_setup_prl.md`, `tables/ablation_prl.md`, `tables/sensitivity_prl.md` (and `.csv` partners)
 - `figures/prl_graphical_abstract_v3.png`
+- `figures/prl_graphical_abstract_v3.pdf`
+- `figures/prl_graphical_abstract_v3.svg`
 - `figures/correction_rate_vs_homophily.png`
 - `figures/safety_comparison.png`
 - `figures/reliability_vs_accuracy.png`
@@ -22,6 +24,15 @@ This regenerates:
 **Runtime:** a few seconds (Matplotlib + CSV I/O only; **no** PyTorch training).
 
 **Dependencies:** Python 3, NumPy, Matplotlib. Homophily values for the correction-rate figure are read from existing files under `logs/` (`manuscript_regime_analysis_final_validation_main.csv` and/or `regime_analysis_manuscript_final_validation_job2.csv`).
+
+**Important caveat about auxiliary FINAL_V3 diagnostics:** the shipped
+`reports/final_method_v3_results.csv` is standardized on the full **10-split**
+benchmark for the main accuracy table, but some split-level diagnostic columns
+(`frac_confident`, `frac_unreliable`, `tau`, `rho`, `runtime_sec`) are present
+only for splits `0–4` in the frozen rebuild path. That is sufficient for the
+current manuscript-facing behavior report because `reports/final_method_v3_analysis.md`
+already restricts those specific aggregates to splits `0–4` and uses all `10`
+splits for the main benchmark and harmful-split counts.
 
 ## Rebuild the canonical CSV from the frozen 10-split export (no training)
 
@@ -44,6 +55,17 @@ python3 code/bfsbased_node_classification/run_final_evaluation.py \
 ```
 
 That **overwrites** `reports/final_method_v3_results.csv` in the default configuration; keep backups if you are comparing against the shipped evidence package.
+
+Use `--output-tag <name>` if you want a side-by-side rerun without touching the
+canonical CSV:
+
+```bash
+python3 code/bfsbased_node_classification/run_final_evaluation.py \
+  --split-dir data/splits \
+  --datasets cora citeseer pubmed chameleon texas wisconsin \
+  --splits 0 1 2 3 4 5 6 7 8 9 \
+  --output-tag scratch
+```
 
 ## Optional: broader PRL artifact bundle
 

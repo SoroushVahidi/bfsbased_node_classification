@@ -1,5 +1,10 @@
 # PRL manuscript — repository & artifact audit
 
+> **Historical scope note:** this audit describes the older
+> `manuscript_runner` / `UG-SGC` evidence package. For the current frozen PRL
+> paper package, prefer `FINAL_V3` artifacts under `tables/main_results_prl.*`,
+> `reports/final_method_v3_analysis.md`, and `README_PRL_MANUSCRIPT.md`.
+
 **Root:** `/home/sv96/node_classification_manuscript`  
 **Date:** 2026-03-21 (audit); user date context 2026-03-18  
 **Venue target:** Pattern Recognition Letters (~7 pages incl. references)
@@ -10,7 +15,7 @@
 
 | Area | Status |
 |------|--------|
-| **Canonical benchmark + split evidence** | **Sufficient** — `logs/manuscript_gain_over_mlp_final_validation.csv` + `comparison_runs_manuscript_final_validation.jsonl` |
+| **Canonical benchmark + split evidence for the older UG-SGC package** | **Sufficient** — `logs/manuscript_gain_over_mlp_final_validation.csv` + `comparison_runs_manuscript_final_validation.jsonl` |
 | **Correction-behavior table (descriptive)** | **Sufficient** — `logs/manuscript_correction_behavior_final_validation.csv` |
 | **Regime / propagation baseline context** | **Sufficient** — `logs/manuscript_regime_analysis_final_validation.csv` |
 | **Threshold “sensitivity” (honest scope)** | **Exists** — cross-run co-variation in `results_prl/` (not a fixed-split τ sweep) |

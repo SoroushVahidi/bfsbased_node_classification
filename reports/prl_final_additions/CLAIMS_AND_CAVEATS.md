@@ -6,7 +6,8 @@
 
 ## Safe to claim
 
-- Strong **MLP** baseline; proposed method applies **graph corrections** only to **uncertain** nodes (gating).
+- Strong **MLP** baseline; in this older `UG-SGC` pipeline, graph corrections are
+  applied only to **uncertain** nodes.
 - On **Cora, CiteSeer, PubMed**, mean test accuracy **improves** vs MLP under the reported protocol (see `logs/manuscript_gain_over_mlp_final_validation.csv`).
 - **Descriptive** alignment: higher validation-selected **τ** and larger **uncertain** fractions on positive datasets vs some near-neutral sets — from aggregated correction CSV (not a causal ablation).
 - **feature-kNN** inactive (`use_feature_knn=no`) in final **aggregated** correction table.

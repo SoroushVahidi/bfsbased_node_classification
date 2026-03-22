@@ -4,6 +4,8 @@ PRL figure + table bundle for FINAL_V3 (no experiments — reads existing CSVs o
 
 Outputs:
   figures/prl_graphical_abstract_v3.png
+  figures/prl_graphical_abstract_v3.pdf
+  figures/prl_graphical_abstract_v3.svg
   figures/correction_rate_vs_homophily.png
   figures/safety_comparison.png
   figures/reliability_vs_accuracy.png
@@ -19,7 +21,7 @@ from pathlib import Path
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.patches import Circle, FancyArrow, FancyBboxPatch
+from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch, Rectangle
 
 mpl.use("Agg")
 
@@ -49,18 +51,23 @@ def load_homophily() -> dict[str, float]:
 
 
 def load_v3_results() -> list[dict]:
+    def _maybe_float(value: str | None, default_nan: bool = False) -> float:
+        if value in ("", None):
+            return float("nan") if default_nan else 0.0
+        return float(value)
+
     rows = []
     with RESULTS.open(newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
             row["split_id"] = int(row["split_id"])
             row["test_acc"] = float(row["test_acc"])
             row["delta_vs_mlp"] = float(row["delta_vs_mlp"])
-            row["frac_corrected"] = float(row["frac_corrected"] or 0)
-            row["frac_confident"] = float(row["frac_confident"] or 0)
-            row["frac_unreliable"] = float(row["frac_unreliable"] or 0)
-            row["correction_precision"] = float(row["correction_precision"] or 1.0)
-            row["tau"] = float(row["tau"]) if row.get("tau") not in ("", None) else float("nan")
-            row["rho"] = float(row["rho"]) if row.get("rho") not in ("", None) else float("nan")
+            row["frac_corrected"] = _maybe_float(row.get("frac_corrected"))
+            row["frac_confident"] = _maybe_float(row.get("frac_confident"), default_nan=True)
+            row["frac_unreliable"] = _maybe_float(row.get("frac_unreliable"), default_nan=True)
+            row["correction_precision"] = _maybe_float(row.get("correction_precision"), default_nan=True)
+            row["tau"] = _maybe_float(row.get("tau"), default_nan=True)
+            row["rho"] = _maybe_float(row.get("rho"), default_nan=True)
             nh, hh = row.get("n_helped", ""), row.get("n_hurt", "")
             row["n_helped"] = int(nh) if nh not in ("", None) else 0
             row["n_hurt"] = int(hh) if hh not in ("", None) else 0
@@ -69,7 +76,7 @@ def load_v3_results() -> list[dict]:
 
 
 def plot_graphical_abstract_v3(out: Path) -> None:
-    """Minimal two-panel abstract: uncontrolled correction vs reliability-gated FINAL_V3."""
+    """Polished canonical graphical abstract for FINAL_V3."""
     mpl.rcParams.update(
         {
             "font.family": "sans-serif",
@@ -80,113 +87,176 @@ def plot_graphical_abstract_v3(out: Path) -> None:
             "savefig.facecolor": "white",
         }
     )
-    fig, (ax_l, ax_r) = plt.subplots(
-        1, 2, figsize=(7.2, 2.8), dpi=150, gridspec_kw={"wspace": 0.28}
-    )
-    for ax in (ax_l, ax_r):
+    c_text = "#1a1a1a"
+    c_muted = "#6b6b6b"
+    c_edge = "#4a4a4a"
+    c_conf = "#5c7a99"
+    c_unc = "#c45c26"
+    c_accent = "#2d5a87"
+    c_panel = "#f5f5f5"
+    c_ok = "#4a7c59"
+
+    def circle_layout(n: int, r: float = 0.36, cx: float = 0.5, cy: float = 0.5):
+        pts = []
+        for i in range(n):
+            t = 2 * np.pi * i / n - np.pi / 2
+            pts.append((cx + r * np.cos(t), cy + r * np.sin(t)))
+        return pts
+
+    def draw_input_panel(ax):
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
         ax.axis("off")
+        pos = circle_layout(6)
+        edges = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 0), (0, 3), (2, 5)]
+        for i, j in edges:
+            ax.plot([pos[i][0], pos[j][0]], [pos[i][1], pos[j][1]], color=c_edge, lw=1.2, alpha=0.85)
+        for x, y in pos:
+            ax.add_patch(Circle((x, y), 0.065, facecolor=c_conf, edgecolor=c_edge, linewidth=1.0, zorder=3))
+        ax.add_patch(Rectangle((0.78, 0.08), 0.18, 0.22, facecolor="white", edgecolor=c_muted, lw=0.8))
+        for r in range(3):
+            for c in range(3):
+                ax.add_patch(
+                    Rectangle(
+                        (0.8 + c * 0.045, 0.12 + r * 0.055),
+                        0.035,
+                        0.04,
+                        facecolor=c_muted,
+                        alpha=0.35 + 0.2 * ((r + c) % 2),
+                        edgecolor="none",
+                    )
+                )
 
-    # --- Left: standard / uncontrolled ---
-    ax_l.set_title("Standard graph correction", fontsize=10, color="0.1", pad=6)
-    cx, cy = 0.52, 0.48
-    ax_l.add_patch(Circle((cx, cy), 0.1, facecolor="0.85", edgecolor="0.2", linewidth=1.2))
-    ax_l.text(cx, cy, "v", ha="center", va="center", fontsize=11, color="0.15", fontweight="bold")
-    bad = [(-0.05, 0.55), (0.08, 0.78), (0.72, 0.72), (0.82, 0.42), (0.12, 0.22)]
-    for i, (bx, by) in enumerate(bad):
-        ax_l.add_patch(Circle((bx, by), 0.055, facecolor="0.75", edgecolor="0.35", linewidth=0.8))
-        ax_l.add_patch(
-            FancyArrow(
-                bx,
-                by,
-                (cx - bx) * 0.55,
-                (cy - by) * 0.55,
-                width=0.012,
-                head_width=0.06,
-                head_length=0.05,
-                length_includes_head=True,
-                facecolor="0.45",
-                edgecolor="0.25",
-                linewidth=0.5,
+    def draw_mlp_panel(ax):
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.axis("off")
+        ax.add_patch(
+            FancyBboxPatch(
+                (0.12, 0.2),
+                0.76,
+                0.55,
+                boxstyle="round,pad=0.02,rounding_size=0.03",
+                facecolor=c_panel,
+                edgecolor=c_accent,
+                linewidth=1.2,
             )
         )
-    ax_l.text(0.5, 0.08, "Heterophily: noisy neighbor influence", ha="center", fontsize=8, color="0.35")
+        ax.text(0.5, 0.72, "Strong MLP", ha="center", va="center", fontsize=10, weight="bold", color=c_text)
+        ax.text(0.5, 0.58, "class scores", ha="center", va="center", fontsize=8.5, color=c_muted)
+        bars = [0.85, 0.45, 0.25]
+        bx, bw, gap = 0.22, 0.18, 0.12
+        for k, h in enumerate(bars):
+            x0 = bx + k * (bw + gap)
+            ax.add_patch(Rectangle((x0, 0.22), bw, h * 0.35, facecolor=c_conf, edgecolor="none", alpha=0.9))
+        ax.text(0.5, 0.12, "confidence", ha="center", va="center", fontsize=7.5, color=c_muted)
 
-    # --- Right: FINAL_V3 ---
-    ax_r.set_title("FINAL_V3 (reliability-gated)", fontsize=10, color="0.1", pad=6)
-    ax_r.add_patch(
-        FancyBboxPatch(
-            (0.06, 0.62),
-            0.34,
-            0.28,
-            boxstyle="round,pad=0.02,rounding_size=0.02",
-            facecolor="0.92",
-            edgecolor="0.35",
-            linewidth=1.0,
-        )
+    def draw_gate_panel(ax):
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.axis("off")
+        ax.plot([0.1, 0.9], [0.52, 0.52], color=c_accent, lw=1.5, linestyle="--", alpha=0.9)
+        ax.text(0.88, 0.56, "τ", fontsize=11, color=c_accent, ha="right")
+        ax.text(0.5, 0.88, "Uncertainty gate", ha="center", fontsize=10, weight="bold", color=c_text)
+        ax.text(0.5, 0.78, "low confidence only", ha="center", fontsize=7.8, color=c_muted)
+        ax.add_patch(Circle((0.28, 0.32), 0.07, facecolor=c_conf, edgecolor=c_edge))
+        ax.text(0.28, 0.32, "✓", ha="center", va="center", fontsize=11, color="white")
+        ax.add_patch(Circle((0.72, 0.32), 0.07, facecolor=c_unc, edgecolor=c_edge))
+        ax.text(0.72, 0.32, "?", ha="center", va="center", fontsize=12, weight="bold", color="white")
+        ax.text(0.28, 0.14, "confident", ha="center", fontsize=7.5, color=c_muted)
+        ax.text(0.72, 0.14, "uncertain", ha="center", fontsize=7.5, color=c_muted)
+
+    def draw_correction_panel(ax):
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.axis("off")
+        ax.text(0.5, 0.9, "Selective graph correction", ha="center", fontsize=10, weight="bold", color=c_text)
+        ax.text(0.5, 0.78, "neighbor support · similarity · compatibility", ha="center", fontsize=7.2, color=c_muted)
+        cx, cy = 0.5, 0.38
+        neigh = [(0.22, 0.42), (0.38, 0.62), (0.62, 0.62), (0.78, 0.42)]
+        for x, y in neigh:
+            ax.add_patch(Circle((x, y), 0.055, facecolor=c_conf, edgecolor=c_edge, lw=0.8))
+            ax.add_patch(
+                FancyArrowPatch(
+                    (x + 0.04 * (cx - x), y + 0.04 * (cy - y)),
+                    (cx - 0.05 * (cx - x), cy - 0.05 * (cy - y)),
+                    arrowstyle="-|>",
+                    mutation_scale=10,
+                    color=c_edge,
+                    lw=0.9,
+                    alpha=0.85,
+                )
+            )
+        ax.add_patch(Circle((cx, cy), 0.08, facecolor=c_unc, edgecolor=c_edge, lw=1.2))
+        ax.text(cx, cy, "u", ha="center", va="center", fontsize=10, weight="bold", color="white")
+        ax.text(0.5, 0.1, "only uncertain nodes", ha="center", fontsize=7.5, color=c_muted)
+
+    def draw_outcome_panel(ax):
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.axis("off")
+        ax.text(0.5, 0.88, "Outcome", ha="center", fontsize=10, weight="bold", color=c_text)
+        ax.text(0.5, 0.62, "Gains: Cora · CiteSeer · PubMed", ha="center", fontsize=8.5, color=c_ok, weight="medium")
+        ax.text(0.5, 0.42, "Near-neutral on several benchmarks", ha="center", fontsize=8, color=c_muted)
+        ax.text(0.5, 0.22, "Graph used selectively — not global propagation", ha="center", fontsize=7.8, color=c_text, style="italic")
+
+    fig = plt.figure(figsize=(14.2, 4.2), dpi=150)
+    fig.patch.set_facecolor("white")
+    gs = fig.add_gridspec(
+        2,
+        5,
+        height_ratios=[1, 0.22],
+        hspace=0.35,
+        wspace=0.28,
+        left=0.04,
+        right=0.96,
+        top=0.88,
+        bottom=0.12,
     )
-    ax_r.text(0.23, 0.82, "MLP", ha="center", va="center", fontsize=9, fontweight="bold", color="0.2")
-    ax_r.text(0.23, 0.7, "base pred.", ha="center", va="center", fontsize=7.5, color="0.4")
-    ax_r.add_patch(
-        FancyBboxPatch(
-            (0.48, 0.62),
-            0.22,
-            0.28,
-            boxstyle="round,pad=0.02,rounding_size=0.02",
-            facecolor="0.88",
-            edgecolor="0.35",
-            linewidth=1.0,
-        )
+    titles = [
+        "Node features + graph",
+        "Strong MLP baseline",
+        "Uncertainty gate",
+        "Selective graph correction",
+        "Empirical outcome",
+    ]
+    panel_drawers = [draw_input_panel, draw_mlp_panel, draw_gate_panel, draw_correction_panel, draw_outcome_panel]
+    for idx, (title, drawer) in enumerate(zip(titles, panel_drawers)):
+        ax = fig.add_subplot(gs[0, idx])
+        drawer(ax)
+        ax.set_title(title, fontsize=9.5, pad=8, color=c_text, weight="medium")
+
+    axf = fig.add_subplot(gs[1, :])
+    axf.axis("off")
+    axf.text(
+        0.5,
+        0.65,
+        "Graph information is applied only where the MLP is uncertain.",
+        ha="center",
+        va="center",
+        fontsize=11,
+        color=c_text,
+        weight="medium",
     )
-    ax_r.annotate(
-        "",
-        xy=(0.48, 0.76),
-        xytext=(0.4, 0.76),
-        arrowprops=dict(arrowstyle="-|>", color="0.35", lw=0.9, shrinkA=2, shrinkB=2),
+    axf.text(
+        0.5,
+        0.2,
+        "Selective correction improves some datasets while avoiding unnecessary global graph use.",
+        ha="center",
+        va="center",
+        fontsize=8.5,
+        color=c_muted,
     )
-    ax_r.text(0.59, 0.76, "Gate\nR(v)", ha="center", va="center", fontsize=8, fontweight="bold", color="0.25")
-    # High R branch
-    ax_r.add_patch(
-        FancyBboxPatch(
-            (0.74, 0.68),
-            0.22,
-            0.22,
-            boxstyle="round,pad=0.015,rounding_size=0.015",
-            facecolor="1.0",
-            edgecolor="0.25",
-            linewidth=1.0,
-        )
+    fig.suptitle(
+        "FINAL_V3: Reliability-Gated Selective Graph Correction for Node Classification",
+        fontsize=11.5,
+        weight="bold",
+        color=c_text,
+        y=0.98,
     )
-    ax_r.text(0.85, 0.79, "graph\ncorrect", ha="center", va="center", fontsize=7.5, color="0.2")
-    ax_r.annotate(
-        "",
-        xy=(0.85, 0.68),
-        xytext=(0.64, 0.72),
-        arrowprops=dict(arrowstyle="-|>", color="0.3", lw=1.0, shrinkA=0, shrinkB=2),
-    )
-    ax_r.text(0.68, 0.66, "high R", fontsize=7, color="0.4")
-    # Low R branch
-    ax_r.add_patch(
-        FancyBboxPatch(
-            (0.74, 0.28),
-            0.22,
-            0.22,
-            boxstyle="round,pad=0.015,rounding_size=0.015",
-            facecolor="0.94",
-            edgecolor="0.35",
-            linewidth=1.0,
-        )
-    )
-    ax_r.text(0.85, 0.39, "keep\nMLP", ha="center", va="center", fontsize=7.5, color="0.2")
-    ax_r.annotate(
-        "",
-        xy=(0.85, 0.5),
-        xytext=(0.64, 0.68),
-        arrowprops=dict(arrowstyle="-|>", color="0.3", lw=1.0, shrinkA=0, shrinkB=2),
-    )
-    ax_r.text(0.68, 0.52, "low R", fontsize=7, color="0.4")
-    fig.savefig(out, dpi=300, bbox_inches="tight", pad_inches=0.05)
+    fig.savefig(out, dpi=300, bbox_inches="tight", pad_inches=0.08)
+    fig.savefig(out.with_suffix(".pdf"), bbox_inches="tight", pad_inches=0.08)
+    fig.savefig(out.with_suffix(".svg"), bbox_inches="tight", pad_inches=0.08)
     plt.close(fig)
 
 
@@ -297,6 +367,8 @@ def plot_reliability_vs_accuracy(rows: list[dict], out: Path) -> None:
     xs, ys, sizes = [], [], []
     for r in rows:
         if r["method"] != "FINAL_V3":
+            continue
+        if not np.isfinite(r["frac_unreliable"]) or not np.isfinite(r["correction_precision"]):
             continue
         if r["frac_corrected"] < 1e-6 and r["n_helped"] + r["n_hurt"] == 0:
             continue

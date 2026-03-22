@@ -122,7 +122,8 @@ def final_method_v3(
     data : PyG Data object
     train_indices, val_indices, test_indices : array-like
     mlp_probs : optional pre-computed MLP probabilities
-    seed : random seed
+    seed : random seed, retained for API compatibility with older runners.
+        When `mlp_probs` is supplied, RNG control is handled by the caller.
     mod : the loaded bfsbased-full-investigate module
     weights : optional single weight dict. If set, **only** this profile is evaluated
         (ablation: single-profile / fixed-weight runs). Default: both `WEIGHT_PROFILES`
@@ -291,6 +292,6 @@ def final_method_v3(
             "selection": float(selection_time),
             "total": float(total_time),
         },
-        "search_space_size": len(tau_candidates) * len(rho_candidates),
+        "search_space_size": len(tau_candidates) * len(rho_candidates) * len(profiles),
     }
     return val_acc, test_acc, info

@@ -1,6 +1,7 @@
 # PRL manuscript — repository evidence package
 
 Start with the [root README](README.md) for the high-level repository map.
+If you are reviewing the repo externally, read `ANALYSIS_GUIDE.md` first.
 
 **Paper working title:** *Uncertainty-Gated Selective Graph Correction for Node Classification*  
 **Target:** Pattern Recognition Letters (7 pages incl. references)
@@ -9,13 +10,17 @@ This repository currently contains multiple manuscript-related packages. This
 file explains which artifacts are canonical, which are supplementary, and which
 belong to the newer resubmission / structural-upgrade line.
 
+**Canonical paper package:** use **`FINAL_V3`** for the short PRL manuscript
+unless you are explicitly writing a supplementary comparison section.
+
 ## Start here
 
 If you are reading the repository for the first time:
 
 1. Read `README.md` for the package overview.
 2. Read `reports/final_method_v3_analysis.md` for the frozen PRL submission line.
-3. Read `reports/prl_resubmission/PRL_METHOD_SPEC.md` for the resubmission / `UG-SGC` method line.
+3. Read `reports/prl_resubmission/PRL_METHOD_SPEC.md` only if you need the
+   older `UG-SGC` / resubmission line as supplementary context.
 4. Read `reports/prl_resubmission/RUN_STATUS.md` for current grouped-job status.
 
 ## Canonical artifacts (FINAL_V3)
@@ -34,7 +39,7 @@ Evaluation uses **10 GEO-GCN splits** per dataset (indices 0–9 in `data/splits
 | **Analysis writeup** | `reports/final_method_v3_analysis.md` |
 | **Narrative for drafting** | `reports/final_method_story.txt` |
 | **Safety / harmful-split summary** | `reports/safety_analysis.md` |
-| **Figures** | `figures/prl_graphical_abstract_v3.png`, `correction_rate_vs_homophily.png`, `safety_comparison.png`, `reliability_vs_accuracy.png` |
+| **Figures** | `figures/prl_graphical_abstract_v3.{png,pdf,svg}`, `figures/correction_rate_vs_homophily.png`, `figures/safety_comparison.png`, `figures/reliability_vs_accuracy.png` |
 | **Regenerate tables + figures (no training)** | `bash scripts/run_all_prl_results.sh` — details in [scripts/README_REPRODUCE.md](scripts/README_REPRODUCE.md) |
 
 ## Avoiding package confusion
@@ -55,8 +60,9 @@ The repository contains **three** distinct evidence lines:
 3. **Structural extension line (`UG-SGC-S`)**  
    `tables/prl_resubmission/`, `logs/prl_resubmission/`,
    `reports/prl_resubmission/STRUCTURAL_UPGRADE_SMOKE_NOTE.md`  
-   This is the newer stronger-method package. Some grouped-job outputs may still
-   be partial or in progress.
+   This is a newer exploratory / resubmission package. It does **not** replace
+   the frozen `FINAL_V3` paper package; some grouped-job outputs may still be
+   partial or in progress.
 
 ## Current repo state
 

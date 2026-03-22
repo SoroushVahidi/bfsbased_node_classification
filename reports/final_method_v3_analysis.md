@@ -1,6 +1,6 @@
-# Final Method v3: Reliability-Gated Selective Graph Correction
+# FINAL_V3: Reliability-Gated Selective Graph Correction
 
-## 1. From V2 to V3: Simplification Journey
+## 1. From V2 to FINAL_V3: simplification journey
 
 ### V2_MULTIBRANCH (predecessor)
 - 3-way branch: no-correct / feature-only / full correction
@@ -9,7 +9,7 @@
 - 3 full weight configs × 13 thresholds × 5 reliability thresholds = ~195 search configs
 - kNN disabled by default
 
-### V3 simplifications
+### FINAL_V3 simplifications
 1. **Removed feature-only branch** — data showed it rarely changed predictions; the reliability gate alone prevents harmful corrections
 2. **Simplified reliability to 3 signals with equal weights** — removed redundant feature-graph agreement and neighbor entropy (correlated with neighbor concentration)
 3. **Reduced to 2 weight profiles** instead of 3+ searched configs
@@ -65,7 +65,9 @@ Objective: maximize validation accuracy, then minimize changed fraction (lexicog
 - If `margin(v) < τ` and `R(v) < ρ`: predict argmax p_MLP(v) *(uncertain + unreliable → keep MLP)*
 
 ### Tuned parameters
-Only 3 choices are made on validation: weight profile, τ, ρ. Total search space: ~72 configurations.
+Only 3 choices are made on validation: weight profile, τ, ρ. The exact search
+space is `|profiles| × |τ candidates| × |ρ candidates|`; in the shipped setup it
+is typically around 72 configurations.
 
 ## 3. Experimental Results
 
@@ -81,7 +83,7 @@ Only 3 choices are made on validation: weight profile, τ, ρ. Total search spac
 |--------|-----------|----------|------|--------|-------|-----------|----------|
 | SGC v1 | +0.15 | +2.67 | +3.06 | +1.28 | +0.00 | −0.00 | +1.19 |
 | V2 | +0.11 | +2.58 | +2.94 | +1.26 | +0.27 | +0.20 | +1.23 |
-| **V3** | **+0.02** | **+2.59** | **+2.90** | **+1.29** | **+0.54** | **+0.20** | **+1.26** |
+| **FINAL_V3** | **+0.02** | **+2.59** | **+2.90** | **+1.29** | **+0.54** | **+0.20** | **+1.26** |
 
 ### Mean test accuracy
 
@@ -90,18 +92,18 @@ Only 3 choices are made on validation: weight profile, τ, ρ. Total search spac
 | MLP | 46.32 | 67.97 | 71.27 | 87.20 | 80.54 | 84.31 | 72.93 |
 | SGC v1 | 46.47 | 70.64 | 74.33 | 88.48 | 80.54 | 84.31 | 74.13 |
 | V2 | 46.43 | 70.55 | 74.21 | 88.46 | 80.81 | 84.51 | 74.16 |
-| **V3** | **46.34** | **70.56** | **74.16** | **88.49** | **81.08** | **84.51** | **74.19** |
+| **FINAL_V3** | **46.34** | **70.56** | **74.16** | **88.49** | **81.08** | **84.51** | **74.19** |
 
 ### Safety: harmful correction analysis
 
-| Dataset | V3 helped | V3 hurt | Net | Notes (SGC v1) |
+| Dataset | FINAL_V3 helped | FINAL_V3 hurt | Net | Notes (SGC v1) |
 |---------|-----------|---------|-----|----------------|
 | Cora | 157 | 13 | +144 | No harmful splits vs MLP |
 | Citeseer | 199 | 39 | +160 | No harmful splits vs MLP |
 | Pubmed | 834 | 326 | +508 | No harmful splits vs MLP |
-| Chameleon | 10 | 9 | +1 | V3: split 4 slightly below MLP (−0.44 pp) |
-| **Texas** | **3** | **1** | **+2** | **V1 harmful on splits 4, 5, 9; V3 avoids split 4 but matches V1 on split 5** |
-| Wisconsin | 1 | 0 | +1 | V1 harmful on split 8; V3 does not regress there |
+| Chameleon | 10 | 9 | +1 | FINAL_V3: split 4 slightly below MLP (−0.44 pp) |
+| **Texas** | **3** | **1** | **+2** | **V1 harmful on splits 4, 5, 9; FINAL_V3 avoids split 4 but matches V1 on split 5** |
+| Wisconsin | 1 | 0 | +1 | V1 harmful on split 8; FINAL_V3 does not regress there |
 
 **Texas (split 4):** SGC v1 is worse than MLP (−2.70 pp); **FINAL_V3 stays at the MLP accuracy** on that split (reliability gate suppresses the bad correction pattern).
 
@@ -116,7 +118,7 @@ Only 3 choices are made on validation: weight profile, τ, ρ. Total search spac
 | MLP | 2.37 | 1.74 | 2.69 | 0.35 | 6.71 | 4.21 |
 | SGC v1 | 2.37 | 1.83 | 2.00 | 0.35 | 7.63 | 4.02 |
 | V2 | 2.43 | 1.87 | 2.08 | 0.36 | 7.59 | 4.06 |
-| **V3** | **2.41** | **1.83** | **2.14** | **0.35** | **7.55** | **4.06** |
+| **FINAL_V3** | **2.41** | **1.83** | **2.14** | **0.35** | **7.55** | **4.06** |
 
 Variance is comparable across methods on this benchmark. Texas remains high-variance for all methods because of a few difficult splits.
 
@@ -139,7 +141,9 @@ Means below are taken over **splits 0–4 only** — the frozen 10-split export 
 - On homophilic datasets (Cora, Citeseer, Pubmed): corrects 20–24% of nodes, where graph evidence is informative
 - On heterophilic datasets (Chameleon, Texas, Wisconsin): corrects only 1–7% of nodes, being conservative where graph evidence is unreliable
 
-This is exactly the desired behavior — **the reliability gate acts as an automatic heterophily detector**.
+This is the desired conservative behavior: the reliability gate functions as a
+local graph-quality filter, allowing more correction where neighborhood evidence
+is consistent and suppressing correction where it looks unreliable.
 
 ### Correction precision (among changed predictions)
 
