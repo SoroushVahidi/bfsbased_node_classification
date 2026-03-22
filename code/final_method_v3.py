@@ -2,6 +2,9 @@
 """
 Publication entry point for **FINAL_V3** (reliability-gated selective graph correction).
 
+On validation, the method **jointly** selects among **two weight profiles**, a margin threshold **τ**,
+and a reliability threshold **ρ** (see module docstring in the implementation file).
+
 The implementation lives in ``code/bfsbased_node_classification/final_method_v3.py``.
 This module exists so reviewers can import a stable path from the ``code/`` folder.
 

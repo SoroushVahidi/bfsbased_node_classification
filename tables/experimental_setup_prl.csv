@@ -1,0 +1,7 @@
+dataset,num_nodes,num_classes,edge_homophily,split_protocol,compared_methods
+chameleon,2277,5,0.231,60%/20%/20% train/val/test; 10 fixed splits (indices 0–9); GEO-GCN `.npz` in `data/splits/`,MLP_ONLY; BASELINE_SGC_V1; V2_MULTIBRANCH; FINAL_V3
+citeseer,3327,6,0.736,60%/20%/20% train/val/test; 10 fixed splits (indices 0–9); GEO-GCN `.npz` in `data/splits/`,MLP_ONLY; BASELINE_SGC_V1; V2_MULTIBRANCH; FINAL_V3
+cora,2708,7,0.810,60%/20%/20% train/val/test; 10 fixed splits (indices 0–9); GEO-GCN `.npz` in `data/splits/`,MLP_ONLY; BASELINE_SGC_V1; V2_MULTIBRANCH; FINAL_V3
+pubmed,19717,3,0.802,60%/20%/20% train/val/test; 10 fixed splits (indices 0–9); GEO-GCN `.npz` in `data/splits/`,MLP_ONLY; BASELINE_SGC_V1; V2_MULTIBRANCH; FINAL_V3
+texas,183,5,0.087,60%/20%/20% train/val/test; 10 fixed splits (indices 0–9); GEO-GCN `.npz` in `data/splits/`,MLP_ONLY; BASELINE_SGC_V1; V2_MULTIBRANCH; FINAL_V3
+wisconsin,251,5,0.192,60%/20%/20% train/val/test; 10 fixed splits (indices 0–9); GEO-GCN `.npz` in `data/splits/`,MLP_ONLY; BASELINE_SGC_V1; V2_MULTIBRANCH; FINAL_V3

@@ -52,5 +52,10 @@ KEY NUMBERS (canonical **10-split** evaluation; see `tables/main_results_prl.md`
   Correction precision (aggregate on citations): high on Cora / Citeseer; see `reports/final_method_v3_analysis.md`
   Search space: ~72 configurations (2 weight profiles × ~9 τ × 4 ρ)
 
+AUXILIARY TABLES (regenerate: `python3 scripts/prl_final_additions/build_prl_auxiliary_tables.py`)
+  Experimental setup (6 datasets, homophily, 10-split protocol): `tables/experimental_setup_prl.md`
+  Ablation snapshot (FINAL_V3 row live; other rows historical): `tables/ablation_prl.md`
+  ρ sensitivity snapshot (historical 3-split grid): `tables/sensitivity_prl.md`
+
 REPO AUDIT
   Section-by-section manuscript ↔ evidence map (what to cite, what is legacy UG-SGC): `reports/manuscript_repo_consistency_audit.md`

@@ -13,6 +13,7 @@ bash scripts/run_all_prl_results.sh
 This regenerates:
 
 - `tables/main_results_prl.md` and `tables/main_results_prl.csv`
+- `tables/experimental_setup_prl.md`, `tables/ablation_prl.md`, `tables/sensitivity_prl.md` (and `.csv` partners)
 - `figures/prl_graphical_abstract_v3.png`
 - `figures/correction_rate_vs_homophily.png`
 - `figures/safety_comparison.png`

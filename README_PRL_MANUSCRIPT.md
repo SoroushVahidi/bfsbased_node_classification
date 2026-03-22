@@ -20,6 +20,9 @@ Evaluation uses **10 GEO-GCN splits** per dataset (indices 0–9 in `data/splits
 | **Frozen 10-split table export (rebuild source)** | `reports/archive/superseded_final_tables_prl/final_tables_prl.csv` |
 | **Rebuild CSV from frozen export (no training)** | `python3 scripts/prl_final_additions/rebuild_final_v3_results_10split.py` |
 | **Main benchmark table** | `tables/main_results_prl.md`, `tables/main_results_prl.csv` |
+| **Experimental setup table** | `tables/experimental_setup_prl.md`, `tables/experimental_setup_prl.csv` |
+| **Ablation snapshot (supplementary)** | `tables/ablation_prl.md`, `tables/ablation_prl.csv` |
+| **ρ sensitivity snapshot (supplementary)** | `tables/sensitivity_prl.md`, `tables/sensitivity_prl.csv` |
 | **Analysis writeup** | `reports/final_method_v3_analysis.md` |
 | **Narrative for drafting** | `reports/final_method_story.txt` |
 | **Safety / harmful-split summary** | `reports/safety_analysis.md` |
