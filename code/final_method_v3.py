@@ -2,6 +2,9 @@
 """
 Publication entry point for **FINAL_V3** (reliability-gated selective graph correction).
 
+On validation, the method **jointly** selects among **two weight profiles**, a margin threshold **τ**,
+and a reliability threshold **ρ** (see module docstring in the implementation file).
+
 The implementation lives in ``code/bfsbased_node_classification/final_method_v3.py``.
 This module exists so reviewers can import a stable path from the ``code/`` folder.
 
@@ -10,7 +13,7 @@ Full benchmark reproduction (MLP, SGC v1, V2 ablation, FINAL_V3)::
     python3 code/bfsbased_node_classification/run_final_evaluation.py \\
       --split-dir data/splits \\
       --datasets cora citeseer pubmed chameleon texas wisconsin \\
-      --splits 0 1 2 3 4
+      --splits 0 1 2 3 4 5 6 7 8 9
 
 Regenerate tables and figures from the frozen per-split CSV (no training)::
 

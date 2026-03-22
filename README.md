@@ -69,13 +69,12 @@ python3 code/bfsbased_node_classification/prl_resubmission_runner.py \
   --methods mlp_only gcn appnp selective_graph_correction --output-tag dev_test
 ```
 
-FINAL_V3 comparison driver (same setting as `reports/final_method_v3_results.csv`):
+FINAL_V3 comparison driver (same setting as `reports/final_method_v3_results.csv` — **10 splits** by default):
 
 ```bash
 python3 code/bfsbased_node_classification/run_final_evaluation.py \
   --split-dir data/splits \
-  --datasets cora citeseer pubmed chameleon texas wisconsin \
-  --splits 0 1 2 3 4
+  --datasets cora citeseer pubmed chameleon texas wisconsin
 ```
 
 Check emitted JSONL under `logs/` for `"success": true` where applicable.

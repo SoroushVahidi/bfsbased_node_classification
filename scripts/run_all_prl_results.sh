@@ -7,6 +7,9 @@ cd "$ROOT"
 echo "==> FINAL_V3 tables + figures (cached CSVs only)"
 python3 scripts/prl_final_additions/build_prl_v3_figures_and_tables.py
 
+echo "==> Experimental setup / ablation / sensitivity tables (CSV + MD, no training)"
+python3 scripts/prl_final_additions/build_prl_auxiliary_tables.py
+
 echo "==> Syntax-check FINAL_V3 entry points (no PyTorch import)"
 python3 -m py_compile code/final_method_v3.py code/bfsbased_node_classification/final_method_v3.py
 echo "OK: py_compile code/final_method_v3.py"

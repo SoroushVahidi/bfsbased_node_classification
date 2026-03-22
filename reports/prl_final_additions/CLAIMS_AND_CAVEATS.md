@@ -1,5 +1,9 @@
 # Safe claims and caveats (PRL)
 
+> **Scope:** These bullets were written around **aggregated logs** from the **manuscript_runner / selective_graph_correction** evaluation (`logs/manuscript_gain_over_mlp_final_validation.csv`, etc.). They remain useful for **descriptive** statements about gating and correction fractions in that pipeline.
+>
+> **For the submitted method (FINAL_V3, reliability gate R(v), 10-split six-dataset benchmark),** anchor quantitative claims in `tables/main_results_prl.md`, `reports/final_method_v3_results.csv`, `reports/final_method_v3_analysis.md`, and `reports/safety_analysis.md`. Do not mix the two packages in one table without relabeling.
+
 ## Safe to claim
 
 - Strong **MLP** baseline; proposed method applies **graph corrections** only to **uncertain** nodes (gating).

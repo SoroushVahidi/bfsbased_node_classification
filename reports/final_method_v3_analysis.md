@@ -71,64 +71,69 @@ Only 3 choices are made on validation: weight profile, τ, ρ. Total search spac
 
 ### Evaluation setup
 - **Datasets:** Cora, Citeseer, Pubmed (homophilic); Chameleon, Texas, Wisconsin (heterophilic)
-- **Splits:** 5 canonical GEO-GCN splits (0–4) per dataset
+- **Splits:** **10** canonical GEO-GCN splits (indices 0–9) per dataset (`data/splits/*_split_0.6_0.2_{0..9}.npz`)
 - **Baselines:** MLP-only, SGC v1 (original), V2_MULTIBRANCH
+- **Source log:** `reports/final_method_v3_results.csv` (rebuilt from the frozen 10-split export under `reports/archive/superseded_final_tables_prl/` via `scripts/prl_final_additions/rebuild_final_v3_results_10split.py`)
 
 ### Mean delta vs MLP (percentage points)
 
 | Method | Chameleon | Citeseer | Cora | Pubmed | Texas | Wisconsin | **Mean** |
 |--------|-----------|----------|------|--------|-------|-----------|----------|
-| SGC v1 | +0.18 | +3.04 | +2.82 | +1.28 | +0.54 | +0.00 | +1.31 |
-| V2 | +0.13 | +2.84 | +2.70 | +1.24 | +1.08 | +0.00 | +1.33 |
-| **V3** | **+0.00** | **+2.93** | **+2.74** | **+1.28** | **+1.08** | **+0.00** | **+1.34** |
+| SGC v1 | +0.15 | +2.67 | +3.06 | +1.28 | +0.00 | −0.00 | +1.19 |
+| V2 | +0.11 | +2.58 | +2.94 | +1.26 | +0.27 | +0.20 | +1.23 |
+| **V3** | **+0.02** | **+2.59** | **+2.90** | **+1.29** | **+0.54** | **+0.20** | **+1.26** |
 
 ### Mean test accuracy
 
 | Method | Chameleon | Citeseer | Cora | Pubmed | Texas | Wisconsin | **Mean** |
 |--------|-----------|----------|------|--------|-------|-----------|----------|
-| MLP | 47.15 | 67.35 | 72.64 | 87.29 | 81.62 | 83.14 | 73.20 |
-| SGC v1 | 47.32 | 70.39 | 75.45 | 88.58 | 82.16 | 83.14 | 74.51 |
-| V2 | 47.28 | 70.20 | 75.33 | 88.53 | 82.70 | 83.14 | 74.53 |
-| **V3** | **47.15** | **70.29** | **75.37** | **88.58** | **82.70** | **83.14** | **74.54** |
+| MLP | 46.32 | 67.97 | 71.27 | 87.20 | 80.54 | 84.31 | 72.93 |
+| SGC v1 | 46.47 | 70.64 | 74.33 | 88.48 | 80.54 | 84.31 | 74.13 |
+| V2 | 46.43 | 70.55 | 74.21 | 88.46 | 80.81 | 84.51 | 74.16 |
+| **V3** | **46.34** | **70.56** | **74.16** | **88.49** | **81.08** | **84.51** | **74.19** |
 
 ### Safety: harmful correction analysis
 
-| Dataset | V3 helped | V3 hurt | Net | V1 had harm on split 4? |
-|---------|-----------|---------|-----|-------------------------|
-| Cora | 76 | 8 | +68 | No |
-| Citeseer | 106 | 18 | +88 | No |
-| Pubmed | 414 | 161 | +253 | No |
-| Chameleon | 6 | 6 | +0 | No |
-| **Texas** | **2** | **0** | **+2** | **Yes: −2.70% on split 4** |
-| Wisconsin | 0 | 0 | 0 | No |
+| Dataset | V3 helped | V3 hurt | Net | Notes (SGC v1) |
+|---------|-----------|---------|-----|----------------|
+| Cora | 157 | 13 | +144 | No harmful splits vs MLP |
+| Citeseer | 199 | 39 | +160 | No harmful splits vs MLP |
+| Pubmed | 834 | 326 | +508 | No harmful splits vs MLP |
+| Chameleon | 10 | 9 | +1 | V3: split 4 slightly below MLP (−0.44 pp) |
+| **Texas** | **3** | **1** | **+2** | **V1 harmful on splits 4, 5, 9; V3 avoids split 4 but matches V1 on split 5** |
+| Wisconsin | 1 | 0 | +1 | V1 harmful on split 8; V3 does not regress there |
 
-**Texas (split 4):** SGC v1 is worse than MLP (−2.70 pp on that split); **FINAL_V3 avoids that failure** via the reliability gate (R(v) < ρ on the affected nodes).
+**Texas (split 4):** SGC v1 is worse than MLP (−2.70 pp); **FINAL_V3 stays at the MLP accuracy** on that split (reliability gate suppresses the bad correction pattern).
 
-**Chameleon (split 4):** FINAL_V3 shows a **small** negative Δ vs MLP (−0.44 pp on that split only). Mean accuracy over five splits still matches MLP (see `tables/main_results_prl.md`).
+**Texas (split 5):** MLP, SGC v1, V2, and FINAL_V3 **all** land at the same reduced accuracy (−2.70 pp vs MLP) in this split — the frozen log shows no remaining headroom for the gate on that realization.
 
-### Stability (std dev of test accuracy across 5 splits)
+**Chameleon (split 4):** FINAL_V3 is slightly below MLP (−0.44 pp). Ten-split means remain within noise of the MLP (see `tables/main_results_prl.md`).
+
+### Stability (std dev of test accuracy across 10 splits)
 
 | Method | Chameleon | Citeseer | Cora | Pubmed | Texas | Wisconsin |
 |--------|-----------|----------|------|--------|-------|-----------|
-| MLP | 2.48 | 1.77 | 3.28 | 0.32 | 7.53 | 4.22 |
-| SGC v1 | 2.56 | 1.80 | 2.19 | 0.40 | 9.14 | 4.22 |
-| V2 | 2.67 | 1.89 | 2.40 | 0.41 | 8.48 | 4.22 |
-| **V3** | **2.58** | **1.81** | **2.46** | **0.41** | **8.48** | **4.22** |
+| MLP | 2.37 | 1.74 | 2.69 | 0.35 | 6.71 | 4.21 |
+| SGC v1 | 2.37 | 1.83 | 2.00 | 0.35 | 7.63 | 4.02 |
+| V2 | 2.43 | 1.87 | 2.08 | 0.36 | 7.59 | 4.06 |
+| **V3** | **2.41** | **1.83** | **2.14** | **0.35** | **7.55** | **4.06** |
 
-V3 variance is comparable to all methods. Notably, v1 has higher variance on Texas (9.14) due to the harmful split 4, which v3 avoids.
+Variance is comparable across methods on this benchmark. Texas remains high-variance for all methods because of a few difficult splits.
 
 ## 4. Behavior Analysis
 
 ### Branch usage by dataset
 
-| Dataset | Confident (keep MLP) | Uncertain+Unreliable (keep MLP) | Uncertain+Reliable (corrected) |
-|---------|----------------------|------|------|
-| **Cora** | 74.2% | 2.7% | **23.1%** |
-| **Citeseer** | 77.1% | 3.2% | **19.7%** |
-| **Pubmed** | 75.4% | 1.0% | **23.6%** |
-| **Chameleon** | 91.1% | 1.8% | **7.1%** |
-| **Texas** | 96.2% | 0.5% | **3.2%** |
-| **Wisconsin** | 97.6% | 1.2% | **1.2%** |
+Means below are taken over **splits 0–4 only** — the frozen 10-split export carries full per-split reliability fractions for those splits in `reports/final_method_v3_results.csv` (splits 5–9 omit `frac_confident` / `frac_unreliable` in the archived table). Mean **correction rate** over **all 10 splits** is in the rightmost column.
+
+| Dataset | Confident (keep MLP) | Uncertain+Unreliable (keep MLP) | Uncertain+Reliable (corrected) | Mean frac. corrected (10 spl.) |
+|---------|----------------------|--------------------------------|--------------------------------|----------------------------------|
+| **Cora** | 74.2% | 2.7% | **23.5%** | **23.7%** |
+| **Citeseer** | 77.1% | 3.2% | **19.7%** | **20.0%** |
+| **Pubmed** | 75.4% | 1.0% | **23.6%** | **23.9%** |
+| **Chameleon** | 91.1% | 1.8% | **7.1%** | **5.8%** |
+| **Texas** | 96.2% | 0.5% | **3.2%** | **2.2%** |
+| **Wisconsin** | 97.6% | 1.2% | **1.2%** | **1.8%** |
 
 **Key observation:** The method automatically adapts its aggressiveness to the dataset:
 - On homophilic datasets (Cora, Citeseer, Pubmed): corrects 20–24% of nodes, where graph evidence is informative
@@ -138,45 +143,49 @@ This is exactly the desired behavior — **the reliability gate acts as an autom
 
 ### Correction precision (among changed predictions)
 
+**Precision** = (total helped) / (total helped + total hurt) across all **10** test splits for FINAL_V3.
+
 | Dataset | Precision | Helped | Hurt | Net gain |
 |---------|-----------|--------|------|----------|
-| Cora | 0.89 | 76 | 8 | +68 |
-| Citeseer | 0.85 | 106 | 18 | +88 |
-| Pubmed | 0.72 | 414 | 161 | +253 |
-| Chameleon | 0.50 | 6 | 6 | 0 |
-| Texas | 1.00 | 2 | 0 | +2 |
-| Wisconsin | 1.00 | 0 | 0 | 0 |
+| Cora | 0.92 | 157 | 13 | +144 |
+| Citeseer | 0.84 | 199 | 39 | +160 |
+| Pubmed | 0.72 | 834 | 326 | +508 |
+| Chameleon | 0.53 | 10 | 9 | +1 |
+| Texas | 0.75 | 3 | 1 | +2 |
+| Wisconsin | 1.00 | 1 | 0 | +1 |
 
 **Interpretation:**
-- On homophilic datasets, correction precision is high (72–89%), leading to consistent gains
-- On heterophilic Chameleon, precision is 50% (random) — but only 7% of nodes are corrected, so the damage is contained
-- On small datasets (Texas, Wisconsin), the method is maximally conservative, never hurting
+- On homophilic datasets, aggregate correction precision is high (72–92%), supporting consistent gains vs MLP
+- On heterophilic Chameleon, aggregate precision is modest (~53%) — mean correction rate is ~6% of test nodes, so errors are contained
+- On small datasets (Texas, Wisconsin), the method is very conservative; hurt counts are small in aggregate but not always zero (see safety section)
 
 ### Selected thresholds
 
 | Dataset | Mean τ | Mean ρ | Interpretation |
 |---------|--------|--------|----------------|
-| Cora | 0.703 | 0.30 | High τ → corrects many uncertain nodes; low ρ → trusts graph evidence |
+| Cora | 0.703 | 0.30 | High τ → many uncertain nodes eligible; low ρ → trusts graph evidence |
 | Citeseer | 0.595 | 0.30 | Similar to Cora |
 | Pubmed | 0.924 | 0.30 | Very high τ → aggressive correction; low ρ (homophilic graph reliable) |
 | Chameleon | 0.120 | 0.38 | Low τ → only the most uncertain nodes considered |
 | Texas | 0.050 | 0.30 | Minimal τ → almost no correction attempted |
 | Wisconsin | 0.050 | 0.32 | Same pattern as Texas |
 
+Means are over **splits 0–4** where validation-selected (τ, ρ) are logged in `reports/final_method_v3_results.csv`.
+
 The threshold selection mechanism correctly identifies that homophilic datasets benefit from aggressive correction (high τ) while heterophilic ones require extreme caution (low τ).
 
 ## 5. Strengths and Limitations
 
 ### Strengths
-1. **Consistent improvement on homophilic datasets:** +2.7% on Cora, +2.9% on Citeseer, +1.3% on Pubmed — all with high correction precision
-2. **Avoids the prominent Texas failure of SGC v1:** Ungated correction hurts on Texas split 4; the reliability gate prevents that pattern
+1. **Consistent improvement on homophilic datasets:** about +2.9 pp on Cora, +2.6 pp on Citeseer, +1.3 pp on Pubmed vs MLP (10-split means), with strong aggregate correction precision on citations
+2. **Mitigates a prominent Texas failure mode of SGC v1:** Ungated correction hurts on Texas split 4; the reliability gate prevents that regression on that split (split 5 remains difficult for all methods in the frozen log)
 3. **Automatic conservatism:** Naturally restricts correction on heterophilic datasets through the reliability gate
 4. **Interpretable:** Three clear signals in the reliability score, each with a natural interpretation
 5. **Simple:** Only 3 tuned choices (weight profile, τ, ρ) from a ~72-config grid
 
 ### Limitations
-1. **Minimal help on heterophilic datasets:** Chameleon shows +0.00% mean gain — the method stays close to MLP rather than improving
-2. **Occasional split-level regressions:** e.g. Chameleon split 4 has a small negative Δ vs MLP; five-split means still match MLP (see `tables/main_results_prl.md`)
+1. **Minimal help on heterophilic datasets:** Chameleon shows only a **+0.02 pp** mean gain vs MLP over 10 splits — the method stays close to the MLP rather than improving
+2. **Occasional split-level regressions:** e.g. Chameleon split 4 and Texas split 5 show negative Δ vs MLP for FINAL_V3; ten-split means still track the MLP on Chameleon and improve Texas on average (see `tables/main_results_prl.md`)
 3. **Correction is not always beneficial:** On Pubmed, 28% of corrections hurt (precision 0.72), though net gain is still positive
 4. **No graph-independent correction pathway:** When graph evidence is unreliable, the method defaults to MLP rather than attempting feature-space correction
 5. **Relies on edge homophily correlation:** The reliability score works because homophilic neighborhoods tend to have high neighbor concentration and MLP-graph agreement; this may not hold for all graph types
@@ -202,12 +211,20 @@ The primary contribution is **safety**: unlike standard SGC or label propagation
 
 ## 7. Reproducibility
 
+### Auxiliary manuscript tables (no training)
+
+Generated by `python3 scripts/prl_final_additions/build_prl_auxiliary_tables.py` (also invoked from `bash scripts/run_all_prl_results.sh`):
+
+- `tables/experimental_setup_prl.md` — six benchmark datasets, sizes, edge homophily, 10-split protocol, compared methods
+- `tables/ablation_prl.md` — **FINAL_V3** row from the 10-split log; other rows from archived Table 7 (historical, not re-run)
+- `tables/sensitivity_prl.md` — archived ρ-sweep snapshot (3-split, illustrative)
+
 ### Run the final evaluation
 ```bash
 python3 code/bfsbased_node_classification/run_final_evaluation.py \
   --split-dir data/splits \
   --datasets cora citeseer pubmed chameleon texas wisconsin \
-  --splits 0 1 2 3 4
+  --splits 0 1 2 3 4 5 6 7 8 9
 ```
 
 ### Results files

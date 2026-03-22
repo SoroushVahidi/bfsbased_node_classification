@@ -5,6 +5,8 @@ Final evaluation runner: compares MLP, baseline SGC (v1), V2_MULTIBRANCH, and FI
 Usage:
   python3 code/bfsbased_node_classification/run_final_evaluation.py \
     --split-dir data/splits --output-tag final_v3
+
+Default: **10 splits** (indices 0–9), matching `reports/final_method_v3_results.csv`.
 """
 from __future__ import annotations
 
@@ -302,7 +304,10 @@ def main():
     parser.add_argument("--split-dir", default="data/splits")
     parser.add_argument("--datasets", nargs="+",
                         default=["cora", "citeseer", "pubmed", "chameleon", "texas", "wisconsin"])
-    parser.add_argument("--splits", nargs="+", type=int, default=[0, 1, 2, 3, 4])
+    parser.add_argument(
+        "--splits", nargs="+", type=int,
+        default=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    )
     parser.add_argument("--output-tag", default="final_v3")
     args = parser.parse_args()
 
