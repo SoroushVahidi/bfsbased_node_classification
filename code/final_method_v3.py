@@ -10,7 +10,7 @@ Full benchmark reproduction (MLP, SGC v1, V2 ablation, FINAL_V3)::
     python3 code/bfsbased_node_classification/run_final_evaluation.py \\
       --split-dir data/splits \\
       --datasets cora citeseer pubmed chameleon texas wisconsin \\
-      --splits 0 1 2 3 4
+      --splits 0 1 2 3 4 5 6 7 8 9
 
 Regenerate tables and figures from the frozen per-split CSV (no training)::
 

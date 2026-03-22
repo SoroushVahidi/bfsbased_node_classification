@@ -366,7 +366,7 @@ def write_md(path: Path, header: list[str], rows: list[list[str]]) -> None:
     lines = [
         "# Main results (test accuracy, mean ± std over splits)",
         "",
-        "Source: `reports/final_method_v3_results.csv` (same splits as FINAL_V3 evaluation).",
+        "Source: `reports/final_method_v3_results.csv` — **10 GEO-GCN splits** (indices 0–9) per dataset, same protocol as the FINAL_V3 evaluation logs.",
         "",
         "Regenerate this table and the PRL v3 figure set:",
         "`python3 scripts/prl_final_additions/build_prl_v3_figures_and_tables.py`",
