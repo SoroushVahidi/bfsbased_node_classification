@@ -1,5 +1,8 @@
 # PRL Publication Tables
 
+> **SUPERSEDED — do not use.** Canonical FINAL_V3 tables: `tables/main_results_prl.md`.  
+> This file disagrees with `reports/final_method_v3_results.csv` (different split aggregation).
+
 ## Table 1: Test Accuracy (mean ± std, 10 splits)
 
 | Dataset | MLP | SGC (v1) | V2 Multibranch | **FINAL V3** |

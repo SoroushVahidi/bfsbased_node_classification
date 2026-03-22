@@ -102,7 +102,9 @@ Only 3 choices are made on validation: weight profile, τ, ρ. Total search spac
 | **Texas** | **2** | **0** | **+2** | **Yes: −2.70% on split 4** |
 | Wisconsin | 0 | 0 | 0 | No |
 
-**V3 avoids all split-level harmful cases**: Texas split 4, where v1 suffered −2.70%, is safely handled by the reliability gate (R(v) < ρ for the affected nodes).
+**Texas (split 4):** SGC v1 is worse than MLP (−2.70 pp on that split); **FINAL_V3 avoids that failure** via the reliability gate (R(v) < ρ on the affected nodes).
+
+**Chameleon (split 4):** FINAL_V3 shows a **small** negative Δ vs MLP (−0.44 pp on that split only). Mean accuracy over five splits still matches MLP (see `tables/main_results_prl.md`).
 
 ### Stability (std dev of test accuracy across 5 splits)
 
@@ -167,16 +169,17 @@ The threshold selection mechanism correctly identifies that homophilic datasets 
 
 ### Strengths
 1. **Consistent improvement on homophilic datasets:** +2.7% on Cora, +2.9% on Citeseer, +1.3% on Pubmed — all with high correction precision
-2. **No harmful split-level failures:** Avoids the -2.70% harm on Texas split 4 that the original SGC exhibits
+2. **Avoids the prominent Texas failure of SGC v1:** Ungated correction hurts on Texas split 4; the reliability gate prevents that pattern
 3. **Automatic conservatism:** Naturally restricts correction on heterophilic datasets through the reliability gate
 4. **Interpretable:** Three clear signals in the reliability score, each with a natural interpretation
 5. **Simple:** Only 3 tuned choices (weight profile, τ, ρ) from a ~72-config grid
 
 ### Limitations
-1. **Minimal help on heterophilic datasets:** Chameleon shows +0.00% gain — the method correctly avoids harm but does not improve over MLP
-2. **Correction is not always beneficial:** On Pubmed, 28% of corrections hurt (precision 0.72), though net gain is still positive
-3. **No graph-independent correction pathway:** When graph evidence is unreliable, the method defaults to MLP rather than attempting feature-space correction
-4. **Relies on edge homophily correlation:** The reliability score works because homophilic neighborhoods tend to have high neighbor concentration and MLP-graph agreement; this may not hold for all graph types
+1. **Minimal help on heterophilic datasets:** Chameleon shows +0.00% mean gain — the method stays close to MLP rather than improving
+2. **Occasional split-level regressions:** e.g. Chameleon split 4 has a small negative Δ vs MLP; five-split means still match MLP (see `tables/main_results_prl.md`)
+3. **Correction is not always beneficial:** On Pubmed, 28% of corrections hurt (precision 0.72), though net gain is still positive
+4. **No graph-independent correction pathway:** When graph evidence is unreliable, the method defaults to MLP rather than attempting feature-space correction
+5. **Relies on edge homophily correlation:** The reliability score works because homophilic neighborhoods tend to have high neighbor concentration and MLP-graph agreement; this may not hold for all graph types
 
 ## 6. Core Claim for PRL Manuscript
 
@@ -212,5 +215,9 @@ python3 code/bfsbased_node_classification/run_final_evaluation.py \
 - `reports/final_method_v3_analysis.md` — this report
 
 ### Code files
+- `code/final_method_v3.py` — stable entry path (loads the implementation below)
 - `code/bfsbased_node_classification/final_method_v3.py` — v3 implementation
 - `code/bfsbased_node_classification/run_final_evaluation.py` — evaluation runner
+
+### Refresh tables and figures (no training)
+- `bash scripts/run_all_prl_results.sh` — see `scripts/README_REPRODUCE.md`

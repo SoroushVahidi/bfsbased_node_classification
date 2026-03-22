@@ -178,7 +178,7 @@ def plot_graphical_abstract_v3(out: Path) -> None:
             linewidth=1.0,
         )
     )
-    ax_r.text(0.85, 0.39, "features\nonly", ha="center", va="center", fontsize=7.5, color="0.2")
+    ax_r.text(0.85, 0.39, "keep\nMLP", ha="center", va="center", fontsize=7.5, color="0.2")
     ax_r.annotate(
         "",
         xy=(0.85, 0.5),
