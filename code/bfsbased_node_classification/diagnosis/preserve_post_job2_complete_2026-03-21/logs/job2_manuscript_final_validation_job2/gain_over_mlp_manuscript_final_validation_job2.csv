@@ -1,3 +1,0 @@
-dataset,sgc_mean,mlp_mean,delta,n_splits_sgc_wins,n_splits_mlp_wins,n_splits_ties,avg_uncertain_fraction,avg_changed_fraction
-pubmed,0.8841,0.8723,+0.0117,30,0,0,0.198,0.148
-squirrel,0.3220,0.3218,+0.0002,14,14,2,0.073,0.178
