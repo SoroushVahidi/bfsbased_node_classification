@@ -1,0 +1,16 @@
+# Main results (test accuracy, mean ± std over splits)
+
+Source: `reports/final_method_v3_results.csv` (same splits as FINAL_V3 evaluation).
+
+Regenerate this table and the PRL v3 figure set:
+`python3 scripts/prl_final_additions/build_prl_v3_figures_and_tables.py`
+(reads existing CSVs only; no experiments).
+
+| Dataset | MLP | SGC v1 | V2 multi | FINAL_V3 |
+| --- | --- | --- | --- | --- |
+| Chameleon | 0.4715 ± 0.0248 | **0.4732 ± 0.0256** | 0.4728 ± 0.0267 | 0.4715 ± 0.0258 |
+| Citeseer | 0.6735 ± 0.0177 | **0.7039 ± 0.0180** | 0.7020 ± 0.0189 | 0.7029 ± 0.0181 |
+| Cora | 0.7264 ± 0.0328 | **0.7545 ± 0.0219** | 0.7533 ± 0.0240 | 0.7537 ± 0.0246 |
+| Pubmed | 0.8729 ± 0.0032 | **0.8858 ± 0.0040** | 0.8853 ± 0.0041 | **0.8858 ± 0.0041** |
+| Texas | 0.8162 ± 0.0753 | 0.8216 ± 0.0914 | **0.8270 ± 0.0848** | **0.8270 ± 0.0848** |
+| Wisconsin | **0.8314 ± 0.0422** | **0.8314 ± 0.0422** | **0.8314 ± 0.0422** | **0.8314 ± 0.0422** |
