@@ -1,9 +1,11 @@
 # PRL manuscript — repository evidence package
 
+Start with the [root README](README.md) for install, quick runs, and repository layout.
+
 **Paper:** *Uncertainty-Gated Selective Graph Correction for Node Classification*  
 **Target:** Pattern Recognition Letters (7 pages incl. references)
 
-This README lists **manuscript-ready** artifacts. Prefer these over older exploratory copies under `code/.../diagnosis/preserve_*`.
+This README lists **manuscript-ready** artifacts. Prefer **`logs/`** and the paths below over ad-hoc snapshots; legacy diagnosis bundles are no longer tracked on this branch.
 
 ## Quick navigation
 

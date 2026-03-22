@@ -13,6 +13,9 @@ diagnosis_bundle*.tar.gz
 _push_*.tar.gz
 _push_*.tar.gz.part.*
 
+# Point-in-time diagnosis snapshots (prefer logs/; large JSON — keep local only if needed)
+code/bfsbased_node_classification/diagnosis/
+
 # Editor
 .idea/
 .vscode/

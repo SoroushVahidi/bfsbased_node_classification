@@ -20,7 +20,7 @@
 
 **Canonical “final validation” prefix:** `*_manuscript_final_validation*` under `logs/` (merged job outputs).
 
-**Obsolete / duplicate content:** Multiple **frozen snapshots** under `code/bfsbased_node_classification/diagnosis/preserve_*` duplicate `logs/` artifacts for archival; prefer **`logs/`** for citations. `logs/broken_job1_883410_backup_2026-03-19/` is explicitly superseded.
+**Obsolete / duplicate content:** Frozen snapshots that used to live under `code/bfsbased_node_classification/diagnosis/preserve_*` duplicated `logs/` artifacts; that tree is **no longer tracked** on the default branch—prefer **`logs/`** for citations (check other git branches for archives). `logs/broken_job1_883410_backup_2026-03-19/` is explicitly superseded.
 
 ---
 
@@ -97,7 +97,7 @@
 | Type | Paths |
 |------|--------|
 | Active Slurm templates | `/home/sv96/node_classification_manuscript/slurm/run_selective_validation_main_r3.sbatch`, `run_selective_validation_large_controls.sbatch`, `run_selective_validation_analysis.sbatch` |
-| Historical copies | Under `code/bfsbased_node_classification/diagnosis/preserve_*/slurm/` (archival) |
+| Historical copies | May exist on non-default git branches; not under `code/.../diagnosis/` on main |
 
 ---
 
@@ -115,7 +115,7 @@
 |----------|--------|
 | `logs/*_final_validation_main.csv` / `job1` / `job2` split artifacts | Earlier pipeline stages; **superseded** by `*_final_validation.csv` without `_main` where merged |
 | `logs/broken_job1_883410_backup_2026-03-19/` | Broken job backup |
-| `code/bfsbased_node_classification/diagnosis/preserve_*` | Point-in-time copies; use `logs/` for paper |
+| `code/bfsbased_node_classification/diagnosis/*` (removed from main) | Was point-in-time copies; use `logs/` for paper |
 
 ---
 

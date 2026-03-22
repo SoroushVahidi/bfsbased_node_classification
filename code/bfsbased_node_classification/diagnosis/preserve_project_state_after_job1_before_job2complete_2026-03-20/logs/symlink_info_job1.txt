@@ -1,8 +1,0 @@
-# JOB 1 analysis-compatibility symlink (documentation)
-
-Intended mapping (for analysis scripts expecting `*_job1.jsonl`):
-  comparison_runs_manuscript_final_validation_job1.jsonl -> comparison_runs_manuscript_final_validation_main.jsonl
-
-State on Wulver at bundle time (2026-03-20):
-  - No `comparison_runs_manuscript_final_validation_job1.jsonl` symlink was present under logs/.
-  - (Historically removed before the repaired rerun to avoid resume-skip; recreate after success if desired.)

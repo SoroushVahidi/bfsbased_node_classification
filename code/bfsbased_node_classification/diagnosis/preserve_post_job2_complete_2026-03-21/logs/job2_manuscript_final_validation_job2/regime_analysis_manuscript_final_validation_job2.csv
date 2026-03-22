@@ -1,3 +1,0 @@
-dataset,num_nodes,num_edges,num_classes,avg_degree,homophily,mlp_mean,mlp_std,prop_mean,prop_std,sgc_mean,sgc_std,sgc_delta_vs_mlp,regime_note
-pubmed,19717,88648,3,4.50,0.802,0.8723,0.0037,0.8090,0.0053,0.8841,0.0036,+0.0117,homophilic
-squirrel,5201,396846,5,76.30,0.222,0.3218,0.0171,0.3035,0.0184,0.3220,0.0174,+0.0002,heterophilic
