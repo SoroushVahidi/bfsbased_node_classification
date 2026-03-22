@@ -900,6 +900,167 @@ def v6_combo(
 # Registry for the experiment runner
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# V7: Adaptive regime-aware correction (refined combo from Phase 1 insights)
+# ---------------------------------------------------------------------------
+
+def v7_adaptive(
+    data,
+    train_indices,
+    val_indices,
+    test_indices,
+    *,
+    mlp_probs: Optional[torch.Tensor] = None,
+    seed: int = 1337,
+    mod=None,
+    feature_knn_k: int = 10,
+) -> Tuple[float, float, Dict[str, Any]]:
+    """
+    Adaptive variant that detects the dataset regime (homophilic vs heterophilic)
+    from validation data and adapts the correction strategy:
+
+    - High homophily: standard graph+feature correction (like baseline SGC)
+      with reliability filtering to avoid rare bad corrections.
+    - Low homophily: feature-heavy correction with kNN enabled,
+      graph terms downweighted, stronger reliability filtering.
+
+    Also uses a validation-calibrated approach: measures correction harm rate
+    on validation to decide the aggressiveness of correction.
+    """
+    y_true = data.y.detach().cpu().numpy().astype(np.int64)
+    train_np = np.asarray(train_indices, dtype=np.int64)
+    val_np = np.asarray(val_indices, dtype=np.int64)
+    test_np = np.asarray(test_indices, dtype=np.int64)
+
+    if mlp_probs is None:
+        mlp_probs, _ = mod.train_mlp_and_predict(
+            data, train_np,
+            **mod.DEFAULT_MANUSCRIPT_MLP_KWARGS, log_file=None,
+        )
+
+    mlp_info = mod.compute_mlp_margin(mlp_probs)
+    mlp_probs_np = mlp_info["mlp_probs_np"]
+    mlp_pred_all = mlp_info["mlp_pred_all"]
+    mlp_margin_all = mlp_info["mlp_margin_all"]
+
+    evidence = mod._build_selective_correction_evidence(
+        data, train_np, mlp_probs_np=mlp_probs_np,
+        enable_feature_knn=True, feature_knn_k=feature_knn_k,
+    )
+    reliability = compute_node_reliability(mlp_probs_np, evidence)
+
+    homophily, _, _ = mod.edge_homophily_fast(data)
+    is_homophilic = homophily >= 0.5
+
+    if is_homophilic:
+        weight_candidates = [
+            {"b1": 1.0, "b2": 0.6, "b3": 0.0, "b4": 0.5, "b5": 0.3, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.9, "b3": 0.0, "b4": 0.3, "b5": 0.2, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.4, "b3": 0.0, "b4": 0.9, "b5": 0.5, "b6": 0.0},
+            {"b1": 1.2, "b2": 0.5, "b3": 0.0, "b4": 0.4, "b5": 0.2, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.6, "b3": 0.2, "b4": 0.5, "b5": 0.3, "b6": 0.0},
+        ]
+        rel_thresholds = [0.3, 0.4, 0.5]
+    else:
+        weight_candidates = [
+            {"b1": 1.0, "b2": 0.7, "b3": 0.4, "b4": 0.1, "b5": 0.1, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.5, "b3": 0.5, "b4": 0.2, "b5": 0.1, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.6, "b3": 0.3, "b4": 0.0, "b5": 0.0, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.4, "b3": 0.6, "b4": 0.1, "b5": 0.1, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.8, "b3": 0.2, "b4": 0.0, "b5": 0.0, "b6": 0.0},
+        ]
+        rel_thresholds = [0.5, 0.6, 0.7, 0.8]
+
+    val_margins = mlp_margin_all[val_np]
+    q = np.quantile(val_margins, [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
+    base = np.array([0.05, 0.10, 0.15, 0.20, 0.25, 0.30])
+    threshold_candidates = sorted(set(np.round(np.concatenate([q, base]), 6).tolist()))
+
+    best_key = None
+    best_cfg = None
+    best_scores = None
+
+    for w_cfg in weight_candidates:
+        comps = mod.build_selective_correction_scores(
+            mlp_probs_np, evidence, **w_cfg,
+        )
+        combined = comps["combined_scores"]
+
+        for t in threshold_candidates:
+            uncertain_val = mlp_margin_all[val_np] < t
+            for r_thr in rel_thresholds:
+                reliable_val = reliability[val_np] >= r_thr
+                apply_val = uncertain_val & reliable_val
+                final_val = mlp_pred_all[val_np].copy()
+                if apply_val.any():
+                    final_val[apply_val] = np.argmax(
+                        combined[val_np][apply_val], axis=1
+                    ).astype(np.int64)
+
+                val_acc = _simple_accuracy(y_true[val_np], final_val)
+                changed = float((final_val != mlp_pred_all[val_np]).mean())
+
+                n_apply = apply_val.sum()
+                if n_apply > 0:
+                    corrections = final_val[apply_val]
+                    mlp_on_apply = mlp_pred_all[val_np][apply_val]
+                    true_on_apply = y_true[val_np][apply_val]
+                    actually_changed = corrections != mlp_on_apply
+                    if actually_changed.any():
+                        harm_rate = float((
+                            (mlp_on_apply[actually_changed] == true_on_apply[actually_changed]) &
+                            (corrections[actually_changed] != true_on_apply[actually_changed])
+                        ).mean())
+                    else:
+                        harm_rate = 0.0
+                else:
+                    harm_rate = 0.0
+
+                penalty = harm_rate * 0.5
+                adjusted_acc = val_acc - penalty
+
+                key = (adjusted_acc, -changed)
+                if best_key is None or key > best_key:
+                    best_key = key
+                    best_cfg = {
+                        "weights": dict(w_cfg),
+                        "threshold": t,
+                        "reliability_threshold": r_thr,
+                        "val_harm_rate": harm_rate,
+                    }
+                    best_scores = combined
+
+    t = best_cfg["threshold"]
+    r_thr = best_cfg["reliability_threshold"]
+    uncertain_all = mlp_margin_all < t
+    reliable_all = reliability >= r_thr
+    apply_all = uncertain_all & reliable_all
+
+    final_pred = mlp_pred_all.copy()
+    if apply_all.any():
+        final_pred[apply_all] = np.argmax(best_scores[apply_all], axis=1).astype(np.int64)
+
+    test_acc = _simple_accuracy(y_true[test_np], final_pred[test_np])
+    val_acc = _simple_accuracy(y_true[val_np], final_pred[val_np])
+    mlp_test_acc = _simple_accuracy(y_true[test_np], mlp_pred_all[test_np])
+
+    info = {
+        "variant": "V7_ADAPTIVE",
+        "val_acc_selective": val_acc,
+        "test_acc_mlp": mlp_test_acc,
+        "test_acc_selective": test_acc,
+        "homophily": homophily,
+        "is_homophilic": is_homophilic,
+        "selected_threshold": t,
+        "selected_reliability_threshold": r_thr,
+        "selected_weights": best_cfg["weights"],
+        "val_harm_rate": best_cfg["val_harm_rate"],
+        "fraction_test_corrected": float(apply_all[test_np].mean()),
+        "fraction_test_changed": float((final_pred[test_np] != mlp_pred_all[test_np]).mean()),
+    }
+    return val_acc, test_acc, info
+
+
 VARIANT_REGISTRY = {
     "V1_RELIABILITY": v1_reliability_correction,
     "V2_MULTIBRANCH": v2_multibranch_correction,
@@ -907,4 +1068,5 @@ VARIANT_REGISTRY = {
     "V4_ENTROPY_GATE": v4_entropy_gate,
     "V5_KNN_ENHANCED": v5_knn_enhanced,
     "V6_COMBO": v6_combo,
+    "V7_ADAPTIVE": v7_adaptive,
 }
