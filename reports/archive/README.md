@@ -1,8 +1,17 @@
 # Archived reports
 
-**`superseded_final_tables_prl/`** — Older merged tables that used a different aggregation label (“10 splits”) and **do not match** the canonical FINAL_V3 evaluation in `reports/final_method_v3_results.csv`.
+## `final_method_v3_results_5split.csv`
 
-For PRL tables aligned with FINAL_V3, use:
+Snapshot of the previous canonical per-split log (**5** GEO-GCN splits only). Superseded by `reports/final_method_v3_results.csv` (10 splits).
 
-- `tables/main_results_prl.md` and `tables/main_results_prl.csv`
-- Regenerate: `python3 scripts/prl_final_additions/build_prl_v3_figures_and_tables.py` or `bash scripts/run_all_prl_results.sh`
+## `superseded_final_tables_prl/`
+
+- **`final_tables_prl.csv`** — Frozen **10-split** per-split metrics (MLP accuracy plus SGC v1 / V2 / FINAL_V3 test accuracy and correction fields). This is the rebuild source for the canonical log:
+
+  ```bash
+  python3 scripts/prl_final_additions/rebuild_final_v3_results_10split.py
+  ```
+
+- **`final_tables_prl.md`** — Historical rendered tables (may drift; do not treat as authoritative).
+
+For PRL-facing merged results, cite **`tables/main_results_prl.md`** (regenerated from the canonical CSV).

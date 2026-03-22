@@ -1,7 +1,8 @@
-# PRL Publication Tables
+# PRL Publication Tables (historical snapshot)
 
-> **SUPERSEDED — do not use.** Canonical FINAL_V3 tables: `tables/main_results_prl.md`.  
-> This file disagrees with `reports/final_method_v3_results.csv` (different split aggregation).
+> **For the manuscript, use** `tables/main_results_prl.md` **(regenerated from** `reports/final_method_v3_results.csv` **) so all PRL-facing numbers stay aligned.**
+>
+> The per-split source rows live in `final_tables_prl.csv` in this folder and feed `scripts/prl_final_additions/rebuild_final_v3_results_10split.py`.
 
 ## Table 1: Test Accuracy (mean ± std, 10 splits)
 

@@ -11,8 +11,9 @@ The original selective graph correction (SGC v1) method trains an MLP, then
 corrects uncertain nodes using weighted graph/feature evidence. While it
 improves predictions on homophilic citation graphs on average, it has no
 reliable way to withhold correction when graph evidence is untrustworthy.
-In our frozen five-split benchmark, SGC v1 is worse than the MLP alone on
-**Texas split 4** (−2.70 pp).
+In our frozen **10-split** benchmark, SGC v1 is worse than the MLP alone on
+**Texas splits 4, 5, and 9** and on **Wisconsin split 8** (see
+`reports/safety_analysis.md`).
 
 WHAT FINAL V3 DOES DIFFERENTLY
 We introduce a per-node graph reliability score R(v) that gates correction:
@@ -37,16 +38,16 @@ The reliability gate acts as a local quality check on neighborhoods:
 This does not require a global homophily estimate — R(v) summarizes local neighborhood behavior.
 
 WHERE IT WORKS BEST
-  - Citation networks (Cora, Citeseer, Pubmed): clear gains over MLP with high correction precision
-  - Small heterophilic datasets (Texas, Wisconsin): conservative — avoids the Texas failure mode of SGC v1
+  - Citation networks (Cora, Citeseer, Pubmed): clear gains over MLP with strong aggregate correction precision
+  - Small heterophilic datasets (Texas, Wisconsin): conservative — reduces harmful-split count vs SGC v1 on this benchmark
 
 LIMITATIONS
-  - On strongly heterophilic Chameleon, mean gain vs MLP is ~0; one split shows a small negative Δ while means stay aligned with MLP
-  - The fixed weight profiles may not transfer to every graph domain
-  - Post-hoc correction layer, not an end-to-end trained GNN
+  - On strongly heterophilic Chameleon, mean gain vs MLP is tiny (+0.02 pp over 10 splits); split 4 shows a small negative Δ while means stay near the MLP
+  - Texas split 5 is bad for SGC v1, V2, and FINAL_V3 alike in the frozen log — the gate does not magically fix every split
+  - Post-hoc correction layer, not an end-to-end trained GNN; we do not claim to beat all GNNs on every benchmark
 
-KEY NUMBERS (canonical five-split evaluation, see tables/main_results_prl.md)
-  Mean Δ vs MLP across six datasets: +1.34 pp (FINAL_V3 vs MLP column means)
-  Harmful splits (Δ test < 0 vs MLP): FINAL_V3 — 1 of 30; SGC v1 — 1 of 30 (different dataset/split)
-  Correction precision on citation graphs: high (see reports/final_method_v3_analysis.md)
+KEY NUMBERS (canonical **10-split** evaluation; see `tables/main_results_prl.md`)
+  Mean Δ vs MLP across six datasets: **+1.26 pp** (FINAL_V3 vs MLP column means)
+  Harmful splits (Δ test < 0 vs MLP): FINAL_V3 — **2 of 60**; SGC v1 — **4 of 60**
+  Correction precision (aggregate on citations): high on Cora / Citeseer; see `reports/final_method_v3_analysis.md`
   Search space: ~72 configurations (2 weight profiles × ~9 τ × 4 ρ)
