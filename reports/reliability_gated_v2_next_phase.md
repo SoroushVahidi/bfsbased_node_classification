@@ -194,7 +194,7 @@ v23 signal selection across all phase-1 runs: entropy=1  margin=5
 
 ```bash
 cd code/bfsbased_node_classification
-python v2_next_phase_runner.py \
+python3 code/bfsbased_node_classification/experimental_archived/v2_next_phase_runner.py \
     --data-dir ../../data \
     --out-dir  ../../reports
 ```

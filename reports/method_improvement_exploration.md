@@ -192,13 +192,13 @@ Better tuning alone is not enough. The key improvement comes from the **multi-br
 
 ### Phase 1 Screening
 ```bash
-python3 code/bfsbased_node_classification/run_improvement_experiments.py \
+python3 code/bfsbased_node_classification/experimental_archived/run_improvement_experiments.py \
   --phase screening --split-dir data/splits --output-tag screening
 ```
 
 ### Phase 2 Focused Evaluation
 ```bash
-python3 code/bfsbased_node_classification/run_improvement_experiments.py \
+python3 code/bfsbased_node_classification/experimental_archived/run_improvement_experiments.py \
   --phase focused --split-dir data/splits \
   --datasets cora citeseer pubmed chameleon texas wisconsin \
   --splits 0 1 2 3 4 \

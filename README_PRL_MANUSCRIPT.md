@@ -1,48 +1,61 @@
 # PRL manuscript — repository evidence package
 
-Start with the [root README](README.md) for install, quick runs, and repository layout.
+**This repository contains the evidence package for a Pattern Recognition Letters (PRL) submission.**
 
-**Paper:** *Uncertainty-Gated Selective Graph Correction for Node Classification*  
+Start with the [root README](README.md) for install, layout, and smoke runs.
+
+**Paper working title:** *Uncertainty-Gated Selective Graph Correction for Node Classification*  
 **Target:** Pattern Recognition Letters (7 pages incl. references)
 
-This README lists **manuscript-ready** artifacts. Prefer **`logs/`** and the paths below over ad-hoc snapshots; legacy diagnosis bundles are no longer tracked on this branch.
+**Main method (submission):** **FINAL_V3** — reliability-gated selective graph correction (`code/bfsbased_node_classification/final_method_v3.py`, stable import: `code/final_method_v3.py`).  
+**Baselines / ablations in the main benchmark table:** MLP-only, **SGC v1** (original selective correction), **V2_MULTIBRANCH** (archived multibranch ablation). These are **not** presented as competing final methods.
 
-## Quick navigation
+## Canonical artifacts (FINAL_V3)
 
 | Purpose | Location |
 |--------|----------|
-| **Regenerate tables/figures + inventory** | `python3 scripts/prl_final_additions/build_all_prl_artifacts.py` |
-| **Phase 1 audit + inventory** | `reports/prl_final_additions/PRL_PHASE1_AUDIT.md`, `artifact_inventory.json` |
-| **Phase 2 gap analysis** | `reports/prl_final_additions/PRL_PHASE2_GAP_ANALYSIS.md` |
-| **Results §3 (gate / threshold) notes** | `reports/prl_final_additions/PRL_RESULTS_SUBSECTION_3.md` |
-| **Safe claims & caveats** | `reports/prl_final_additions/CLAIMS_AND_CAVEATS.md` |
-| **PRL resubmission method spec / readiness audit** | `reports/prl_resubmission/PRL_METHOD_SPEC.md`, `REPO_READINESS_AUDIT.md` |
-| **Focused resubmission runner (baselines + ablations)** | `python3 code/bfsbased_node_classification/prl_resubmission_runner.py ...` |
-| **Merged benchmark CSV** | `tables/prl_final_additions/prl_benchmark_summary.csv` (copy of merged table) |
-| **Win/tie/loss** | `tables/prl_final_additions/prl_split_win_tie_loss.csv` |
-| **Correction behavior** | `tables/prl_final_additions/prl_correction_behavior_compact.csv` |
-| **Gate cross-run correlations** | `tables/prl_final_additions/prl_subsection3_crossrun_correlations.csv` |
-| **Figures (Δ vs MLP, gate stats)** | `figures/prl_final_additions/` |
-| **Graphical abstract (submission, separate from main PDF)** | `figures/prl_final_additions/graphical_abstract_prl.{pdf,png,svg}` — regenerate: `python3 scripts/prl_final_additions/make_graphical_abstract.py` |
-| **Threshold cross-run package** | `results_prl/` + `results_prl/README_threshold_sensitivity.md` |
-| **Focused resubmission outputs** | `logs/prl_resubmission/`, `tables/prl_resubmission/`, `reports/prl_resubmission/` |
-| **Canonical logs** | `logs/*_manuscript_final_validation*` |
+| **Per-split numerical log** | `reports/final_method_v3_results.csv` |
+| **Main benchmark table** | `tables/main_results_prl.md`, `tables/main_results_prl.csv` |
+| **Analysis writeup** | `reports/final_method_v3_analysis.md` |
+| **Narrative for drafting** | `reports/final_method_story.txt` |
+| **Safety / harmful-split summary** | `reports/safety_analysis.md` |
+| **Figures** | `figures/prl_graphical_abstract_v3.png`, `correction_rate_vs_homophily.png`, `safety_comparison.png`, `reliability_vs_accuracy.png` |
+| **Regenerate tables + figures (no training)** | `bash scripts/run_all_prl_results.sh` — details in [scripts/README_REPRODUCE.md](scripts/README_REPRODUCE.md) |
+
+## Framing (careful claims)
+
+- **Feature-first, reliability-aware selective graph correction** — not a claim to universally beat GNNs on all benchmarks.
+- **Not** a dedicated heterophily “booster”: on strongly heterophilic Chameleon the method stays near the MLP on average; see `reports/safety_analysis.md` for split-level detail.
+- **Threshold evidence:** cross-run validation choices vs test behavior; see `results_prl/README_threshold_sensitivity.md` where applicable.
+
+## Supplementary PRL materials (logs / resubmission bundle)
+
+| Purpose | Location |
+|--------|----------|
+| Regenerate extended tables/figures + inventory | `python3 scripts/prl_final_additions/build_all_prl_artifacts.py` |
+| Phase 1 audit + inventory | `reports/prl_final_additions/PRL_PHASE1_AUDIT.md`, `artifact_inventory.json` |
+| Phase 2 gap analysis | `reports/prl_final_additions/PRL_PHASE2_GAP_ANALYSIS.md` |
+| Results §3 (gate / threshold) notes | `reports/prl_final_additions/PRL_RESULTS_SUBSECTION_3.md` |
+| Safe claims & caveats | `reports/prl_final_additions/CLAIMS_AND_CAVEATS.md` |
+| PRL resubmission method spec / readiness | `reports/prl_resubmission/PRL_METHOD_SPEC.md`, `REPO_READINESS_AUDIT.md` |
+| Resubmission runner (GCN, APPNP, ablations) | `python3 code/bfsbased_node_classification/prl_resubmission_runner.py ...` |
+| Merged benchmark CSV (supplementary) | `tables/prl_final_additions/prl_benchmark_summary.csv` |
+| Older graphical abstract (legacy bundle) | `figures/prl_final_additions/graphical_abstract_prl.{pdf,png,svg}` |
+
+## Archived / exploratory (do not treat as “main method”)
+
+- **Superseded conflicting tables:** `reports/archive/superseded_final_tables_prl/` (disagrees with `final_method_v3_results.csv` — do not cite).
+- **Legacy runners:** `code/bfsbased_node_classification/experimental_archived/README.md`
+- **Exploration reports** (diagnostics, v2 phases, improvement sweeps): under `reports/*.md` — historical context only.
 
 ## LaTeX manuscript
 
-There is **no** `.tex` file in this repository; add your paper separately or submodule your writing repo.
+There is **no** `.tex` file in this repository; keep the paper in a separate writing repo if needed.
 
-## Reproducibility
+## Drivers
 
-- Per-run JSONL: `logs/comparison_runs_manuscript_final_validation.jsonl`
-- Training/eval driver (under `code/`): `code/bfsbased_node_classification/manuscript_runner.py`
+- Core manuscript driver: `code/bfsbased_node_classification/manuscript_runner.py`
+- **FINAL_V3** benchmark driver: `code/bfsbased_node_classification/run_final_evaluation.py`
 - Focused resubmission driver: `code/bfsbased_node_classification/prl_resubmission_runner.py`
-- Focused resubmission analysis: `code/bfsbased_node_classification/analyze_prl_resubmission.py`
+- Analysis helper: `code/bfsbased_node_classification/analyze_prl_resubmission.py`
 - Slurm templates: `slurm/*.sbatch`
-
-## Framing (do not overclaim)
-
-- **Not** a universal heterophily-robust method.
-- **Main story:** strong MLP → **selective** graph correction for **uncertain** nodes.
-- **No** formal component-removal ablations unless you add experiments that truly implement them.
-- **Threshold:** evidence is primarily **cross-run** (validation-selected τ vs test uncertain/changed fractions), **not** full per-τ sweeps on a fixed split — see `results_prl/README_threshold_sensitivity.md`.

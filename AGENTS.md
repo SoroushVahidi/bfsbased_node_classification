@@ -16,6 +16,12 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 pip install torch_geometric numpy networkx sortedcontainers matplotlib
 ```
 
+### FINAL_V3 entry point
+
+- Implementation: `code/bfsbased_node_classification/final_method_v3.py`
+- Stable import path: `code/final_method_v3.py` (requires PyTorch when imported)
+- Regenerate main PRL tables/figures from CSVs: `bash scripts/run_all_prl_results.sh`
+
 ### Running experiments
 
 All experiment scripts live in `code/bfsbased_node_classification/`. They must be run from the repo root (`/workspace`).

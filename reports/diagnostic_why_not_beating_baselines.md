@@ -264,7 +264,7 @@ All analyses above were produced by:
 
 ```bash
 cd code/bfsbased_node_classification
-python diagnostic_runner.py --split-dir ../../data/splits --log-dir ../../logs
+python3 code/bfsbased_node_classification/experimental_archived/diagnostic_runner.py --split-dir ../../data/splits --log-dir ../../logs
 ```
 
 Output files:
