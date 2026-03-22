@@ -2456,6 +2456,794 @@ def selective_graph_correction_v2(
     return torch.tensor(test_pred, device=device), float(test_acc), info
 
 
+# =====================================================
+# BLOCK: v2.1 – v2.3 Next-phase improvements
+# =====================================================
+
+
+def compute_graph_reliability_continuous(
+    evidence: Dict[str, np.ndarray],
+    mlp_probs_np: np.ndarray,
+    *,
+    num_classes: int,
+    reliability_weights: Optional[Dict[str, float]] = None,
+) -> np.ndarray:
+    """
+    Improved per-node graph-reliability score using *continuous* signals.
+
+    Replaces the binary top-1 agreement in ``compute_graph_reliability`` with
+    probability-level cosine similarity and adds a graph-confidence component.
+
+    Args:
+        evidence: Dict from ``_build_selective_correction_evidence``.
+            Keys used: ``graph_neighbor_support``, ``node_degree``,
+            ``feature_knn_vote``, ``support_train_neighbors``.
+        mlp_probs_np: [N, C] MLP probability matrix.
+        num_classes: Number of classes C.
+        reliability_weights: Optional component weights.
+            Keys: ``neighbor_agreement``, ``mlp_graph_cosine``,
+                  ``knn_graph_cosine``, ``graph_confidence``,
+                  ``labeled_neighbor_frac``.
+
+    Returns:
+        [N] float64 reliability array in [0, 1].
+
+    Components:
+      1. neighbor_agreement   (0.35) – 1 - H(graph_neighbor_support) / log(C)
+      2. mlp_graph_cosine     (0.30) – cosine sim between mlp_probs and
+                                        graph_neighbor_support vectors
+      3. knn_graph_cosine     (0.15) – cosine sim between knn_vote and
+                                        graph_neighbor_support (0 when kNN absent)
+      4. graph_confidence     (0.10) – top1-top2 margin of graph_neighbor_support
+      5. labeled_neighbor_frac(0.10) – fraction of labeled neighbors
+    """
+    if reliability_weights is None:
+        reliability_weights = {
+            "neighbor_agreement": 0.35,
+            "mlp_graph_cosine": 0.30,
+            "knn_graph_cosine": 0.15,
+            "graph_confidence": 0.10,
+            "labeled_neighbor_frac": 0.10,
+        }
+
+    N = mlp_probs_np.shape[0]
+    C = max(int(num_classes), 2)
+
+    nbr_supp = np.asarray(evidence["graph_neighbor_support"], dtype=np.float64)
+    deg = np.asarray(evidence.get("node_degree", np.ones(N)), dtype=np.float64)
+    knn_vote = np.asarray(
+        evidence.get("feature_knn_vote", np.zeros((N, C), dtype=np.float64)),
+        dtype=np.float64,
+    )
+    train_nbrs = np.asarray(
+        evidence.get("support_train_neighbors", np.zeros(N, dtype=np.float64)),
+        dtype=np.float64,
+    )
+
+    # 1. Neighbor agreement: 1 - normalised entropy
+    log_C = float(np.log(C)) if C > 1 else 1.0
+    # Vectorised entropy: avoid log(0)
+    nz_mask = nbr_supp > 1e-12
+    safe_log = np.where(nz_mask, np.log(np.where(nz_mask, nbr_supp, 1.0)), 0.0)
+    nbr_entropy = -(nbr_supp * safe_log).sum(axis=1)
+    neighbor_agreement = np.clip(1.0 - nbr_entropy / log_C, 0.0, 1.0)
+
+    # 2. MLP-graph cosine similarity (probability space)
+    #    For nodes with no neighbours the graph support is all-zero → cosine = 0.
+    mlp_norm = np.linalg.norm(mlp_probs_np, axis=1, keepdims=True).clip(min=1e-12)
+    nbr_norm = np.linalg.norm(nbr_supp, axis=1, keepdims=True).clip(min=1e-12)
+    mlp_graph_cosine = np.clip(
+        ((mlp_probs_np / mlp_norm) * (nbr_supp / nbr_norm)).sum(axis=1),
+        0.0, 1.0,
+    )
+    # Nodes with no neighbors: set to 0.5 (neutral)
+    no_nbrs = deg < 1
+    mlp_graph_cosine = np.where(no_nbrs, 0.5, mlp_graph_cosine)
+
+    # 3. kNN-graph cosine similarity
+    knn_available = knn_vote.sum(axis=1) > 1e-12
+    knn_norm = np.linalg.norm(knn_vote, axis=1, keepdims=True).clip(min=1e-12)
+    knn_graph_raw = np.clip(
+        ((knn_vote / knn_norm) * (nbr_supp / nbr_norm)).sum(axis=1),
+        0.0, 1.0,
+    )
+    knn_graph_cosine = np.where(knn_available, knn_graph_raw, 0.0)
+
+    # 4. Graph confidence: top1 - top2 margin of graph_neighbor_support, in [0,1]
+    sorted_nbr = np.sort(nbr_supp, axis=1)
+    graph_conf_raw = sorted_nbr[:, -1] - sorted_nbr[:, -2] if C >= 2 else sorted_nbr[:, -1]
+    # margin is already in [0, 1] since nbr_supp rows sum to ≤ 1
+    graph_confidence = np.clip(graph_conf_raw, 0.0, 1.0)
+    graph_confidence = np.where(no_nbrs, 0.0, graph_confidence)
+
+    # 5. Labeled-neighbor fraction
+    deg_safe = np.maximum(deg, 1.0)
+    labeled_neighbor_frac = np.clip(train_nbrs / deg_safe, 0.0, 1.0)
+
+    w_na = float(reliability_weights.get("neighbor_agreement", 0.35))
+    w_mc = float(reliability_weights.get("mlp_graph_cosine", 0.30))
+    w_kc = float(reliability_weights.get("knn_graph_cosine", 0.15))
+    w_gc = float(reliability_weights.get("graph_confidence", 0.10))
+    w_lf = float(reliability_weights.get("labeled_neighbor_frac", 0.10))
+    total_w = w_na + w_mc + w_kc + w_gc + w_lf
+
+    reliability = (
+        w_na * neighbor_agreement
+        + w_mc * mlp_graph_cosine
+        + w_kc * knn_graph_cosine
+        + w_gc * graph_confidence
+        + w_lf * labeled_neighbor_frac
+    ) / max(total_w, 1e-9)
+
+    return reliability.astype(np.float64)
+
+
+def _mlp_entropy(mlp_probs_np: np.ndarray) -> np.ndarray:
+    """Row-wise entropy of MLP probability matrix, normalised to [0, 1]."""
+    C = mlp_probs_np.shape[1]
+    log_C = float(np.log(max(C, 2)))
+    nz = mlp_probs_np > 1e-12
+    safe_log = np.where(nz, np.log(np.where(nz, mlp_probs_np, 1.0)), 0.0)
+    raw_entropy = -(mlp_probs_np * safe_log).sum(axis=1)
+    return np.clip(raw_entropy / log_C, 0.0, 1.0)
+
+
+def _choose_threshold_from_signal(
+    y_true: np.ndarray,
+    val_indices: np.ndarray,
+    mlp_pred_all: np.ndarray,
+    signal_all: np.ndarray,
+    combined_scores: np.ndarray,
+    *,
+    threshold_candidates: Optional[List[float]] = None,
+    use_percentile: bool = True,
+    percentile_candidates: Optional[List[float]] = None,
+) -> Dict[str, Any]:
+    """
+    Generic threshold selector supporting both absolute and percentile modes.
+
+    ``signal_all`` is a per-node scalar (margin or entropy).  For margin, low
+    values mean uncertain; for entropy, high values mean uncertain.  The
+    convention here is that nodes with ``signal_all < tau`` are flagged
+    (caller should reverse the signal for entropy: pass ``-entropy``).
+    """
+    val_indices = np.asarray(val_indices, dtype=np.int64)
+    val_signal = signal_all[val_indices]
+
+    if use_percentile:
+        if percentile_candidates is None:
+            percentile_candidates = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50]
+        cands: List[Tuple[float, float]] = [
+            (pct, float(np.quantile(val_signal, pct)))
+            for pct in percentile_candidates
+        ]
+    else:
+        if threshold_candidates is None:
+            q = np.quantile(val_signal, [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
+            base = np.array([0.05, 0.10, 0.15, 0.20, 0.25, 0.30])
+            threshold_candidates = sorted(set(np.round(np.concatenate([q, base]), 6).tolist()))
+        cands = [(float("nan"), t) for t in threshold_candidates if np.isfinite(t)]
+
+    best: Optional[Dict[str, Any]] = None
+    for pct_or_nan, tau in cands:
+        uncertain_val = val_signal < tau
+        final_val = mlp_pred_all[val_indices].copy()
+        if uncertain_val.any():
+            final_val[uncertain_val] = np.argmax(
+                combined_scores[val_indices][uncertain_val], axis=1
+            ).astype(np.int64)
+        val_acc = _simple_accuracy(y_true[val_indices], final_val)
+        changed_frac = float((final_val != mlp_pred_all[val_indices]).mean())
+        uncertain_frac = float(uncertain_val.mean())
+        key = (val_acc, -changed_frac, -uncertain_frac)
+        if best is None or key > best["key"]:
+            best = {
+                "tau": tau,
+                "percentile": pct_or_nan,
+                "val_acc": float(val_acc),
+                "changed_fraction_val": changed_frac,
+                "uncertain_fraction_val": uncertain_frac,
+                "key": key,
+            }
+    assert best is not None
+    return best
+
+
+def selective_graph_correction_v21(
+    data,
+    train_indices,
+    val_indices,
+    test_indices,
+    *,
+    mlp_probs: Optional[torch.Tensor] = None,
+    seed: int = 1337,
+    log_prefix: str = "sgc_v21",
+    log_file: Optional[str] = None,
+    weight_candidates: Optional[List[Dict[str, float]]] = None,
+    feat_weight_candidates: Optional[List[Dict[str, float]]] = None,
+    use_percentile_threshold: bool = True,
+    percentile_candidates: Optional[List[float]] = None,
+    enable_feature_knn: bool = True,
+    feature_knn_k: int = 5,
+    soft_mix_sharpness_candidates: Optional[List[float]] = None,
+) -> Tuple[torch.Tensor, float, Dict[str, Any]]:
+    """
+    v2.1 — Soft reliability mixing with continuous reliability scoring.
+
+    Instead of hard 3-way routing, each uncertain node gets a *blend* of the
+    full-graph score and the feat-only score weighted by its continuous
+    reliability score:
+
+        combined[i] = alpha[i] * full_score[i] + (1 - alpha[i]) * feat_score[i]
+
+    where ``alpha[i] = min(max((rel[i] - lo) / (hi - lo), 0), 1)`` is a linear
+    ramp between the chosen lo / hi reliability cut-points.
+
+    Uses ``compute_graph_reliability_continuous`` for the reliability estimate.
+    Threshold search uses percentile of MLP margin.
+    """
+    t_all0 = time.perf_counter()
+    device = data.x.device
+    y_true = data.y.detach().cpu().numpy().astype(np.int64)
+    train_indices = np.asarray(train_indices, dtype=np.int64)
+    val_indices = np.asarray(val_indices, dtype=np.int64)
+    test_indices = np.asarray(test_indices, dtype=np.int64)
+    N = int(data.num_nodes)
+    C = int(y_true.max()) + 1
+
+    # 1. MLP
+    mlp_train_runtime_sec = 0.0
+    if mlp_probs is None:
+        t0 = time.perf_counter()
+        mlp_probs, _ = train_mlp_and_predict(
+            data, train_indices,
+            hidden=DEFAULT_MANUSCRIPT_MLP_KWARGS["hidden"],
+            layers=DEFAULT_MANUSCRIPT_MLP_KWARGS["layers"],
+            dropout=DEFAULT_MANUSCRIPT_MLP_KWARGS["dropout"],
+            lr=DEFAULT_MANUSCRIPT_MLP_KWARGS["lr"],
+            epochs=DEFAULT_MANUSCRIPT_MLP_KWARGS["epochs"],
+            log_file=log_file,
+        )
+        mlp_train_runtime_sec = time.perf_counter() - t0
+
+    mlp_info = compute_mlp_margin(mlp_probs)
+    mlp_probs_np = mlp_info["mlp_probs_np"]
+    mlp_pred_all = mlp_info["mlp_pred_all"]
+    mlp_margin_all = mlp_info["mlp_margin_all"]
+
+    # 2. Evidence
+    t_e0 = time.perf_counter()
+    evidence = _build_selective_correction_evidence(
+        data, train_indices, mlp_probs_np=mlp_probs_np,
+        enable_feature_knn=enable_feature_knn, feature_knn_k=feature_knn_k,
+    )
+    evidence_runtime_sec = time.perf_counter() - t_e0
+
+    # 3. Continuous reliability
+    reliability_score = compute_graph_reliability_continuous(
+        evidence, mlp_probs_np, num_classes=C,
+    )
+
+    # 4. Candidate configs
+    if weight_candidates is None:
+        weight_candidates = [
+            {"b1": 1.0, "b2": 0.6, "b3": 0.4, "b4": 0.5, "b5": 0.3, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.9, "b3": 0.3, "b4": 0.3, "b5": 0.2, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.4, "b3": 0.2, "b4": 0.9, "b5": 0.5, "b6": 0.0},
+        ]
+    # Feature-only weights independently tuned (not derived from full weights)
+    if feat_weight_candidates is None:
+        feat_weight_candidates = [
+            {"b1": 1.0, "b2": 1.2, "b3": 0.6, "b4": 0.0, "b5": 0.0, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.8, "b3": 0.8, "b4": 0.0, "b5": 0.0, "b6": 0.0},
+            {"b1": 1.0, "b2": 1.5, "b3": 0.3, "b4": 0.0, "b5": 0.0, "b6": 0.0},
+        ]
+    if soft_mix_sharpness_candidates is None:
+        soft_mix_sharpness_candidates = [1.0, 2.0, 4.0]
+
+    if percentile_candidates is None:
+        percentile_candidates = [0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50]
+
+    val_margins = mlp_margin_all[val_indices]
+    val_reliability = reliability_score[val_indices]
+
+    t_sel0 = time.perf_counter()
+    best_cfg: Optional[Dict[str, Any]] = None
+    best_mixed_scores: Optional[np.ndarray] = None
+
+    for w_cfg in weight_candidates:
+        scores_full = build_selective_correction_scores(
+            mlp_probs_np, evidence, **w_cfg,
+        )["combined_scores"]
+        for fo_cfg in feat_weight_candidates:
+            scores_feat = build_selective_correction_scores(
+                mlp_probs_np, evidence, **fo_cfg,
+            )["combined_scores"]
+            for sharpness in soft_mix_sharpness_candidates:
+                # Soft alpha from reliability raised to sharpness power
+                alpha_all = np.clip(reliability_score ** sharpness, 0.0, 1.0)
+                # Mixed scores for every node
+                mixed_scores = (
+                    alpha_all[:, None] * scores_full
+                    + (1.0 - alpha_all[:, None]) * scores_feat
+                )
+
+                for pct in percentile_candidates:
+                    tau = float(np.quantile(val_margins, pct))
+                    uncertain_val = val_margins < tau
+                    final_val = mlp_pred_all[val_indices].copy()
+                    if uncertain_val.any():
+                        final_val[uncertain_val] = np.argmax(
+                            mixed_scores[val_indices][uncertain_val], axis=1
+                        ).astype(np.int64)
+                    val_acc = _simple_accuracy(y_true[val_indices], final_val)
+                    changed_frac = float((final_val != mlp_pred_all[val_indices]).mean())
+                    uncertain_frac = float(uncertain_val.mean())
+                    key = (val_acc, -changed_frac, -uncertain_frac)
+                    if best_cfg is None or key > best_cfg["key"]:
+                        best_cfg = {
+                            "weights": dict(w_cfg),
+                            "feat_weights": dict(fo_cfg),
+                            "sharpness": sharpness,
+                            "tau": tau,
+                            "percentile": pct,
+                            "val_acc": val_acc,
+                            "changed_fraction_val": changed_frac,
+                            "uncertain_fraction_val": uncertain_frac,
+                            "key": key,
+                        }
+                        best_mixed_scores = mixed_scores
+
+    assert best_cfg is not None and best_mixed_scores is not None
+    selection_runtime_sec = time.perf_counter() - t_sel0
+
+    tau_star = float(best_cfg["tau"])
+    t_inf0 = time.perf_counter()
+    uncertain_mask_all = mlp_margin_all < tau_star
+    final_pred_all = mlp_pred_all.copy()
+    if uncertain_mask_all.any():
+        final_pred_all[uncertain_mask_all] = np.argmax(
+            best_mixed_scores[uncertain_mask_all], axis=1
+        ).astype(np.int64)
+    inference_runtime_sec = time.perf_counter() - t_inf0
+
+    test_pred = final_pred_all[test_indices]
+    test_acc = _simple_accuracy(y_true[test_indices], test_pred)
+    test_acc_mlp = _simple_accuracy(y_true[test_indices], mlp_pred_all[test_indices])
+    alpha_test = np.clip(reliability_score[test_indices] ** best_cfg["sharpness"], 0.0, 1.0)
+
+    if log_file:
+        write_log(
+            f"SGC_v21: test={test_acc:.4f} mlp={test_acc_mlp:.4f} Δ={test_acc-test_acc_mlp:+.4f} "
+            f"| τ={tau_star:.4f} sharpness={best_cfg['sharpness']:.1f} "
+            f"| mean_alpha={alpha_test.mean():.3f}",
+            log_file, tag=f"{log_prefix}:SUMMARY",
+        )
+
+    overhead_sec = evidence_runtime_sec + selection_runtime_sec + inference_runtime_sec
+    info: Dict[str, Any] = {
+        "method": "sgc_v21",
+        "selected_tau": tau_star,
+        "selected_percentile": best_cfg["percentile"],
+        "selected_sharpness": best_cfg["sharpness"],
+        "selected_weights": best_cfg["weights"],
+        "selected_feat_weights": best_cfg["feat_weights"],
+        "test_acc_mlp": float(test_acc_mlp),
+        "test_acc_v21": float(test_acc),
+        "delta_over_mlp": float(test_acc - test_acc_mlp),
+        "frac_test_uncertain": float(uncertain_mask_all[test_indices].mean()),
+        "mean_alpha_test": float(alpha_test.mean()),
+        "mean_reliability_score": float(reliability_score[test_indices].mean()),
+        "runtime_sec": {
+            "mlp_training": float(mlp_train_runtime_sec),
+            "evidence": float(evidence_runtime_sec),
+            "selection": float(selection_runtime_sec),
+            "inference": float(inference_runtime_sec),
+            "overhead": float(overhead_sec),
+            "total": float(mlp_train_runtime_sec + overhead_sec),
+        },
+    }
+    return torch.tensor(test_pred, device=device), float(test_acc), info
+
+
+def selective_graph_correction_v22(
+    data,
+    train_indices,
+    val_indices,
+    test_indices,
+    *,
+    mlp_probs: Optional[torch.Tensor] = None,
+    seed: int = 1337,
+    log_prefix: str = "sgc_v22",
+    log_file: Optional[str] = None,
+    weight_candidates: Optional[List[Dict[str, float]]] = None,
+    feat_weight_candidates: Optional[List[Dict[str, float]]] = None,
+    use_entropy_threshold: bool = True,
+    percentile_candidates: Optional[List[float]] = None,
+    enable_feature_knn: bool = True,
+    feature_knn_k: int = 5,
+    reliability_threshold_candidates: Optional[List[float]] = None,
+) -> Tuple[torch.Tensor, float, Dict[str, Any]]:
+    """
+    v2.2 — Entropy-based uncertainty gate with tuned feature-only fallback.
+
+    Changes vs v2:
+    - Uncertainty signal: MLP output entropy (high entropy → uncertain) instead
+      of margin (low margin → uncertain).  Percentile of entropy distribution is
+      used so the threshold adapts to each dataset's calibration.
+    - Feature-only weights are independently tuned, not derived from full weights.
+    - Uses ``compute_graph_reliability_continuous`` for the reliability estimate.
+    """
+    t_all0 = time.perf_counter()
+    device = data.x.device
+    y_true = data.y.detach().cpu().numpy().astype(np.int64)
+    train_indices = np.asarray(train_indices, dtype=np.int64)
+    val_indices = np.asarray(val_indices, dtype=np.int64)
+    test_indices = np.asarray(test_indices, dtype=np.int64)
+    N = int(data.num_nodes)
+    C = int(y_true.max()) + 1
+
+    mlp_train_runtime_sec = 0.0
+    if mlp_probs is None:
+        t0 = time.perf_counter()
+        mlp_probs, _ = train_mlp_and_predict(
+            data, train_indices,
+            hidden=DEFAULT_MANUSCRIPT_MLP_KWARGS["hidden"],
+            layers=DEFAULT_MANUSCRIPT_MLP_KWARGS["layers"],
+            dropout=DEFAULT_MANUSCRIPT_MLP_KWARGS["dropout"],
+            lr=DEFAULT_MANUSCRIPT_MLP_KWARGS["lr"],
+            epochs=DEFAULT_MANUSCRIPT_MLP_KWARGS["epochs"],
+            log_file=log_file,
+        )
+        mlp_train_runtime_sec = time.perf_counter() - t0
+
+    mlp_info = compute_mlp_margin(mlp_probs)
+    mlp_probs_np = mlp_info["mlp_probs_np"]
+    mlp_pred_all = mlp_info["mlp_pred_all"]
+
+    t_e0 = time.perf_counter()
+    evidence = _build_selective_correction_evidence(
+        data, train_indices, mlp_probs_np=mlp_probs_np,
+        enable_feature_knn=enable_feature_knn, feature_knn_k=feature_knn_k,
+    )
+    evidence_runtime_sec = time.perf_counter() - t_e0
+
+    # Entropy uncertainty: high entropy → flag for correction
+    mlp_entropy_all = _mlp_entropy(mlp_probs_np)
+    # Negate so that ``signal < tau`` convention means "high entropy"
+    # (we pass -entropy so that low signal = high entropy = uncertain)
+    neg_entropy_all = -mlp_entropy_all
+
+    reliability_score = compute_graph_reliability_continuous(
+        evidence, mlp_probs_np, num_classes=C,
+    )
+
+    if weight_candidates is None:
+        weight_candidates = [
+            {"b1": 1.0, "b2": 0.6, "b3": 0.4, "b4": 0.5, "b5": 0.3, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.9, "b3": 0.3, "b4": 0.3, "b5": 0.2, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.4, "b3": 0.2, "b4": 0.9, "b5": 0.5, "b6": 0.0},
+        ]
+    if feat_weight_candidates is None:
+        feat_weight_candidates = [
+            {"b1": 1.0, "b2": 1.2, "b3": 0.6, "b4": 0.0, "b5": 0.0, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.8, "b3": 0.8, "b4": 0.0, "b5": 0.0, "b6": 0.0},
+            {"b1": 1.0, "b2": 1.5, "b3": 0.3, "b4": 0.0, "b5": 0.0, "b6": 0.0},
+        ]
+    if percentile_candidates is None:
+        percentile_candidates = [0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50]
+    if reliability_threshold_candidates is None:
+        reliability_threshold_candidates = [0.3, 0.4, 0.5, 0.6, 0.7]
+
+    # Entropy threshold: flag nodes with entropy > tau_entropy
+    # We use the negated signal: neg_entropy < tau ↔ entropy > -tau
+    val_neg_ent = neg_entropy_all[val_indices]
+    val_reliability = reliability_score[val_indices]
+
+    t_sel0 = time.perf_counter()
+    best_cfg: Optional[Dict[str, Any]] = None
+    best_scores_full: Optional[np.ndarray] = None
+    best_scores_feat: Optional[np.ndarray] = None
+
+    for w_cfg in weight_candidates:
+        scores_full = build_selective_correction_scores(
+            mlp_probs_np, evidence, **w_cfg,
+        )["combined_scores"]
+        for fo_cfg in feat_weight_candidates:
+            scores_feat = build_selective_correction_scores(
+                mlp_probs_np, evidence, **fo_cfg,
+            )["combined_scores"]
+            for pct in percentile_candidates:
+                tau = float(np.quantile(val_neg_ent, pct))
+                uncertain_val = val_neg_ent < tau
+                for r_thr in reliability_threshold_candidates:
+                    high_rel_val = val_reliability >= r_thr
+                    final_val = mlp_pred_all[val_indices].copy()
+                    full_mask_val = uncertain_val & high_rel_val
+                    feat_mask_val = uncertain_val & ~high_rel_val
+                    if full_mask_val.any():
+                        final_val[full_mask_val] = np.argmax(
+                            scores_full[val_indices][full_mask_val], axis=1
+                        ).astype(np.int64)
+                    if feat_mask_val.any():
+                        final_val[feat_mask_val] = np.argmax(
+                            scores_feat[val_indices][feat_mask_val], axis=1
+                        ).astype(np.int64)
+                    val_acc = _simple_accuracy(y_true[val_indices], final_val)
+                    changed_frac = float((final_val != mlp_pred_all[val_indices]).mean())
+                    uncertain_frac = float(uncertain_val.mean())
+                    key = (val_acc, -changed_frac, -uncertain_frac)
+                    if best_cfg is None or key > best_cfg["key"]:
+                        best_cfg = {
+                            "weights": dict(w_cfg),
+                            "feat_weights": dict(fo_cfg),
+                            "tau": tau,
+                            "percentile": pct,
+                            "reliability_threshold": r_thr,
+                            "val_acc": val_acc,
+                            "changed_fraction_val": changed_frac,
+                            "uncertain_fraction_val": uncertain_frac,
+                            "key": key,
+                        }
+                        best_scores_full = scores_full
+                        best_scores_feat = scores_feat
+
+    assert best_cfg is not None
+    selection_runtime_sec = time.perf_counter() - t_sel0
+
+    tau_star = float(best_cfg["tau"])
+    r_thr_star = float(best_cfg["reliability_threshold"])
+
+    t_inf0 = time.perf_counter()
+    uncertain_mask_all = neg_entropy_all < tau_star
+    high_rel_mask_all = reliability_score >= r_thr_star
+    full_graph_mask_all = uncertain_mask_all & high_rel_mask_all
+    feat_only_mask_all = uncertain_mask_all & ~high_rel_mask_all
+    final_pred_all = mlp_pred_all.copy()
+    if full_graph_mask_all.any():
+        final_pred_all[full_graph_mask_all] = np.argmax(
+            best_scores_full[full_graph_mask_all], axis=1  # type: ignore[index]
+        ).astype(np.int64)
+    if feat_only_mask_all.any():
+        final_pred_all[feat_only_mask_all] = np.argmax(
+            best_scores_feat[feat_only_mask_all], axis=1  # type: ignore[index]
+        ).astype(np.int64)
+    inference_runtime_sec = time.perf_counter() - t_inf0
+
+    test_pred = final_pred_all[test_indices]
+    test_acc = _simple_accuracy(y_true[test_indices], test_pred)
+    test_acc_mlp = _simple_accuracy(y_true[test_indices], mlp_pred_all[test_indices])
+
+    if log_file:
+        write_log(
+            f"SGC_v22: test={test_acc:.4f} mlp={test_acc_mlp:.4f} Δ={test_acc-test_acc_mlp:+.4f}",
+            log_file, tag=f"{log_prefix}:SUMMARY",
+        )
+
+    overhead_sec = evidence_runtime_sec + selection_runtime_sec + inference_runtime_sec
+    info: Dict[str, Any] = {
+        "method": "sgc_v22",
+        "use_entropy_threshold": bool(use_entropy_threshold),
+        "selected_tau_neg_entropy": tau_star,
+        "selected_percentile": best_cfg["percentile"],
+        "selected_reliability_threshold": r_thr_star,
+        "selected_weights": best_cfg["weights"],
+        "selected_feat_weights": best_cfg["feat_weights"],
+        "test_acc_mlp": float(test_acc_mlp),
+        "test_acc_v22": float(test_acc),
+        "delta_over_mlp": float(test_acc - test_acc_mlp),
+        "frac_test_uncertain": float(uncertain_mask_all[test_indices].mean()),
+        "frac_test_full_graph": float(full_graph_mask_all[test_indices].mean()),
+        "frac_test_feat_only": float(feat_only_mask_all[test_indices].mean()),
+        "mean_reliability_score": float(reliability_score[test_indices].mean()),
+        "runtime_sec": {
+            "mlp_training": float(mlp_train_runtime_sec),
+            "evidence": float(evidence_runtime_sec),
+            "selection": float(selection_runtime_sec),
+            "inference": float(inference_runtime_sec),
+            "overhead": float(overhead_sec),
+            "total": float(mlp_train_runtime_sec + overhead_sec),
+        },
+    }
+    return torch.tensor(test_pred, device=device), float(test_acc), info
+
+
+def selective_graph_correction_v23(
+    data,
+    train_indices,
+    val_indices,
+    test_indices,
+    *,
+    mlp_probs: Optional[torch.Tensor] = None,
+    seed: int = 1337,
+    log_prefix: str = "sgc_v23",
+    log_file: Optional[str] = None,
+    weight_candidates: Optional[List[Dict[str, float]]] = None,
+    feat_weight_candidates: Optional[List[Dict[str, float]]] = None,
+    percentile_candidates: Optional[List[float]] = None,
+    enable_feature_knn: bool = True,
+    feature_knn_k: int = 5,
+    soft_mix_sharpness_candidates: Optional[List[float]] = None,
+    use_entropy_threshold: bool = True,
+) -> Tuple[torch.Tensor, float, Dict[str, Any]]:
+    """
+    v2.3 — Combined best: continuous reliability + soft mixing + entropy threshold.
+
+    Integrates all improvements:
+    - ``compute_graph_reliability_continuous`` (cosine-based reliability)
+    - Soft reliability mixing: alpha[i] = rel[i]^sharpness (no hard branch)
+    - Entropy-based uncertainty signal (MLP output entropy) with percentile
+      threshold, falling back to margin percentile when entropy threshold
+      performs worse on validation
+    - Independently tuned feature-only weights for the low-reliability end of
+      the soft mix
+
+    The combined score used for every uncertain node is:
+        score[i] = alpha[i] * full_score[i] + (1 - alpha[i]) * feat_score[i]
+    """
+    t_all0 = time.perf_counter()
+    device = data.x.device
+    y_true = data.y.detach().cpu().numpy().astype(np.int64)
+    train_indices = np.asarray(train_indices, dtype=np.int64)
+    val_indices = np.asarray(val_indices, dtype=np.int64)
+    test_indices = np.asarray(test_indices, dtype=np.int64)
+    N = int(data.num_nodes)
+    C = int(y_true.max()) + 1
+
+    mlp_train_runtime_sec = 0.0
+    if mlp_probs is None:
+        t0 = time.perf_counter()
+        mlp_probs, _ = train_mlp_and_predict(
+            data, train_indices,
+            hidden=DEFAULT_MANUSCRIPT_MLP_KWARGS["hidden"],
+            layers=DEFAULT_MANUSCRIPT_MLP_KWARGS["layers"],
+            dropout=DEFAULT_MANUSCRIPT_MLP_KWARGS["dropout"],
+            lr=DEFAULT_MANUSCRIPT_MLP_KWARGS["lr"],
+            epochs=DEFAULT_MANUSCRIPT_MLP_KWARGS["epochs"],
+            log_file=log_file,
+        )
+        mlp_train_runtime_sec = time.perf_counter() - t0
+
+    mlp_info = compute_mlp_margin(mlp_probs)
+    mlp_probs_np = mlp_info["mlp_probs_np"]
+    mlp_pred_all = mlp_info["mlp_pred_all"]
+    mlp_margin_all = mlp_info["mlp_margin_all"]
+
+    t_e0 = time.perf_counter()
+    evidence = _build_selective_correction_evidence(
+        data, train_indices, mlp_probs_np=mlp_probs_np,
+        enable_feature_knn=enable_feature_knn, feature_knn_k=feature_knn_k,
+    )
+    evidence_runtime_sec = time.perf_counter() - t_e0
+
+    reliability_score = compute_graph_reliability_continuous(
+        evidence, mlp_probs_np, num_classes=C,
+    )
+    mlp_entropy_all = _mlp_entropy(mlp_probs_np)
+    neg_entropy_all = -mlp_entropy_all  # low = high-entropy = uncertain
+
+    if weight_candidates is None:
+        weight_candidates = [
+            {"b1": 1.0, "b2": 0.6, "b3": 0.4, "b4": 0.5, "b5": 0.3, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.9, "b3": 0.3, "b4": 0.3, "b5": 0.2, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.4, "b3": 0.2, "b4": 0.9, "b5": 0.5, "b6": 0.0},
+        ]
+    if feat_weight_candidates is None:
+        feat_weight_candidates = [
+            {"b1": 1.0, "b2": 1.2, "b3": 0.6, "b4": 0.0, "b5": 0.0, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.8, "b3": 0.8, "b4": 0.0, "b5": 0.0, "b6": 0.0},
+            {"b1": 1.0, "b2": 1.5, "b3": 0.3, "b4": 0.0, "b5": 0.0, "b6": 0.0},
+        ]
+    if percentile_candidates is None:
+        percentile_candidates = [0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50]
+    if soft_mix_sharpness_candidates is None:
+        soft_mix_sharpness_candidates = [1.0, 2.0, 4.0]
+
+    # Uncertainty signals: both margin and entropy are searched
+    val_margins = mlp_margin_all[val_indices]
+    val_neg_ent = neg_entropy_all[val_indices]
+
+    t_sel0 = time.perf_counter()
+    best_cfg: Optional[Dict[str, Any]] = None
+    best_mixed_scores: Optional[np.ndarray] = None
+
+    for w_cfg in weight_candidates:
+        scores_full = build_selective_correction_scores(
+            mlp_probs_np, evidence, **w_cfg,
+        )["combined_scores"]
+        for fo_cfg in feat_weight_candidates:
+            scores_feat = build_selective_correction_scores(
+                mlp_probs_np, evidence, **fo_cfg,
+            )["combined_scores"]
+            for sharpness in soft_mix_sharpness_candidates:
+                alpha_all = np.clip(reliability_score ** sharpness, 0.0, 1.0)
+                mixed_scores = (
+                    alpha_all[:, None] * scores_full
+                    + (1.0 - alpha_all[:, None]) * scores_feat
+                )
+                for signal_name, val_signal in [("margin", val_margins), ("neg_entropy", val_neg_ent)]:
+                    for pct in percentile_candidates:
+                        tau = float(np.quantile(val_signal, pct))
+                        uncertain_val = val_signal < tau
+                        final_val = mlp_pred_all[val_indices].copy()
+                        if uncertain_val.any():
+                            final_val[uncertain_val] = np.argmax(
+                                mixed_scores[val_indices][uncertain_val], axis=1
+                            ).astype(np.int64)
+                        val_acc = _simple_accuracy(y_true[val_indices], final_val)
+                        changed_frac = float((final_val != mlp_pred_all[val_indices]).mean())
+                        uncertain_frac = float(uncertain_val.mean())
+                        key = (val_acc, -changed_frac, -uncertain_frac)
+                        if best_cfg is None or key > best_cfg["key"]:
+                            best_cfg = {
+                                "weights": dict(w_cfg),
+                                "feat_weights": dict(fo_cfg),
+                                "sharpness": sharpness,
+                                "tau": tau,
+                                "percentile": pct,
+                                "signal": signal_name,
+                                "val_acc": val_acc,
+                                "changed_fraction_val": changed_frac,
+                                "uncertain_fraction_val": uncertain_frac,
+                                "key": key,
+                            }
+                            best_mixed_scores = mixed_scores
+
+    assert best_cfg is not None and best_mixed_scores is not None
+    selection_runtime_sec = time.perf_counter() - t_sel0
+
+    tau_star = float(best_cfg["tau"])
+    signal_name_star = best_cfg["signal"]
+    signal_all_star = mlp_margin_all if signal_name_star == "margin" else neg_entropy_all
+
+    t_inf0 = time.perf_counter()
+    uncertain_mask_all = signal_all_star < tau_star
+    final_pred_all = mlp_pred_all.copy()
+    if uncertain_mask_all.any():
+        final_pred_all[uncertain_mask_all] = np.argmax(
+            best_mixed_scores[uncertain_mask_all], axis=1
+        ).astype(np.int64)
+    inference_runtime_sec = time.perf_counter() - t_inf0
+
+    test_pred = final_pred_all[test_indices]
+    test_acc = _simple_accuracy(y_true[test_indices], test_pred)
+    test_acc_mlp = _simple_accuracy(y_true[test_indices], mlp_pred_all[test_indices])
+    alpha_test = np.clip(reliability_score[test_indices] ** best_cfg["sharpness"], 0.0, 1.0)
+
+    if log_file:
+        write_log(
+            f"SGC_v23: test={test_acc:.4f} mlp={test_acc_mlp:.4f} Δ={test_acc-test_acc_mlp:+.4f} "
+            f"| signal={signal_name_star} τ={tau_star:.4f} sharpness={best_cfg['sharpness']:.1f}",
+            log_file, tag=f"{log_prefix}:SUMMARY",
+        )
+
+    overhead_sec = evidence_runtime_sec + selection_runtime_sec + inference_runtime_sec
+    info: Dict[str, Any] = {
+        "method": "sgc_v23",
+        "selected_signal": signal_name_star,
+        "selected_tau": tau_star,
+        "selected_percentile": best_cfg["percentile"],
+        "selected_sharpness": best_cfg["sharpness"],
+        "selected_weights": best_cfg["weights"],
+        "selected_feat_weights": best_cfg["feat_weights"],
+        "test_acc_mlp": float(test_acc_mlp),
+        "test_acc_v23": float(test_acc),
+        "delta_over_mlp": float(test_acc - test_acc_mlp),
+        "frac_test_uncertain": float(uncertain_mask_all[test_indices].mean()),
+        "mean_alpha_test": float(alpha_test.mean()),
+        "mean_reliability_score": float(reliability_score[test_indices].mean()),
+        "runtime_sec": {
+            "mlp_training": float(mlp_train_runtime_sec),
+            "evidence": float(evidence_runtime_sec),
+            "selection": float(selection_runtime_sec),
+            "inference": float(inference_runtime_sec),
+            "overhead": float(overhead_sec),
+            "total": float(mlp_train_runtime_sec + overhead_sec),
+        },
+    }
+    return torch.tensor(test_pred, device=device), float(test_acc), info
+
+
 def selective_graph_correction_structural_predictclass(
     data,
     train_indices,
