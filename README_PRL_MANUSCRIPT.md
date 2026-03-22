@@ -26,6 +26,15 @@ Evaluation uses **10 GEO-GCN splits** per dataset (indices 0–9 in `data/splits
 | **Figures** | `figures/prl_graphical_abstract_v3.png`, `correction_rate_vs_homophily.png`, `safety_comparison.png`, `reliability_vs_accuracy.png` |
 | **Regenerate tables + figures (no training)** | `bash scripts/run_all_prl_results.sh` — details in [scripts/README_REPRODUCE.md](scripts/README_REPRODUCE.md) |
 
+## Avoiding dual-package confusion (critical for drafting)
+
+The repository contains **two different numerical stories**:
+
+1. **FINAL_V3 (submission):** `reports/final_method_v3_results.csv` → `tables/main_results_prl.*` — **10 splits**, **six datasets**, reliability gate — **use this for the main paper.**
+2. **Legacy UG-SGC / manuscript_runner line:** `logs/manuscript_gain_over_mlp_final_validation.csv`, `prl_final_additions/prl_writing_numbers.md`, `tables/prl_final_additions/prl_benchmark_summary.csv` — **nine datasets**, **30 comparisons per dataset**, **SGC v1-style** correction — **do not paste into the FINAL_V3 results section.**
+
+Structural **UG-SGC-S** tables under `tables/prl_resubmission/` are a **third** line (supplementary smoke runs). See `reports/manuscript_repo_consistency_audit.md` for a full section-by-section map.
+
 ## Framing (careful claims)
 
 - **Feature-first, reliability-aware selective graph correction** — not a claim to universally beat GNNs on all benchmarks.

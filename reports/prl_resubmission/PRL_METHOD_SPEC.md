@@ -1,5 +1,7 @@
 # PRL method specification recovered from code
 
+> **Important:** This document describes **selective graph correction as implemented in** `bfsbased-full-investigate-homophil.py` / **`manuscript_runner.py`** (margin-based uncertainty gate, `threshold_high`, multi-weight search). That corresponds to **SGC v1** in the FINAL_V3 benchmark table — **not** the submission method **FINAL_V3**, which adds the **reliability score R(v)**, **ρ**, and a reduced profile grid (see `reports/final_method_v3_analysis.md` and `code/bfsbased_node_classification/final_method_v3.py`).
+
 Canonical implementation:
 - `code/bfsbased_node_classification/bfsbased-full-investigate-homophil.py`
 - Primary driver:

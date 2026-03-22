@@ -1,5 +1,7 @@
 # PRL resubmission package
 
+**Relation to FINAL_V3:** The **short PRL manuscript** should treat **FINAL_V3** as the proposed method (`README_PRL_MANUSCRIPT.md`, `tables/main_results_prl.*`). This directory and `prl_resubmission_runner.py` focus on **extended baselines** (GCN, APPNP) and **structural / UG-SGC-S** smoke experiments — **supplementary**, not a replacement for the FINAL_V3 evidence package.
+
 This directory holds the **new** evidence package intended to close the main
 technical gaps for a PRL rewrite:
 

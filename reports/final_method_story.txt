@@ -51,3 +51,6 @@ KEY NUMBERS (canonical **10-split** evaluation; see `tables/main_results_prl.md`
   Harmful splits (Δ test < 0 vs MLP): FINAL_V3 — **2 of 60**; SGC v1 — **4 of 60**
   Correction precision (aggregate on citations): high on Cora / Citeseer; see `reports/final_method_v3_analysis.md`
   Search space: ~72 configurations (2 weight profiles × ~9 τ × 4 ρ)
+
+REPO AUDIT
+  Section-by-section manuscript ↔ evidence map (what to cite, what is legacy UG-SGC): `reports/manuscript_repo_consistency_audit.md`
