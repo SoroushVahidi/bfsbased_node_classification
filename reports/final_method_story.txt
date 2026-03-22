@@ -1,0 +1,57 @@
+FINAL METHOD STORY — for PRL manuscript writing
+
+PROBLEM
+Standard graph-based node classifiers propagate neighbor information globally.
+On heterophilic graphs, where connected nodes often have different labels, this
+propagation can be harmful — it systematically degrades predictions for nodes
+whose neighborhoods are misleading.
+
+WHAT FAILS IN PRIOR METHODS
+The original selective graph correction (SGC) method trains an MLP, then
+corrects uncertain nodes using weighted graph/feature evidence.  While it
+improves predictions on homophilic citation graphs (+1.3% mean), it has no
+mechanism to detect when graph evidence is unreliable.  Result: on 4
+split(s) across our benchmark, SGC v1 produces harmful corrections where the
+corrected accuracy is WORSE than the MLP alone.
+
+WHAT FINAL V3 DOES DIFFERENTLY
+We introduce a per-node graph reliability score R(v) that gates correction:
+
+  R(v) = (neighbor_concentration + MLP_graph_agreement + degree_signal) / 3
+
+Three interpretable signals, equally weighted:
+  1. Neighbor concentration: do graph neighbors agree on a class?
+  2. MLP-graph agreement: does the MLP prediction match the graph vote?
+  3. Degree signal: does the node have enough neighbors for reliable statistics?
+
+Correction is applied ONLY when both conditions hold:
+  - The MLP is uncertain (margin < τ)
+  - The graph is reliable for this node (R(v) ≥ ρ)
+
+Both τ and ρ are selected on validation data from a compact grid (~72 configs).
+
+WHY IT WORKS
+The reliability gate acts as an automatic heterophily detector:
+  - On homophilic graphs, most nodes have high R(v) → corrections proceed freely
+  - On heterophilic graphs, most nodes have low R(v) → corrections are suppressed
+This happens WITHOUT explicit homophily estimation — R(v) captures local
+neighborhood quality directly.
+
+WHERE IT WORKS BEST
+  - Citation networks (Cora, Citeseer, Pubmed): +1.3–2.9% over MLP,
+    with 72–89% correction precision
+  - Small heterophilic datasets (Texas, Wisconsin): safe — zero harmful
+    corrections, small positive or neutral improvement
+
+LIMITATIONS
+  - On strongly heterophilic datasets (Chameleon), the method is correctly
+    conservative but provides no improvement over MLP
+  - The fixed weight profiles may not be optimal for all graph types
+  - The method is a post-hoc correction, not an end-to-end trainable model
+
+KEY NUMBERS (10-split evaluation)
+  Mean Δ vs MLP across 6 datasets: +1.26%
+  Harmful splits (V3): 2 out of 60
+  Harmful splits (V1): 4 out of 60
+  Correction precision on citation graphs: ~80–90%
+  Search space: ~72 configurations (2 weight profiles × ~9 τ × 4 ρ)
