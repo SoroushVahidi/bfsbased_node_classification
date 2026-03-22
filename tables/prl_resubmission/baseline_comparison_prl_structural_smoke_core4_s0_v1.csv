@@ -1,0 +1,13 @@
+dataset,method,display_name,mean_test_acc,std_test_acc,delta_vs_mlp,wins_vs_mlp,losses_vs_mlp,ties_vs_mlp,n_runs
+chameleon,mlp_only,MLP,0.4627,0.0000,+0.0000,0,0,1,1
+chameleon,selective_graph_correction,Selective correction,0.4627,0.0000,+0.0000,0,0,1,1
+chameleon,selective_graph_correction_structural,UG-SGC-S structural,0.4671,0.0000,+0.0044,1,0,0,1
+citeseer,mlp_only,MLP,0.6667,0.0000,+0.0000,0,0,1,1
+citeseer,selective_graph_correction,Selective correction,0.6877,0.0000,+0.0210,1,0,0,1
+citeseer,selective_graph_correction_structural,UG-SGC-S structural,0.6877,0.0000,+0.0210,1,0,0,1
+cora,mlp_only,MLP,0.6861,0.0000,+0.0000,0,0,1,1
+cora,selective_graph_correction,Selective correction,0.7284,0.0000,+0.0423,1,0,0,1
+cora,selective_graph_correction_structural,UG-SGC-S structural,0.7304,0.0000,+0.0443,1,0,0,1
+pubmed,mlp_only,MLP,0.8666,0.0000,+0.0000,0,0,1,1
+pubmed,selective_graph_correction,Selective correction,0.8803,0.0000,+0.0137,1,0,0,1
+pubmed,selective_graph_correction_structural,UG-SGC-S structural,0.8783,0.0000,+0.0117,1,0,0,1

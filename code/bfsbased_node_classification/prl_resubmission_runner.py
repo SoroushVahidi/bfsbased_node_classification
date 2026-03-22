@@ -36,6 +36,7 @@ DEFAULT_METHODS = [
     "gcn",
     "appnp",
     "selective_graph_correction",
+    "selective_graph_correction_structural",
     "gated_mlp_prop",
     "sgc_no_gate",
     "sgc_no_feature_similarity",
@@ -43,6 +44,10 @@ DEFAULT_METHODS = [
     "sgc_no_compatibility",
     "sgc_mlp_plus_graph",
     "sgc_knn_enabled",
+    "sgcs_margin_gate_only",
+    "sgcs_no_far",
+    "sgcs_far_only",
+    "sgcs_no_gate",
 ]
 
 
@@ -92,6 +97,35 @@ def _variant_kwargs(method: str) -> Dict[str, Any]:
             ],
         }
     raise ValueError(f"Unknown SGC variant: {method}")
+
+
+def _structural_variant_kwargs(method: str) -> Dict[str, Any]:
+    base = [
+        {"b1": 1.0, "b2": 0.4, "b3": 0.0, "b4": 0.2, "b5": 0.3, "b6": 0.9},
+        {"b1": 1.0, "b2": 0.6, "b3": 0.0, "b4": 0.3, "b5": 0.2, "b6": 0.8},
+        {"b1": 1.1, "b2": 0.4, "b3": 0.0, "b4": 0.1, "b5": 0.2, "b6": 1.0},
+    ]
+    if method == "selective_graph_correction_structural":
+        return {"use_structure_quality_gate": True, "weight_candidates": base}
+    if method == "sgcs_margin_gate_only":
+        return {"use_structure_quality_gate": False, "weight_candidates": base}
+    if method == "sgcs_no_far":
+        return {
+            "use_structure_quality_gate": True,
+            "weight_candidates": [{**cfg, "b6": 0.0, "b4": max(float(cfg["b4"]), 0.6)} for cfg in base],
+        }
+    if method == "sgcs_far_only":
+        return {
+            "use_structure_quality_gate": True,
+            "weight_candidates": [{**cfg, "b4": 0.0, "b6": max(float(cfg["b6"]), 0.8)} for cfg in base],
+        }
+    if method == "sgcs_no_gate":
+        return {
+            "use_structure_quality_gate": False,
+            "threshold_candidates": [1.1],
+            "weight_candidates": base,
+        }
+    raise ValueError(f"Unknown structural SGC variant: {method}")
 
 
 def _build_record(**kwargs: Any) -> Dict[str, Any]:
@@ -200,9 +234,25 @@ def run_prl_resubmission(
                 tuning_time_prop = 0.0
 
                 # MLP
-                if any(m in methods for m in ["mlp_only", "selective_graph_correction", "gated_mlp_prop",
-                                              "sgc_no_gate", "sgc_no_feature_similarity", "sgc_no_graph_neighbor",
-                                              "sgc_no_compatibility", "sgc_mlp_plus_graph", "sgc_knn_enabled"]):
+                if any(
+                    m in methods
+                    for m in [
+                        "mlp_only",
+                        "selective_graph_correction",
+                        "selective_graph_correction_structural",
+                        "gated_mlp_prop",
+                        "sgc_no_gate",
+                        "sgc_no_feature_similarity",
+                        "sgc_no_graph_neighbor",
+                        "sgc_no_compatibility",
+                        "sgc_mlp_plus_graph",
+                        "sgc_knn_enabled",
+                        "sgcs_margin_gate_only",
+                        "sgcs_no_far",
+                        "sgcs_far_only",
+                        "sgcs_no_gate",
+                    ]
+                ):
                     rec = _build_record(**rec_base, method="mlp_only", method_family="baseline")
                     t0 = time.perf_counter()
                     try:
@@ -340,6 +390,11 @@ def run_prl_resubmission(
                         "sgc_no_compatibility",
                         "sgc_mlp_plus_graph",
                         "sgc_knn_enabled",
+                        "selective_graph_correction_structural",
+                        "sgcs_margin_gate_only",
+                        "sgcs_no_far",
+                        "sgcs_far_only",
+                        "sgcs_no_gate",
                     }
                 ]
                 for method in sgc_methods:
@@ -351,21 +406,38 @@ def run_prl_resubmission(
                     )
                     t0 = time.perf_counter()
                     try:
-                        variant_kwargs = _variant_kwargs(method)
-                        _, acc_sgc, info = mod.selective_graph_correction_predictclass(
-                            data,
-                            train_np,
-                            val_np,
-                            test_np,
-                            mlp_probs=mlp_probs,
-                            seed=current_seed,
-                            log_file=None,
-                            log_prefix=f"{method}_{dataset_key}_s{split_id}_r{repeat}",
-                            diagnostics_run_id=f"{method}_{dataset_key}_s{split_id}_r{repeat}",
-                            dataset_key_for_logs=f"{dataset_key}_{method}",
-                            write_node_diagnostics=True,
-                            **variant_kwargs,
-                        )
+                        if method.startswith("sgcs") or method == "selective_graph_correction_structural":
+                            variant_kwargs = _structural_variant_kwargs(method)
+                            _, acc_sgc, info = mod.selective_graph_correction_structural_predictclass(
+                                data,
+                                train_np,
+                                val_np,
+                                test_np,
+                                mlp_probs=mlp_probs,
+                                seed=current_seed,
+                                log_file=None,
+                                log_prefix=f"{method}_{dataset_key}_s{split_id}_r{repeat}",
+                                diagnostics_run_id=f"{method}_{dataset_key}_s{split_id}_r{repeat}",
+                                dataset_key_for_logs=f"{dataset_key}_{method}",
+                                write_node_diagnostics=True,
+                                **variant_kwargs,
+                            )
+                        else:
+                            variant_kwargs = _variant_kwargs(method)
+                            _, acc_sgc, info = mod.selective_graph_correction_predictclass(
+                                data,
+                                train_np,
+                                val_np,
+                                test_np,
+                                mlp_probs=mlp_probs,
+                                seed=current_seed,
+                                log_file=None,
+                                log_prefix=f"{method}_{dataset_key}_s{split_id}_r{repeat}",
+                                diagnostics_run_id=f"{method}_{dataset_key}_s{split_id}_r{repeat}",
+                                dataset_key_for_logs=f"{dataset_key}_{method}",
+                                write_node_diagnostics=True,
+                                **variant_kwargs,
+                            )
                         method_time = time.perf_counter() - t0
                         weights = info.get("selected_weights", {}) or {}
                         frac_u = float(info.get("fraction_test_nodes_uncertain", 0.0) or 0.0)
@@ -385,6 +457,7 @@ def run_prl_resubmission(
                                     float(weights.get("b3", 0.0)),
                                     float(weights.get("b4", 0.0)),
                                     float(weights.get("b5", 0.0)),
+                                    float(weights.get("b6", 0.0)),
                                 ],
                                 "sgc_n_uncertain": int(round(frac_u * n_test)),
                                 "sgc_n_changed": int(round(frac_changed * n_test)),

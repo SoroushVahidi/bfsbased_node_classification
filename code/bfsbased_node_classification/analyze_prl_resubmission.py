@@ -26,6 +26,7 @@ BASELINE_METHODS = [
     "gcn",
     "appnp",
     "selective_graph_correction",
+    "selective_graph_correction_structural",
     "gated_mlp_prop",
 ]
 
@@ -37,6 +38,11 @@ ABLATION_METHODS = [
     "sgc_no_compatibility",
     "sgc_mlp_plus_graph",
     "sgc_knn_enabled",
+    "selective_graph_correction_structural",
+    "sgcs_margin_gate_only",
+    "sgcs_no_far",
+    "sgcs_far_only",
+    "sgcs_no_gate",
 ]
 
 DISPLAY = {
@@ -45,6 +51,7 @@ DISPLAY = {
     "gcn": "GCN",
     "appnp": "APPNP",
     "selective_graph_correction": "Selective correction",
+    "selective_graph_correction_structural": "UG-SGC-S structural",
     "gated_mlp_prop": "Learned MLP/prop gate",
     "sgc_no_gate": "SGC without gate",
     "sgc_no_feature_similarity": "SGC w/o feature similarity",
@@ -52,6 +59,10 @@ DISPLAY = {
     "sgc_no_compatibility": "SGC w/o compatibility",
     "sgc_mlp_plus_graph": "SGC MLP+graph only",
     "sgc_knn_enabled": "SGC with feature-kNN enabled",
+    "sgcs_margin_gate_only": "UG-SGC-S without structure-aware gate",
+    "sgcs_no_far": "UG-SGC-S near only",
+    "sgcs_far_only": "UG-SGC-S far only",
+    "sgcs_no_gate": "UG-SGC-S without gate",
 }
 
 

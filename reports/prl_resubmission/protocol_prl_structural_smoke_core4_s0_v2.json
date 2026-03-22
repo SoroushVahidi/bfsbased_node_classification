@@ -1,0 +1,32 @@
+{
+  "output_tag": "prl_structural_smoke_core4_s0_v2",
+  "generated_at": "2026-03-21T20:29:42",
+  "runs_file": "logs/prl_resubmission/comparison_runs_prl_structural_smoke_core4_s0_v2.jsonl",
+  "datasets": [
+    "chameleon",
+    "citeseer",
+    "cora",
+    "pubmed"
+  ],
+  "methods": [
+    "mlp_only",
+    "selective_graph_correction",
+    "selective_graph_correction_structural",
+    "sgcs_far_only",
+    "sgcs_margin_gate_only",
+    "sgcs_no_far"
+  ],
+  "n_records_total": 24,
+  "n_records_successful": 24,
+  "splits": [
+    0
+  ],
+  "repeats": [
+    0
+  ],
+  "parameter_sources": [
+    "DEFAULT_MANUSCRIPT_MLP_KWARGS",
+    "feature_first_selective_structural_quality_gate_v1",
+    "feature_first_selective_weighted_correction_v1"
+  ]
+}

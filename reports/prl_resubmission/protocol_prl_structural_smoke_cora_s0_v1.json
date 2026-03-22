@@ -1,0 +1,30 @@
+{
+  "output_tag": "prl_structural_smoke_cora_s0_v1",
+  "generated_at": "2026-03-21T20:13:49",
+  "runs_file": "logs/prl_resubmission/comparison_runs_prl_structural_smoke_cora_s0_v1.jsonl",
+  "datasets": [
+    "cora"
+  ],
+  "methods": [
+    "mlp_only",
+    "selective_graph_correction",
+    "selective_graph_correction_structural",
+    "sgcs_far_only",
+    "sgcs_margin_gate_only",
+    "sgcs_no_far",
+    "sgcs_no_gate"
+  ],
+  "n_records_total": 7,
+  "n_records_successful": 7,
+  "splits": [
+    0
+  ],
+  "repeats": [
+    0
+  ],
+  "parameter_sources": [
+    "DEFAULT_MANUSCRIPT_MLP_KWARGS",
+    "feature_first_selective_structural_quality_gate_v1",
+    "feature_first_selective_weighted_correction_v1"
+  ]
+}

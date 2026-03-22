@@ -1,0 +1,11 @@
+/home/sv96/.local/lib/python3.11/site-packages/torch_geometric/typing.py:68: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /mmfs1/home/sv96/.conda/envs/feedback-weighted-maximization/lib/python3.11/site-packages/libpyg.so: undefined symbol: _ZNK5torch8autograd4Node4nameEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+/home/sv96/.local/lib/python3.11/site-packages/torch_geometric/typing.py:86: UserWarning: An issue occurred while importing 'torch-scatter'. Disabling its usage. Stacktrace: libcudart.so.12: cannot open shared object file: No such file or directory
+  warnings.warn(f"An issue occurred while importing 'torch-scatter'. "
+/home/sv96/.local/lib/python3.11/site-packages/torch_geometric/typing.py:97: UserWarning: An issue occurred while importing 'torch-cluster'. Disabling its usage. Stacktrace: /mmfs1/home/sv96/.conda/envs/feedback-weighted-maximization/lib/python3.11/site-packages/torch_cluster/_version_cpu.so: undefined symbol: _ZN5torch3jit17parseSchemaOrNameERKSs
+  warnings.warn(f"An issue occurred while importing 'torch-cluster'. "
+/home/sv96/.local/lib/python3.11/site-packages/torch_geometric/typing.py:113: UserWarning: An issue occurred while importing 'torch-spline-conv'. Disabling its usage. Stacktrace: /mmfs1/home/sv96/.conda/envs/feedback-weighted-maximization/lib/python3.11/site-packages/torch_spline_conv/_version_cpu.so: undefined symbol: _ZN5torch3jit17parseSchemaOrNameERKSs
+  warnings.warn(
+/home/sv96/.local/lib/python3.11/site-packages/torch_geometric/typing.py:124: UserWarning: An issue occurred while importing 'torch-sparse'. Disabling its usage. Stacktrace: libcudart.so.12: cannot open shared object file: No such file or directory
+  warnings.warn(f"An issue occurred while importing 'torch-sparse'. "
+[2026-03-21T19:13:37.850] error: *** JOB 889218 ON n0032 CANCELLED AT 2026-03-21T19:13:37 DUE to SIGNAL Terminated ***

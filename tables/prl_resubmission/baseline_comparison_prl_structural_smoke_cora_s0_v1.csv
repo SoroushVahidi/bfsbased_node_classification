@@ -1,0 +1,4 @@
+dataset,method,display_name,mean_test_acc,std_test_acc,delta_vs_mlp,wins_vs_mlp,losses_vs_mlp,ties_vs_mlp,n_runs
+cora,mlp_only,MLP,0.6861,0.0000,+0.0000,0,0,1,1
+cora,selective_graph_correction,Selective correction,0.7284,0.0000,+0.0423,1,0,0,1
+cora,selective_graph_correction_structural,UG-SGC-S structural,0.7304,0.0000,+0.0443,1,0,0,1

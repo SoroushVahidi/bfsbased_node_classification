@@ -1308,6 +1308,34 @@ def _safe_sigmoid(x: np.ndarray) -> np.ndarray:
     return 1.0 / (1.0 + np.exp(-x))
 
 
+def _row_normalized_sparse_adj(edge_index: torch.Tensor, num_nodes: int) -> torch.Tensor:
+    """
+    Build a row-normalized sparse adjacency without self-loops.
+
+    This is used only for selective-correction evidence extraction, not as a
+    full message-passing model. Keeping it here makes the structural support
+    term easy to inspect and reproduce.
+    """
+    edge_index = edge_index.long()
+    values = torch.ones(edge_index.size(1), device=edge_index.device, dtype=torch.float32)
+    adj = torch.sparse_coo_tensor(edge_index, values, (num_nodes, num_nodes), device=edge_index.device).coalesce()
+    row = adj.indices()[0]
+    deg = torch.zeros(num_nodes, device=edge_index.device, dtype=torch.float32)
+    deg.scatter_add_(0, row, adj.values())
+    deg_inv = deg.clamp(min=1.0).pow(-1.0)
+    norm = deg_inv[row] * adj.values()
+    return torch.sparse_coo_tensor(adj.indices(), norm, adj.shape, device=edge_index.device).coalesce()
+
+
+def _normalize_rows_dense(mat: np.ndarray, eps: float = 1e-12) -> np.ndarray:
+    mat = np.asarray(mat, dtype=np.float64)
+    row_sum = mat.sum(axis=1, keepdims=True)
+    out = np.zeros_like(mat)
+    nz = row_sum[:, 0] > eps
+    out[nz] = mat[nz] / row_sum[nz]
+    return out
+
+
 def compute_mlp_margin(mlp_probs: torch.Tensor) -> Dict[str, np.ndarray]:
     """
     Compute MLP predictions, confidence, and margin from probabilities.
@@ -1331,6 +1359,8 @@ def _build_selective_correction_evidence(
     min_labeled_neighbors_for_full_weight: int = 2,
     enable_feature_knn: bool = False,
     feature_knn_k: int = 5,
+    diffusion_steps: int = 4,
+    diffusion_decay: float = 0.6,
 ) -> Dict[str, np.ndarray]:
     """
     Build class-wise evidence matrices for feature-first selective graph correction.
@@ -1413,6 +1443,7 @@ def _build_selective_correction_evidence(
     _update_D_weighted(D, class_insts, lbl_arr, device, node_state_conf, xz)
 
     graph_neighbor_support = np.zeros((N, C), dtype=np.float64)
+    structural_far_support = np.zeros((N, C), dtype=np.float64)
     compatibility_support = np.zeros((N, C), dtype=np.float64)
     neighbor_class_entropy = np.zeros(N, dtype=np.float64)
 
@@ -1440,6 +1471,30 @@ def _build_selective_correction_evidence(
             compatibility_support[u] = np.full(C, 1.0 / C, dtype=np.float64)
             neighbor_class_entropy[u] = 0.0
 
+    # Diffusion-style structural support from 2+ hops.
+    structural_quality = np.zeros(N, dtype=np.float64)
+    if diffusion_steps >= 2:
+        # Confidence-weighted diffusion reduces the impact of uncertain
+        # pseudo-labels while still allowing high-confidence non-train nodes to
+        # contribute structural evidence beyond 1-hop neighborhoods.
+        state_t = torch.as_tensor(
+            node_state_vec * node_state_conf[:, None],
+            dtype=torch.float32,
+            device=device,
+        )
+        adj_rw = _row_normalized_sparse_adj(edge_index, N)
+        walk_t = torch.sparse.mm(adj_rw, state_t)
+        far_acc = torch.zeros_like(walk_t)
+        decay = 1.0
+        for step in range(2, int(diffusion_steps) + 1):
+            walk_t = torch.sparse.mm(adj_rw, walk_t)
+            far_acc = far_acc + float(decay) * walk_t
+            decay *= float(diffusion_decay)
+
+        structural_far_support = _normalize_rows_dense(far_acc.detach().cpu().numpy())
+        structural_mix = _normalize_rows_dense(0.5 * graph_neighbor_support + 0.5 * structural_far_support)
+        _, _, _, structural_quality = _top1_top2_margin(structural_mix)
+
     # Optional feature-space kNN vote (off by default for v1).
     feature_knn_vote = np.zeros((N, C), dtype=np.float64)
     if enable_feature_knn and feature_knn_k > 0 and train_indices.size > 0:
@@ -1466,10 +1521,12 @@ def _build_selective_correction_evidence(
         "feature_similarity": D,
         "feature_knn_vote": feature_knn_vote,
         "graph_neighbor_support": graph_neighbor_support,
+        "structural_far_support": structural_far_support,
         "compatibility_support": compatibility_support,
         "node_degree": deg.astype(np.float64),
         "support_train_neighbors": support_train_neighbors.astype(np.float64),
         "neighbor_class_entropy": neighbor_class_entropy,
+        "structural_quality": structural_quality,
     }
 
 
@@ -1482,6 +1539,7 @@ def build_selective_correction_scores(
     b3: float,
     b4: float,
     b5: float,
+    b6: float = 0.0,
     eps: float = 1e-9,
 ) -> Dict[str, np.ndarray]:
     """
@@ -1492,12 +1550,14 @@ def build_selective_correction_scores(
     feature_knn_term = float(b3) * evidence["feature_knn_vote"]
     graph_neighbor_term = float(b4) * evidence["graph_neighbor_support"]
     compatibility_term = float(b5) * evidence["compatibility_support"]
+    structural_far_term = float(b6) * evidence.get("structural_far_support", 0.0)
     combined_scores = (
         mlp_term
         + feature_similarity_term
         + feature_knn_term
         + graph_neighbor_term
         + compatibility_term
+        + structural_far_term
     )
     return {
         "combined_scores": combined_scores,
@@ -1506,6 +1566,7 @@ def build_selective_correction_scores(
         "feature_knn_term": feature_knn_term,
         "graph_neighbor_term": graph_neighbor_term,
         "compatibility_term": compatibility_term,
+        "structural_far_term": structural_far_term,
     }
 
 
@@ -1556,6 +1617,69 @@ def choose_uncertainty_threshold(
     return best
 
 
+def choose_uncertainty_threshold_with_structure_gate(
+    y_true: np.ndarray,
+    val_indices: np.ndarray,
+    mlp_pred_all: np.ndarray,
+    mlp_margin_all: np.ndarray,
+    combined_scores: np.ndarray,
+    structural_quality_all: np.ndarray,
+    *,
+    threshold_candidates: Optional[List[float]] = None,
+    quality_threshold_candidates: Optional[List[float]] = None,
+) -> Dict[str, Any]:
+    """
+    Select a margin threshold and an optional structure-quality threshold using
+    validation data only.
+    """
+    val_indices = np.asarray(val_indices, dtype=np.int64)
+    val_margins = mlp_margin_all[val_indices]
+    val_quality = structural_quality_all[val_indices]
+
+    if threshold_candidates is None:
+        q = np.quantile(val_margins, [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
+        base = np.array([0.05, 0.10, 0.15, 0.20, 0.25, 0.30], dtype=np.float64)
+        threshold_candidates = sorted(set(np.round(np.concatenate([q, base]), 6).tolist()))
+    threshold_candidates = [float(t) for t in threshold_candidates if np.isfinite(t)]
+    if not threshold_candidates:
+        threshold_candidates = [0.2]
+
+    if quality_threshold_candidates is None:
+        qq = np.quantile(val_quality, [0.2, 0.4, 0.6]) if val_quality.size > 0 else np.array([], dtype=np.float64)
+        quality_threshold_candidates = sorted(set(np.round(np.concatenate([np.array([-1.0, 0.0, 0.05, 0.10]), qq]), 6).tolist()))
+    quality_threshold_candidates = [float(qt) for qt in quality_threshold_candidates if np.isfinite(qt)]
+    if not quality_threshold_candidates:
+        quality_threshold_candidates = [-1.0]
+
+    best = None
+    for t in threshold_candidates:
+        margin_mask = val_margins < t
+        for q_thr in quality_threshold_candidates:
+            structural_mask = val_quality >= q_thr
+            apply_mask = margin_mask & structural_mask
+            final_val = mlp_pred_all[val_indices].copy()
+            if apply_mask.any():
+                final_val[apply_mask] = np.argmax(combined_scores[val_indices][apply_mask], axis=1).astype(np.int64)
+            val_acc = _simple_accuracy(y_true[val_indices], final_val)
+            changed_frac = float((final_val != mlp_pred_all[val_indices]).mean())
+            uncertain_frac = float(apply_mask.mean())
+            key = (val_acc, -changed_frac, -uncertain_frac)
+            if best is None or key > best["key"]:
+                best = {
+                    "threshold_high": float(t),
+                    "structure_quality_threshold": float(q_thr),
+                    "val_acc": float(val_acc),
+                    "changed_fraction_val": changed_frac,
+                    "uncertain_fraction_val": uncertain_frac,
+                    "key": key,
+                }
+
+    assert best is not None
+    best["threshold_candidates_evaluated"] = threshold_candidates
+    best["quality_threshold_candidates_evaluated"] = quality_threshold_candidates
+    return best
+
+
 def summarize_selective_correction_behavior(
     y_true: np.ndarray,
     node_indices: np.ndarray,
@@ -1600,6 +1724,10 @@ def selective_graph_correction_predictclass(
     weight_candidates: Optional[List[Dict[str, float]]] = None,
     enable_feature_knn: bool = False,
     feature_knn_k: int = 5,
+    diffusion_steps: int = 4,
+    diffusion_decay: float = 0.6,
+    use_structure_quality_gate: bool = False,
+    quality_threshold_candidates: Optional[List[float]] = None,
     write_node_diagnostics: bool = True,
 ) -> Tuple[torch.Tensor, float, Dict[str, Any]]:
     """
@@ -1644,16 +1772,18 @@ def selective_graph_correction_predictclass(
         mlp_probs_np=mlp_probs_np,
         enable_feature_knn=enable_feature_knn,
         feature_knn_k=feature_knn_k,
+        diffusion_steps=diffusion_steps,
+        diffusion_decay=diffusion_decay,
     )
     evidence_runtime_sec = time.perf_counter() - t_e0
 
     # 3) Validation-only selection of weights + uncertainty threshold
     if weight_candidates is None:
         weight_candidates = [
-            {"b1": 1.0, "b2": 0.6, "b3": 0.0, "b4": 0.5, "b5": 0.3},
-            {"b1": 1.0, "b2": 0.9, "b3": 0.0, "b4": 0.3, "b5": 0.2},
-            {"b1": 1.0, "b2": 0.4, "b3": 0.0, "b4": 0.9, "b5": 0.5},
-            {"b1": 1.2, "b2": 0.5, "b3": 0.0, "b4": 0.4, "b5": 0.2},
+            {"b1": 1.0, "b2": 0.6, "b3": 0.0, "b4": 0.5, "b5": 0.3, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.9, "b3": 0.0, "b4": 0.3, "b5": 0.2, "b6": 0.0},
+            {"b1": 1.0, "b2": 0.4, "b3": 0.0, "b4": 0.9, "b5": 0.5, "b6": 0.0},
+            {"b1": 1.2, "b2": 0.5, "b3": 0.0, "b4": 0.4, "b5": 0.2, "b6": 0.0},
         ]
 
     t_sel0 = time.perf_counter()
@@ -1669,15 +1799,28 @@ def selective_graph_correction_predictclass(
             b3=w_cfg["b3"],
             b4=w_cfg["b4"],
             b5=w_cfg["b5"],
+            b6=w_cfg.get("b6", 0.0),
         )
-        th = choose_uncertainty_threshold(
-            y_true,
-            val_indices,
-            mlp_pred_all,
-            mlp_margin_all,
-            comps["combined_scores"],
-            threshold_candidates=threshold_candidates,
-        )
+        if use_structure_quality_gate:
+            th = choose_uncertainty_threshold_with_structure_gate(
+                y_true,
+                val_indices,
+                mlp_pred_all,
+                mlp_margin_all,
+                comps["combined_scores"],
+                evidence["structural_quality"],
+                threshold_candidates=threshold_candidates,
+                quality_threshold_candidates=quality_threshold_candidates,
+            )
+        else:
+            th = choose_uncertainty_threshold(
+                y_true,
+                val_indices,
+                mlp_pred_all,
+                mlp_margin_all,
+                comps["combined_scores"],
+                threshold_candidates=threshold_candidates,
+            )
         key = (th["val_acc"], -th["changed_fraction_val"], -th["uncertain_fraction_val"])
         if best_cfg is None or key > best_cfg["key"]:
             best_cfg = {
@@ -1691,15 +1834,18 @@ def selective_graph_correction_predictclass(
     selection_runtime_sec = time.perf_counter() - t_sel0
 
     selected_threshold_high = float(best_cfg["threshold"]["threshold_high"])
+    selected_quality_threshold = float(best_cfg["threshold"].get("structure_quality_threshold", -1.0))
     selected_weights = best_cfg["weights"]
 
     # 4) Inference with selected config
     t_inf0 = time.perf_counter()
     uncertain_mask_all = mlp_margin_all < selected_threshold_high
+    structure_gate_mask_all = evidence["structural_quality"] >= selected_quality_threshold
+    apply_mask_all = uncertain_mask_all & structure_gate_mask_all if use_structure_quality_gate else uncertain_mask_all
     final_pred_all = mlp_pred_all.copy()
-    if uncertain_mask_all.any():
-        final_pred_all[uncertain_mask_all] = np.argmax(
-            best_components["combined_scores"][uncertain_mask_all], axis=1
+    if apply_mask_all.any():
+        final_pred_all[apply_mask_all] = np.argmax(
+            best_components["combined_scores"][apply_mask_all], axis=1
         ).astype(np.int64)
     inference_runtime_sec = time.perf_counter() - t_inf0
 
@@ -1709,10 +1855,10 @@ def selective_graph_correction_predictclass(
     test_acc_mlp = _simple_accuracy(y_true[test_indices], mlp_pred_all[test_indices])
 
     val_summary = summarize_selective_correction_behavior(
-        y_true, val_indices, mlp_pred_all, final_pred_all, uncertain_mask_all
+        y_true, val_indices, mlp_pred_all, final_pred_all, apply_mask_all
     )
     test_summary = summarize_selective_correction_behavior(
-        y_true, test_indices, mlp_pred_all, final_pred_all, uncertain_mask_all
+        y_true, test_indices, mlp_pred_all, final_pred_all, apply_mask_all
     )
 
     selective_overhead_runtime_sec = evidence_runtime_sec + selection_runtime_sec + inference_runtime_sec
@@ -1741,9 +1887,13 @@ def selective_graph_correction_predictclass(
                     "mlp_max_prob": float(mlp_top1_all[nid]),
                     "mlp_margin": float(mlp_margin_all[nid]),
                     "was_uncertain": bool(uncertain_mask_all[nid]),
+                    "passed_structure_quality_gate": bool(structure_gate_mask_all[nid]),
+                    "gate_structural_quality": float(evidence["structural_quality"][nid]),
+                    "was_corrected": bool(apply_mask_all[nid]),
                     "final_pred": final_lbl,
                     "changed_from_mlp": bool(final_pred_all[nid] != mlp_pred_all[nid]),
                     "selected_threshold_high": float(selected_threshold_high),
+                    "selected_structure_quality_threshold": float(selected_quality_threshold),
                     "selected_method_mode": "feature_first_selective_weighted_correction_v1",
                     "winning_class_components": {
                         "mlp_term": float(best_components["mlp_term"][nid, final_lbl]),
@@ -1751,6 +1901,7 @@ def selective_graph_correction_predictclass(
                         "feature_knn_term": float(best_components["feature_knn_term"][nid, final_lbl]),
                         "graph_neighbor_term": float(best_components["graph_neighbor_term"][nid, final_lbl]),
                         "compatibility_term": float(best_components["compatibility_term"][nid, final_lbl]),
+                        "structural_far_term": float(best_components["structural_far_term"][nid, final_lbl]),
                     },
                 }
             )
@@ -1760,10 +1911,18 @@ def selective_graph_correction_predictclass(
             "seed": int(seed),
             "method": "selective_graph_correction",
             "selected_threshold_high": float(selected_threshold_high),
+            "selected_structure_quality_threshold": float(selected_quality_threshold),
             "selected_weights": {k: float(v) for k, v in selected_weights.items()},
-            "mode": "feature_first_selective_weighted_correction_v1",
+            "mode": (
+                "feature_first_selective_structural_quality_gate_v1"
+                if use_structure_quality_gate
+                else "feature_first_selective_weighted_correction_v1"
+            ),
             "feature_knn_used": bool(enable_feature_knn),
             "feature_knn_k": int(feature_knn_k),
+            "diffusion_steps": int(diffusion_steps),
+            "diffusion_decay": float(diffusion_decay),
+            "structure_quality_gate_used": bool(use_structure_quality_gate),
             "runtime_sec": {
                 "mlp_training_runtime_sec": float(mlp_train_runtime_sec),
                 "evidence_runtime_sec": float(evidence_runtime_sec),
@@ -1782,6 +1941,8 @@ def selective_graph_correction_predictclass(
                 "test_fraction_uncertain": test_summary["fraction_uncertain"],
                 "val_fraction_changed_from_mlp": val_summary["fraction_changed_from_mlp"],
                 "test_fraction_changed_from_mlp": test_summary["fraction_changed_from_mlp"],
+                "val_fraction_passing_structure_gate": float(structure_gate_mask_all[val_indices].mean()),
+                "test_fraction_passing_structure_gate": float(structure_gate_mask_all[test_indices].mean()),
                 "acc_val_confident": val_summary["acc_confident"],
                 "acc_val_uncertain": val_summary["acc_uncertain"],
                 "acc_test_confident": test_summary["acc_confident"],
@@ -1797,6 +1958,7 @@ def selective_graph_correction_predictclass(
             (
                 f"SelectiveCorrection: test_acc={test_acc:.4f} vs MLP={test_acc_mlp:.4f} | "
                 f"thr={selected_threshold_high:.4f} | uncertain_frac_test={test_summary['fraction_uncertain']:.3f} | "
+                f"struct_gate_thr={selected_quality_threshold:.4f} | "
                 f"changed_frac_test={test_summary['fraction_changed_from_mlp']:.3f}"
             ),
             log_file,
@@ -1805,15 +1967,24 @@ def selective_graph_correction_predictclass(
 
     info = {
         "selected_threshold_high": float(selected_threshold_high),
+        "selected_structure_quality_threshold": float(selected_quality_threshold),
         "selected_weights": {k: float(v) for k, v in selected_weights.items()},
-        "mode": "feature_first_selective_weighted_correction_v1",
+        "mode": (
+            "feature_first_selective_structural_quality_gate_v1"
+            if use_structure_quality_gate
+            else "feature_first_selective_weighted_correction_v1"
+        ),
         "feature_knn_used": bool(enable_feature_knn),
         "feature_knn_k": int(feature_knn_k),
+        "diffusion_steps": int(diffusion_steps),
+        "diffusion_decay": float(diffusion_decay),
+        "structure_quality_gate_used": bool(use_structure_quality_gate),
         "val_acc_selective": float(val_acc),
         "test_acc_mlp": float(test_acc_mlp),
         "test_acc_selective": float(test_acc),
         "fraction_test_nodes_uncertain": float(test_summary["fraction_uncertain"] or 0.0),
         "fraction_test_nodes_changed_from_mlp": float(test_summary["fraction_changed_from_mlp"] or 0.0),
+        "fraction_test_nodes_passing_structure_gate": float(structure_gate_mask_all[test_indices].mean()),
         "acc_test_confident_nodes": test_summary["acc_confident"],
         "acc_test_uncertain_nodes": test_summary["acc_uncertain"],
         "runtime_breakdown_sec": {
@@ -1831,11 +2002,74 @@ def selective_graph_correction_predictclass(
             "best_val_uncertain_fraction": float(best_cfg["threshold"]["uncertain_fraction_val"]),
             "best_val_changed_fraction": float(best_cfg["threshold"]["changed_fraction_val"]),
             "threshold_candidates_evaluated": best_cfg["threshold"]["threshold_candidates_evaluated"],
+            "quality_threshold_candidates_evaluated": best_cfg["threshold"].get("quality_threshold_candidates_evaluated"),
             "weight_candidates_evaluated": [{k: float(v) for k, v in cfg.items()} for cfg in weight_candidates],
         },
         "wall_clock_runtime_sec": float(time.perf_counter() - t_all0),
     }
     return torch.tensor(test_pred, device=device), float(test_acc), info
+
+
+def selective_graph_correction_structural_predictclass(
+    data,
+    train_indices,
+    val_indices,
+    test_indices,
+    *,
+    mlp_probs: Optional[torch.Tensor] = None,
+    seed: int = 1337,
+    log_prefix: str = "selective_graph_correction_structural",
+    log_file: str | None = None,
+    diagnostics_run_id: str | None = None,
+    dataset_key_for_logs: Optional[str] = None,
+    mlp_runtime_sec: Optional[float] = None,
+    threshold_candidates: Optional[List[float]] = None,
+    quality_threshold_candidates: Optional[List[float]] = None,
+    weight_candidates: Optional[List[Dict[str, float]]] = None,
+    enable_feature_knn: bool = False,
+    feature_knn_k: int = 5,
+    diffusion_steps: int = 4,
+    diffusion_decay: float = 0.6,
+    use_structure_quality_gate: bool = True,
+    write_node_diagnostics: bool = True,
+) -> Tuple[torch.Tensor, float, Dict[str, Any]]:
+    """
+    Diffusion-aware selective correction with a near/far structural split.
+
+    The base MLP remains primary. Only uncertain nodes are candidates for
+    correction, and optional structure-quality gating can suppress correction
+    when the multi-hop structural evidence is too diffuse.
+    """
+    if weight_candidates is None:
+        weight_candidates = [
+            {"b1": 1.0, "b2": 0.4, "b3": 0.0, "b4": 0.2, "b5": 0.3, "b6": 0.9},
+            {"b1": 1.0, "b2": 0.6, "b3": 0.0, "b4": 0.3, "b5": 0.2, "b6": 0.8},
+            {"b1": 1.1, "b2": 0.4, "b3": 0.0, "b4": 0.1, "b5": 0.2, "b6": 1.0},
+            {"b1": 1.0, "b2": 0.3, "b3": 0.0, "b4": 0.5, "b5": 0.3, "b6": 0.6},
+        ]
+
+    return selective_graph_correction_predictclass(
+        data,
+        train_indices,
+        val_indices,
+        test_indices,
+        mlp_probs=mlp_probs,
+        seed=seed,
+        log_prefix=log_prefix,
+        log_file=log_file,
+        diagnostics_run_id=diagnostics_run_id,
+        dataset_key_for_logs=dataset_key_for_logs,
+        mlp_runtime_sec=mlp_runtime_sec,
+        threshold_candidates=threshold_candidates,
+        quality_threshold_candidates=quality_threshold_candidates,
+        weight_candidates=weight_candidates,
+        enable_feature_knn=enable_feature_knn,
+        feature_knn_k=feature_knn_k,
+        diffusion_steps=diffusion_steps,
+        diffusion_decay=diffusion_decay,
+        use_structure_quality_gate=use_structure_quality_gate,
+        write_node_diagnostics=write_node_diagnostics,
+    )
 
 
 def _build_gate_feature_matrix(
