@@ -1,0 +1,50 @@
+{
+  "output_tag": "prl_resubmission_core_merged_r1",
+  "generated_at": "2026-03-22T03:30:27",
+  "runs_file": "/mmfs1/home/sv96/node_classification_manuscript/logs/prl_resubmission/comparison_runs_prl_resubmission_core_merged_r1.jsonl",
+  "datasets": [
+    "chameleon",
+    "citeseer",
+    "cora",
+    "pubmed",
+    "wisconsin"
+  ],
+  "methods": [
+    "appnp",
+    "gated_mlp_prop",
+    "gcn",
+    "mlp_only",
+    "prop_only",
+    "selective_graph_correction",
+    "sgc_knn_enabled",
+    "sgc_mlp_plus_graph",
+    "sgc_no_compatibility",
+    "sgc_no_feature_similarity",
+    "sgc_no_gate",
+    "sgc_no_graph_neighbor"
+  ],
+  "n_records_total": 600,
+  "n_records_successful": 600,
+  "splits": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "repeats": [
+    0
+  ],
+  "parameter_sources": [
+    "DEFAULT_MANUSCRIPT_MLP_KWARGS",
+    "feature_first_selective_weighted_correction_v1",
+    "gated_mlp_prop",
+    "robust_random_search",
+    "small_val_grid_search"
+  ]
+}

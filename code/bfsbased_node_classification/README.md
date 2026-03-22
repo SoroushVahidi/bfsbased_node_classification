@@ -1,21 +1,51 @@
-# Node classification experiments (BFS-based / selective graph correction)
+# Node-classification code directory
 
-Implementation of **feature-first, reliability-aware selective graph correction** for node classification. The repository root [README.md](../../README.md) describes layout, licensing, and reproduction.
+This directory contains the main implementation code used by the current PRL
+repository workflow. It now includes both the frozen submission package and the
+newer resubmission / structural-extension line.
 
-## FINAL_V3 (PRL submission method)
+## Main method lines
+
+### 1. Frozen submission method: `FINAL_V3`
 
 | Artifact | Path |
 |----------|------|
 | Implementation | `final_method_v3.py` |
 | Stable import from `code/` | `../final_method_v3.py` |
-| Benchmark runner (MLP, SGC v1, V2 ablation, FINAL_V3) | `run_final_evaluation.py` |
+| Benchmark runner | `run_final_evaluation.py` |
 
-**Archived exploration** (diagnostics, early gated variants, improvement sweeps): `experimental_archived/`
+`FINAL_V3` is the cleanest frozen submission-facing package currently available
+on `main`.
 
-**Baselines / ablations:** `improved_sgc_variants.py` (SGC v1, V2_MULTIBRANCH and other experimental tags — only v1/v2 are used in the main FINAL_V3 table).
+### 2. Original uncertainty-gated selective correction
 
-**Core study code** is still loaded dynamically from `bfsbased-full-investigate-homophil.py` (see root `AGENTS.md`).
+| Artifact | Path |
+|----------|------|
+| Core implementation | `bfsbased-full-investigate-homophil.py` |
+| Original manuscript driver | `manuscript_runner.py` |
 
-**Earlier publication line:** [arxiv.org/abs/2512.22221](https://arxiv.org/abs/2512.22221) — interpretable node classification on heterophilic benchmarks.
+### 3. Structural extension / PRL resubmission package
 
-**License:** [MIT](../../LICENSE) (copy also in this directory as `LICENSE`).
+| Artifact | Path |
+|----------|------|
+| Focused resubmission runner | `prl_resubmission_runner.py` |
+| Compact GCN/APPNP baselines | `standard_node_baselines.py` |
+| Resubmission analysis | `analyze_prl_resubmission.py` |
+| Grouped-run merge helper | `merge_prl_resubmission_runs.py` |
+
+## Notes
+
+- `bfsbased-full-investigate-homophil.py` remains the main location for the
+  original `UG-SGC` logic and the structural `UG-SGC-S` extension.
+- `experimental_archived/` contains older diagnostic and pre-final exploration
+  scripts.
+- Some older files reflect earlier heterophily-oriented wording and should not
+  be treated as the current paper framing.
+
+For the manuscript-facing map, prefer:
+
+- repository root `README.md`
+- `README_PRL_MANUSCRIPT.md`
+- `reports/prl_resubmission/`
+
+License: [MIT](../../LICENSE)

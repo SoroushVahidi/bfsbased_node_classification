@@ -1,0 +1,53 @@
+
+=== Split Coverage Check ===
+  chameleon   : FULL
+  wisconsin   : FULL
+
+
+=== Dataset: chameleon ===
+  split=0 repeat=1/1 seed=133700
+  split=1 repeat=1/1 seed=133800
+  split=2 repeat=1/1 seed=133900
+  split=3 repeat=1/1 seed=134000
+  split=4 repeat=1/1 seed=134100
+  split=5 repeat=1/1 seed=134200
+  split=6 repeat=1/1 seed=134300
+  split=7 repeat=1/1 seed=134400
+  split=8 repeat=1/1 seed=134500
+  split=9 repeat=1/1 seed=134600
+
+=== Dataset: wisconsin ===
+  split=0 repeat=1/1 seed=133700
+  split=1 repeat=1/1 seed=133800
+  split=2 repeat=1/1 seed=133900
+  split=3 repeat=1/1 seed=134000
+  split=4 repeat=1/1 seed=134100
+  split=5 repeat=1/1 seed=134200
+  split=6 repeat=1/1 seed=134300
+  split=7 repeat=1/1 seed=134400
+  split=8 repeat=1/1 seed=134500
+  split=9 repeat=1/1 seed=134600
+
+Completed 240 runs in 13013.6s
+{
+  "runs_path": "/mmfs1/home/sv96/node_classification_manuscript/logs/prl_resubmission/comparison_runs_prl_resubmission_core_group2_r1.jsonl",
+  "dataset_meta": {
+    "chameleon": {
+      "num_nodes": 2277,
+      "num_edges": 62792,
+      "num_classes": 5,
+      "avg_degree": 27.57663592446201,
+      "homophily": 0.23053892215568864
+    },
+    "wisconsin": {
+      "num_nodes": 251,
+      "num_edges": 916,
+      "num_classes": 5,
+      "avg_degree": 3.649402390438247,
+      "homophily": 0.19213973799126638
+    }
+  },
+  "total_runs": 240,
+  "wall_time_sec": 13013.649796142,
+  "output_tag": "prl_resubmission_core_group2_r1"
+}

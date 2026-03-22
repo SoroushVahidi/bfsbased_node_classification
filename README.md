@@ -1,59 +1,104 @@
 # Uncertainty-Gated Selective Graph Correction for Node Classification
 
-**This repository contains the evidence package for a Pattern Recognition Letters (PRL) submission.**
+This repository is the working code-and-artifact package for the current
+Pattern Recognition Letters (PRL) manuscript line.
 
-The work studies **feature-first, reliability-aware selective graph correction**: a strong MLP baseline plus **selective** graph-based correction that is applied mainly when the model is uncertain **and** local graph evidence appears reliable. The publication method is **FINAL_V3** (reliability-gated selective graph correction). Older gated variants and exploratory runners are **archived** under `code/bfsbased_node_classification/experimental_archived/` or labeled as baselines/ablations in reports.
+It contains both:
 
-Manuscript-oriented index: **[README_PRL_MANUSCRIPT.md](README_PRL_MANUSCRIPT.md)**  
-Reproduce tables and figures from frozen CSVs: **[scripts/README_REPRODUCE.md](scripts/README_REPRODUCE.md)**
+- the newer frozen PRL submission package centered on **FINAL_V3**
+  (reliability-gated selective graph correction), and
+- the broader manuscript / resubmission evidence package around
+  **uncertainty-gated selective graph correction** (`UG-SGC`) plus the newer
+  structural extension (`UG-SGC-S`)
 
-**Suggested GitHub “About” blurb:**
+Manuscript-oriented index: `README_PRL_MANUSCRIPT.md`  
+Frozen table/figure refresh instructions: `scripts/README_REPRODUCE.md`
 
-> PyTorch research code: feature-first, reliability-aware selective graph correction for node classification; PRL submission evidence package.
+## Repository identity
 
-## License
+Across all variants, the scientific story is intentionally narrow:
 
-This project is released under the [MIT License](LICENSE). A copy is also kept under `code/bfsbased_node_classification/LICENSE` for convenience when browsing only the implementation folder.
+- start from a strong feature-only `MLP`
+- identify uncertain nodes from model confidence or margin
+- use graph information only as a **selective correction** mechanism
+- keep the method interpretable by exposing score terms and correction behavior
+
+This repository is **not** a claim of universal heterophily robustness or a
+global replacement of the MLP with graph propagation.
+
+## Main method / package lines
+
+### 1. Frozen submission package: `FINAL_V3`
+
+This is the current stable PRL submission-facing package in the remote repo.
+
+- Stable import: `code/final_method_v3.py`
+- Implementation: `code/bfsbased_node_classification/final_method_v3.py`
+- Main 10-split driver: `code/bfsbased_node_classification/run_final_evaluation.py`
+- Canonical tables: `tables/main_results_prl.md`, `tables/main_results_prl.csv`
+- Main analysis: `reports/final_method_v3_analysis.md`
+
+### 2. Original uncertainty-gated selective correction: `UG-SGC`
+
+Implemented in:
+- `code/bfsbased_node_classification/bfsbased-full-investigate-homophil.py`
+- `code/bfsbased_node_classification/manuscript_runner.py`
+
+Main ingredients:
+- MLP log-probability term
+- feature-prototype similarity
+- optional feature-kNN support
+- local graph-neighbor support
+- compatibility support
+- validation-selected uncertainty threshold
+
+### 3. Structural selective correction extension: `UG-SGC-S`
+
+Also implemented in:
+- `code/bfsbased_node_classification/bfsbased-full-investigate-homophil.py`
+- `code/bfsbased_node_classification/prl_resubmission_runner.py`
+
+This extension keeps the same MLP-first selective-correction identity, but adds
+a **far structural support** term based on confidence-weighted multi-hop
+diffusion. Current repository evidence suggests it is **promising but mixed**,
+not yet a universally stronger replacement.
 
 ## Repository layout
 
 | Path | Purpose |
 |------|---------|
-| `code/final_method_v3.py` | Stable import path for **FINAL_V3** (loads `code/bfsbased_node_classification/final_method_v3.py`) |
-| `code/bfsbased_node_classification/` | Runners, models, dynamically loaded core study script |
-| `code/bfsbased_node_classification/experimental_archived/` | Legacy diagnostic / v1–v2 exploration scripts (not the main method) |
+| `code/final_method_v3.py` | Stable import path for the frozen `FINAL_V3` submission method |
+| `code/bfsbased_node_classification/` | Core implementations, runners, baselines, and analysis scripts |
+| `code/bfsbased_node_classification/experimental_archived/` | Legacy diagnostic and pre-final exploration scripts |
 | `data/splits/` | Pre-bundled dataset splits (`.npz`) |
 | `logs/` | Canonical JSONL/CSV run logs |
-| `figures/` | PRL figures (FINAL_V3 set + optional `prl_final_additions/`) |
-| `tables/` | Merged tables (`main_results_prl.*` + optional `prl_final_additions/`) |
-| `reports/` | Audits, **FINAL_V3** analysis, safety note, narrative story |
-| `results_prl/` | Threshold-sensitivity and related packaged outputs |
-| `scripts/` | Regeneration scripts; **`scripts/run_all_prl_results.sh`** refreshes main tables/figures |
-| `prl_final_additions/` | Supplementary PRL tables/scripts bundle (mirrored under `tables/` / `figures/` by build scripts) |
-| `slurm/` | Batch job templates |
-| `AGENTS.md` | Tooling and validation notes for automation |
+| `figures/` | PRL figures, including `prl_final_additions/` |
+| `tables/` | Manuscript tables and supplementary PRL tables |
+| `reports/` | Audits, method notes, result narratives, and run-status docs |
+| `results_prl/` | Threshold/gate behavior package |
+| `scripts/` | Artifact regeneration scripts |
+| `slurm/` | Wulver batch templates |
+| `AGENTS.md` | Automation and repository-maintenance notes |
 
-## Dependencies
+## Most important documentation
 
-- Python 3 with **PyTorch** (CPU is enough) for **training** runs
-- **PyTorch Geometric**, NumPy, NetworkX, sortedcontainers, Matplotlib
+- Manuscript artifact guide: `README_PRL_MANUSCRIPT.md`
+- Frozen-method analysis: `reports/final_method_v3_analysis.md`
+- PRL resubmission method spec: `reports/prl_resubmission/PRL_METHOD_SPEC.md`
+- Repo readiness audit: `reports/prl_resubmission/REPO_READINESS_AUDIT.md`
+- Current run/job status: `reports/prl_resubmission/RUN_STATUS.md`
+- Structural-upgrade smoke note:
+  `reports/prl_resubmission/STRUCTURAL_UPGRADE_SMOKE_NOTE.md`
 
-Install example (CPU wheels):
+## Quick commands
 
-```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-pip install torch_geometric numpy networkx sortedcontainers matplotlib
-```
-
-Refreshing **tables and figures only** needs NumPy + Matplotlib (see `scripts/README_REPRODUCE.md`).
-
-## Reproduce PRL tables and figures (lightweight)
+Refresh frozen PRL tables and figures from packaged CSVs:
 
 ```bash
 bash scripts/run_all_prl_results.sh
 ```
 
-## Quick start (smoke experiment, from repo root)
+Smoke test the original selective-correction line:
 
 ```bash
 python3 code/bfsbased_node_classification/manuscript_runner.py \
@@ -61,7 +106,7 @@ python3 code/bfsbased_node_classification/manuscript_runner.py \
   --methods mlp_only selective_graph_correction --output-tag dev_test
 ```
 
-PRL resubmission runner (GCN, APPNP, structural ablations — heavier):
+Run the heavier PRL resubmission package:
 
 ```bash
 python3 code/bfsbased_node_classification/prl_resubmission_runner.py \
@@ -69,7 +114,7 @@ python3 code/bfsbased_node_classification/prl_resubmission_runner.py \
   --methods mlp_only gcn appnp selective_graph_correction --output-tag dev_test
 ```
 
-FINAL_V3 comparison driver (same setting as `reports/final_method_v3_results.csv` — **10 splits** by default):
+Run the frozen `FINAL_V3` 10-split benchmark driver:
 
 ```bash
 python3 code/bfsbased_node_classification/run_final_evaluation.py \
@@ -77,12 +122,15 @@ python3 code/bfsbased_node_classification/run_final_evaluation.py \
   --datasets cora citeseer pubmed chameleon texas wisconsin
 ```
 
-Check emitted JSONL under `logs/` for `"success": true` where applicable.
+## Reading guidance for external analysis
 
-## Related writing
+- Start with `README_PRL_MANUSCRIPT.md`.
+- Treat `reports/prl_resubmission/RUN_STATUS.md` as the source of truth for
+  which structural-upgrade jobs are complete versus still running.
+- Treat `code/bfsbased_node_classification/experimental_archived/` and older
+  diagnostic material as provenance, not the current paper story.
 
-- **Earlier arXiv line** (heterophilic interpretability): [arxiv.org/abs/2512.22221](https://arxiv.org/abs/2512.22221) — see `code/bfsbased_node_classification/README.md` for the historical one-line summary.
+## License
 
-## Citation
-
-If you use this code, please cite the work you are building on (e.g. the PRL submission and/or the arXiv preprint above) using the citation your venue requires once DOI/page numbers are fixed.
+This project is released under the [MIT License](LICENSE). A copy is also kept
+under `code/bfsbased_node_classification/LICENSE` for convenience.

@@ -18,6 +18,8 @@ technical gaps for a PRL rewrite:
 - `protocol_<output_tag>.md`
 - `summary_<output_tag>.md`
 - `claims_and_risks_<output_tag>.md`
+- `STRUCTURAL_UPGRADE_SMOKE_NOTE.md`
+- `RUN_STATUS.md`
 
 ## Matching raw / tabular outputs
 
@@ -42,3 +44,16 @@ Wulver:
 ```bash
 sbatch slurm/run_prl_resubmission_core.sbatch
 ```
+
+## Structural-upgrade jobs
+
+The structural selective-correction extension has its own grouped Wulver
+submission scripts:
+
+- `slurm/run_prl_structural_group1.sbatch`
+- `slurm/run_prl_structural_group2.sbatch`
+- `slurm/run_prl_structural_merge_analysis.sbatch`
+
+Current status is tracked in:
+
+- `reports/prl_resubmission/RUN_STATUS.md`
