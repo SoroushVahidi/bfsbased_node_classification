@@ -172,6 +172,26 @@ def analyze(runs_path: str, output_tag: str) -> Dict[str, str]:
         baseline_rows,
     )
 
+    # 2b) APPNP standalone table in manuscript Table-1-friendly format.
+    appnp_rows: List[Dict[str, Any]] = []
+    for ds in datasets:
+        recs = by_ds_method[ds].get("appnp", [])
+        if not recs:
+            continue
+        appnp_rows.append(
+            {
+                "dataset": ds,
+                "mean_accuracy": f"{float(np.mean([r['test_acc'] for r in recs])):.4f}",
+                "std": f"{float(np.std([r['test_acc'] for r in recs])):.4f}",
+            }
+        )
+    appnp_csv = os.path.join(tables_dir, f"appnp_results_{output_tag}.csv")
+    _write_csv(
+        appnp_csv,
+        ["dataset", "mean_accuracy", "std"],
+        appnp_rows,
+    )
+
     # 3) Ablation comparison vs default SGC
     ablation_rows: List[Dict[str, Any]] = []
     for ds in datasets:
@@ -237,6 +257,7 @@ def analyze(runs_path: str, output_tag: str) -> Dict[str, str]:
         "protocol_json": protocol_json,
         "protocol_md": protocol_md,
         "baseline_csv": baseline_csv,
+        "appnp_csv": appnp_csv,
         "ablation_csv": ablation_csv,
         "summary_md": summary_md,
         "claims_md": claims_md,

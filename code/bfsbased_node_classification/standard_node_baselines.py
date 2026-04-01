@@ -58,18 +58,6 @@ def _normalize_adj(edge_index: torch.Tensor, num_nodes: int) -> torch.Tensor:
     ).coalesce()
 
 
-def _row_normalize_adj(edge_index: torch.Tensor, num_nodes: int) -> torch.Tensor:
-    adj = _coalesce_adj(edge_index, num_nodes, add_self_loops=True)
-    row, _ = adj.indices()
-    deg = torch.zeros(num_nodes, device=edge_index.device, dtype=torch.float32)
-    deg.scatter_add_(0, row, adj.values())
-    deg_inv = deg.clamp(min=1.0).pow(-1.0)
-    norm = deg_inv[row] * adj.values()
-    return torch.sparse_coo_tensor(
-        adj.indices(), norm, adj.shape, device=edge_index.device
-    ).coalesce()
-
-
 class SparseGCN(nn.Module):
     def __init__(self, in_dim: int, hidden: int, out_dim: int, dropout: float):
         super().__init__()
@@ -150,7 +138,8 @@ def _train_one_model(
 ) -> Tuple[torch.Tensor, float]:
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     best_state = None
-    best_key = None
+    best_val_loss = None
+    best_val_acc = None
     bad_epochs = 0
 
     for _epoch in range(max_epochs):
@@ -165,9 +154,9 @@ def _train_one_model(
         with torch.no_grad():
             logits = model(data.x, adj)
             val_acc, val_loss = _val_objective(logits, data.y, val_idx)
-        key = (val_acc, -val_loss)
-        if best_key is None or key > best_key:
-            best_key = key
+        if best_val_loss is None or val_loss < best_val_loss:
+            best_val_loss = float(val_loss)
+            best_val_acc = float(val_acc)
             best_state = copy.deepcopy(model.state_dict())
             bad_epochs = 0
         else:
@@ -175,13 +164,13 @@ def _train_one_model(
             if bad_epochs >= patience:
                 break
 
-    assert best_state is not None and best_key is not None
+    assert best_state is not None and best_val_acc is not None
     model.load_state_dict(best_state)
     model.eval()
     with torch.no_grad():
         logits = model(data.x, adj)
         probs = F.softmax(logits, dim=1)
-    return probs, float(best_key[0])
+    return probs, float(best_val_acc)
 
 
 def _gcn_grid() -> List[Dict[str, float]]:
@@ -195,10 +184,10 @@ def _gcn_grid() -> List[Dict[str, float]]:
 
 def _appnp_grid() -> List[Dict[str, float]]:
     return [
+        {"hidden": 64, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4, "k_steps": 5, "alpha": 0.1},
         {"hidden": 64, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4, "k_steps": 10, "alpha": 0.1},
+        {"hidden": 64, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4, "k_steps": 5, "alpha": 0.2},
         {"hidden": 64, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4, "k_steps": 10, "alpha": 0.2},
-        {"hidden": 128, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4, "k_steps": 10, "alpha": 0.1},
-        {"hidden": 64, "dropout": 0.3, "lr": 0.005, "weight_decay": 1e-3, "k_steps": 15, "alpha": 0.1},
     ]
 
 
@@ -210,8 +199,8 @@ def run_baseline(
     test_idx: torch.Tensor,
     *,
     seed: int,
-    max_epochs: int = 300,
-    patience: int = 50,
+    max_epochs: int = 200,
+    patience: int = 100,
 ) -> BaselineResult:
     _set_seed(seed)
     in_dim = int(data.x.size(1))
@@ -224,7 +213,7 @@ def run_baseline(
         build = lambda cfg: SparseGCN(in_dim, int(cfg["hidden"]), out_dim, float(cfg["dropout"])).to(device)
     elif model_name == "appnp":
         configs = _appnp_grid()
-        adj = _row_normalize_adj(data.edge_index.to(device), data.num_nodes)
+        adj = _normalize_adj(data.edge_index.to(device), data.num_nodes)
         build = lambda cfg: APPNPNet(
             in_dim,
             int(cfg["hidden"]),

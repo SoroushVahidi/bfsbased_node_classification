@@ -28,7 +28,7 @@ from standard_node_baselines import run_baseline
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 LOGS_DIR = os.path.join(REPO_ROOT, "logs", "prl_resubmission")
 
-CORE_DATASETS = ["cora", "citeseer", "pubmed", "chameleon", "wisconsin"]
+CORE_DATASETS = ["cora", "citeseer", "pubmed", "chameleon", "texas", "wisconsin"]
 
 DEFAULT_METHODS = [
     "mlp_only",
