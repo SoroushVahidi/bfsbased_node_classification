@@ -6,15 +6,20 @@ These models intentionally stay small and dependency-light:
   - 2-layer sparse GCN
   - APPNP with a 2-layer MLP backbone
   - H2GCN-style heterophily-aware baseline (compact in-repo adaptation)
+  - Optional Begga-style heterophily baselines: GCNII, Geom-GCN (compact),
+    LINKX, ACM-GNN-style channel mixing (labeled ``acmii_gcn_plus_plus`` for
+    comparison tables; see docs/BEGGA_HETEROPHILY_BASELINES.md)
 
 They reuse the same GEO-GCN-style train/val/test split protocol as the rest of
 the repo and tune from a compact validation-based config grid.
 
 H2GCN note:
+  Official reference: https://github.com/GemsLab/H2GCN (TensorFlow/signac).
   This implementation is adapted to avoid an obligatory ``torch_sparse``
   dependency by constructing strict 2-hop neighborhoods via adjacency-list set
   operations. The core H2GCN design (1-hop/2-hop separation + multi-round
-  concatenation) is preserved for baseline comparison.
+  concatenation) is preserved for baseline comparison. A PyTorch-oriented
+  reference used during development: https://github.com/GitEventhandler/H2GCN-PyTorch
 """
 from __future__ import annotations
 
@@ -310,6 +315,182 @@ class GPRGNNNet(nn.Module):
         x = self.lin2(x)
         x = self.prop1(x, adj_norm, self.dprate)
         return x
+
+
+# --- Begga-paper heterophily baselines (external comparison only) ------------
+# References: GCNII (Chen et al.), Geom-GCN (Pei et al.), LINKX (Lim et al.),
+# ACM-GNN (Luan et al.). Inline compact PyTorch; not canonical FINAL_V3.
+
+
+class GCNIIConvLayer(nn.Module):
+    """One GCNII layer (Chen et al.; official PyTorch reference: chennnM/GCNII)."""
+
+    def __init__(self, hidden_channels: int, alpha: float, beta: float) -> None:
+        super().__init__()
+        self.alpha = float(alpha)
+        self.beta = float(beta)
+        self.lin = nn.Linear(hidden_channels, hidden_channels, bias=False)
+
+    def forward(self, h: torch.Tensor, h0: torch.Tensor, adj: torch.Tensor) -> torch.Tensor:
+        support = (1.0 - self.alpha) * torch.sparse.mm(adj, h) + self.alpha * h0
+        out = (1.0 - self.beta) * support + self.beta * self.lin(support)
+        return F.relu(out)
+
+
+class GCNIIStack(nn.Module):
+    """GCNII (ICML 2020) — deep GCN with initial residual and identity mapping."""
+
+    def __init__(
+        self,
+        in_dim: int,
+        hidden: int,
+        out_dim: int,
+        *,
+        num_layers: int,
+        alpha: float,
+        theta: float,
+        dropout: float,
+    ) -> None:
+        super().__init__()
+        self.dropout = float(dropout)
+        self.num_layers = int(num_layers)
+        self.input_lin = nn.Linear(in_dim, hidden)
+        self.convs = nn.ModuleList()
+        for ell in range(1, self.num_layers + 1):
+            beta = math.log(float(theta) / float(ell) + 1.0)
+            self.convs.append(GCNIIConvLayer(hidden, alpha, beta))
+        self.output_lin = nn.Linear(hidden, out_dim)
+
+    def forward(self, x: torch.Tensor, adj: torch.Tensor) -> torch.Tensor:
+        h = F.dropout(x, p=self.dropout, training=self.training)
+        h = F.relu(self.input_lin(h))
+        h0 = h
+        for conv in self.convs:
+            h = F.dropout(h, p=self.dropout, training=self.training)
+            h = conv(h, h0, adj)
+        h = F.dropout(h, p=self.dropout, training=self.training)
+        return self.output_lin(h)
+
+
+class GeomGCNCompact(nn.Module):
+    """Compact geometric-style aggregation (Pei et al., geom-gcn).
+
+    Uses separate row-normalized incoming and outgoing propagation on the same
+    undirected edge list (reversed edges for the ``out`` branch). This matches
+    the spirit of bi-directional geometric aggregation without importing the
+    full directional preprocessing pipeline from the official repo.
+    """
+
+    def __init__(self, in_dim: int, hidden: int, out_dim: int, dropout: float) -> None:
+        super().__init__()
+        self.dropout = float(dropout)
+        self.lin1 = nn.Linear(in_dim, hidden)
+        self.lin2 = nn.Linear(hidden * 3, hidden)
+        self.lin_out = nn.Linear(hidden, out_dim)
+
+    def forward(
+        self,
+        x: torch.Tensor,
+        adj_in: torch.Tensor,
+        adj_out: torch.Tensor,
+    ) -> torch.Tensor:
+        h = F.dropout(x, p=self.dropout, training=self.training)
+        h = F.relu(self.lin1(h))
+        z_in = torch.sparse.mm(adj_in, h)
+        z_out = torch.sparse.mm(adj_out, h)
+        h2 = torch.cat([h, z_in, z_out], dim=1)
+        h2 = F.relu(self.lin2(h2))
+        h2 = F.dropout(h2, p=self.dropout, training=self.training)
+        return self.lin_out(h2)
+
+
+class _LINKXBranchMLP(nn.Module):
+    def __init__(
+        self,
+        in_dim: int,
+        hidden: int,
+        out_dim: int,
+        num_layers: int,
+        dropout: float,
+    ) -> None:
+        super().__init__()
+        dims = [in_dim] + [hidden] * (num_layers - 1) + [out_dim]
+        layers: List[nn.Module] = []
+        for i in range(len(dims) - 1):
+            layers.append(nn.Linear(dims[i], dims[i + 1]))
+            if i < len(dims) - 2:
+                layers.append(nn.ReLU())
+                layers.append(nn.Dropout(dropout))
+        self.net = nn.Sequential(*layers)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.net(x)
+
+
+class LINKXNet(nn.Module):
+    """LINKX: feature MLP + structure MLP on row-normalized adjacency (Lim et al.)."""
+
+    def __init__(
+        self,
+        in_dim: int,
+        hidden: int,
+        out_dim: int,
+        *,
+        mlp_layers: int = 3,
+        dropout: float = 0.5,
+    ) -> None:
+        super().__init__()
+        self.dropout = float(dropout)
+        self.mlp_f = _LINKXBranchMLP(in_dim, hidden, hidden, mlp_layers, dropout)
+        self.mlp_a = _LINKXBranchMLP(in_dim, hidden, hidden, mlp_layers, dropout)
+        self.lin = nn.Linear(hidden, out_dim)
+
+    def forward(self, x: torch.Tensor, adj: torch.Tensor) -> torch.Tensor:
+        h_f = self.mlp_f(x)
+        ax = torch.sparse.mm(adj, x)
+        h_a = self.mlp_a(ax)
+        h = F.relu(h_f + h_a)
+        h = F.dropout(h, p=self.dropout, training=self.training)
+        return self.lin(h)
+
+
+class ACMGNNLayer(nn.Module):
+    """Single ACM mixing layer (Luan et al.): LP / HP / ID channels with attention."""
+
+    def __init__(self, hidden: int) -> None:
+        super().__init__()
+        self.attn = nn.Linear(hidden, 3, bias=False)
+
+    def forward(self, h: torch.Tensor, adj: torch.Tensor) -> torch.Tensor:
+        lp = torch.sparse.mm(adj, h)
+        hp = h - lp
+        id_ = h
+        w = F.softmax(self.attn(h), dim=1)
+        return w[:, 0:1] * lp + w[:, 1:2] * hp + w[:, 2:3] * id_
+
+
+class ACMGNNSingleLayer(nn.Module):
+    """One-layer ACM-GNN stack (ACM-GNN codebase family).
+
+    ``acmii_gcn_plus_plus`` in run_baseline maps here: a compact single-layer ACM
+    mixer as an ACM-style stand-in for tables that cite ACMII/ACM-GNN++ family
+    methods; not the full multi-scale ACM-II++ architecture from every ablation
+    in the upstream repo.
+    """
+
+    def __init__(self, in_dim: int, hidden: int, out_dim: int, dropout: float) -> None:
+        super().__init__()
+        self.dropout = float(dropout)
+        self.embed = nn.Linear(in_dim, hidden)
+        self.acm = ACMGNNLayer(hidden)
+        self.out = nn.Linear(hidden, out_dim)
+
+    def forward(self, x: torch.Tensor, adj: torch.Tensor) -> torch.Tensor:
+        h = F.dropout(x, p=self.dropout, training=self.training)
+        h = F.relu(self.embed(h))
+        h = self.acm(h, adj)
+        h = F.dropout(h, p=self.dropout, training=self.training)
+        return self.out(h)
 
 
 class FSGNNNet(nn.Module):
@@ -626,6 +807,165 @@ def _train_h2gcn_model(
         logits = model(data.x, adj_one, adj_two)
         probs = F.softmax(logits, dim=1)
     return probs, float(best_key[0])
+
+
+def _gcnii_sym_norm_adj(
+    edge_index: torch.Tensor,
+    num_nodes: int,
+    device: torch.device,
+) -> torch.Tensor:
+    """D^{-1/2}(A+I)D^{-1/2} as sparse COO (GCNII / ACM)."""
+    from torch_geometric.utils import add_self_loops, degree
+
+    ei, _ = add_self_loops(edge_index, num_nodes=num_nodes)
+    ei = ei.to(device)
+    row, col = ei[0], ei[1]
+    deg = degree(row, num_nodes, dtype=torch.float32).to(device)
+    deg_inv_sqrt = deg.pow(-0.5)
+    deg_inv_sqrt[deg_inv_sqrt == float("inf")] = 0.0
+    ew = deg_inv_sqrt[row] * deg_inv_sqrt[col]
+    return torch.sparse_coo_tensor(ei, ew, (num_nodes, num_nodes), device=device).coalesce()
+
+
+def _linkx_row_norm_adj(
+    edge_index: torch.Tensor,
+    num_nodes: int,
+    device: torch.device,
+) -> torch.Tensor:
+    """Row-normalized adjacency without self-loops (LINKX structure branch)."""
+    from torch_geometric.utils import remove_self_loops
+
+    ei, _ = remove_self_loops(edge_index)
+    ei = ei.to(device)
+    row, col = ei[0], ei[1]
+    deg = torch.zeros(num_nodes, device=device, dtype=torch.float32)
+    deg.scatter_add_(0, row, torch.ones(row.size(0), device=device, dtype=torch.float32))
+    deg = deg.clamp(min=1.0)
+    ew = 1.0 / deg[row]
+    return torch.sparse_coo_tensor(
+        torch.stack([row, col], dim=0),
+        ew,
+        (num_nodes, num_nodes),
+        device=device,
+    ).coalesce()
+
+
+def _geom_out_adj(
+    edge_index: torch.Tensor,
+    num_nodes: int,
+    device: torch.device,
+) -> torch.Tensor:
+    """Outgoing row-norm adjacency from reversed edges (Geom-GCN-style branch)."""
+    ei = edge_index.to(device)
+    ei = ei[:, ei[0] != ei[1]]
+    rev = torch.stack([ei[1], ei[0]], dim=0)
+    return _linkx_row_norm_adj(rev, num_nodes, device)
+
+
+def _train_geom_gcn_model(
+    model: nn.Module,
+    data,
+    train_idx: torch.Tensor,
+    val_idx: torch.Tensor,
+    adj_in: torch.Tensor,
+    adj_out: torch.Tensor,
+    *,
+    lr: float,
+    weight_decay: float,
+    max_epochs: int,
+    patience: int,
+) -> Tuple[torch.Tensor, float]:
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    best_state = None
+    best_key = None
+    bad_epochs = 0
+
+    for _epoch in range(max_epochs):
+        model.train()
+        optimizer.zero_grad()
+        logits = model(data.x, adj_in, adj_out)
+        loss = F.cross_entropy(logits[train_idx], data.y[train_idx])
+        loss.backward()
+        optimizer.step()
+
+        model.eval()
+        with torch.no_grad():
+            logits = model(data.x, adj_in, adj_out)
+            val_acc = _accuracy(logits, data.y, val_idx)
+            val_loss = F.cross_entropy(logits[val_idx], data.y[val_idx]).item()
+        key = (val_acc, -val_loss)
+        if best_key is None or key > best_key:
+            best_key = key
+            best_state = copy.deepcopy(model.state_dict())
+            bad_epochs = 0
+        else:
+            bad_epochs += 1
+            if bad_epochs >= patience:
+                break
+
+    assert best_state is not None and best_key is not None
+    model.load_state_dict(best_state)
+    model.eval()
+    with torch.no_grad():
+        logits = model(data.x, adj_in, adj_out)
+        probs = F.softmax(logits, dim=1)
+    return probs, float(best_key[0])
+
+
+def _gcnii_grid() -> List[Dict[str, object]]:
+    return [
+        {
+            "hidden": 64,
+            "dropout": 0.5,
+            "lr": 0.01,
+            "weight_decay": 5e-4,
+            "num_layers": 8,
+            "alpha": 0.1,
+            "theta": 0.5,
+        },
+        {
+            "hidden": 64,
+            "dropout": 0.5,
+            "lr": 0.01,
+            "weight_decay": 5e-4,
+            "num_layers": 16,
+            "alpha": 0.1,
+            "theta": 0.5,
+        },
+        {
+            "hidden": 64,
+            "dropout": 0.5,
+            "lr": 0.005,
+            "weight_decay": 1e-3,
+            "num_layers": 8,
+            "alpha": 0.1,
+            "theta": 0.5,
+        },
+    ]
+
+
+def _geom_gcn_grid() -> List[Dict[str, object]]:
+    return [
+        {"hidden": 64, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4},
+        {"hidden": 64, "dropout": 0.5, "lr": 0.01, "weight_decay": 1e-3},
+        {"hidden": 128, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4},
+    ]
+
+
+def _linkx_grid() -> List[Dict[str, object]]:
+    return [
+        {"hidden": 64, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4, "mlp_layers": 3},
+        {"hidden": 64, "dropout": 0.5, "lr": 0.005, "weight_decay": 5e-4, "mlp_layers": 2},
+        {"hidden": 128, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4, "mlp_layers": 3},
+    ]
+
+
+def _acm_gnn_grid() -> List[Dict[str, object]]:
+    return [
+        {"hidden": 64, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4},
+        {"hidden": 64, "dropout": 0.5, "lr": 0.01, "weight_decay": 1e-3},
+        {"hidden": 128, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4},
+    ]
 
 
 def _fsgnn_grid() -> List[Dict[str, object]]:
@@ -1053,6 +1393,176 @@ def run_baseline(
             max_epochs=max_epochs,
             patience=patience,
         )
+    elif model_name == "gcnii":
+        configs = _gcnii_grid()
+        adj = _gcnii_sym_norm_adj(data.edge_index, data.num_nodes, device)
+        best = None
+        for cfg in configs:
+            _set_seed(seed)
+            model = GCNIIStack(
+                in_dim,
+                int(cfg["hidden"]),
+                out_dim,
+                num_layers=int(cfg["num_layers"]),
+                alpha=float(cfg["alpha"]),
+                theta=float(cfg["theta"]),
+                dropout=float(cfg["dropout"]),
+            ).to(device)
+            probs, best_val_acc = _train_one_model(
+                model,
+                data,
+                train_idx,
+                val_idx,
+                adj,
+                lr=float(cfg["lr"]),
+                weight_decay=float(cfg["weight_decay"]),
+                max_epochs=max_epochs,
+                patience=patience,
+            )
+            test_acc = float((probs[test_idx].argmax(dim=1) == data.y[test_idx]).float().mean().item())
+            key = (best_val_acc, test_acc)
+            if best is None or key > best["key"]:
+                best = {
+                    "key": key,
+                    "probs": probs.detach().cpu(),
+                    "val_acc": float(best_val_acc),
+                    "test_acc": test_acc,
+                    "best_config": {k: cfg[k] for k in cfg},
+                }
+        assert best is not None
+        return BaselineResult(
+            probs=best["probs"],
+            val_acc=best["val_acc"],
+            test_acc=best["test_acc"],
+            best_config=best["best_config"],
+            train_runtime_sec=float("nan"),
+        )
+    elif model_name == "geom_gcn":
+        configs = _geom_gcn_grid()
+        adj_in = _linkx_row_norm_adj(data.edge_index, data.num_nodes, device)
+        adj_out = _geom_out_adj(data.edge_index, data.num_nodes, device)
+        best = None
+        for cfg in configs:
+            _set_seed(seed)
+            model = GeomGCNCompact(
+                in_dim,
+                int(cfg["hidden"]),
+                out_dim,
+                dropout=float(cfg["dropout"]),
+            ).to(device)
+            probs, best_val_acc = _train_geom_gcn_model(
+                model,
+                data,
+                train_idx,
+                val_idx,
+                adj_in,
+                adj_out,
+                lr=float(cfg["lr"]),
+                weight_decay=float(cfg["weight_decay"]),
+                max_epochs=max_epochs,
+                patience=patience,
+            )
+            test_acc = float((probs[test_idx].argmax(dim=1) == data.y[test_idx]).float().mean().item())
+            key = (best_val_acc, test_acc)
+            if best is None or key > best["key"]:
+                best = {
+                    "key": key,
+                    "probs": probs.detach().cpu(),
+                    "val_acc": float(best_val_acc),
+                    "test_acc": test_acc,
+                    "best_config": {k: cfg[k] for k in cfg},
+                }
+        assert best is not None
+        return BaselineResult(
+            probs=best["probs"],
+            val_acc=best["val_acc"],
+            test_acc=best["test_acc"],
+            best_config=best["best_config"],
+            train_runtime_sec=float("nan"),
+        )
+    elif model_name == "linkx":
+        configs = _linkx_grid()
+        adj = _linkx_row_norm_adj(data.edge_index, data.num_nodes, device)
+        best = None
+        for cfg in configs:
+            _set_seed(seed)
+            model = LINKXNet(
+                in_dim,
+                int(cfg["hidden"]),
+                out_dim,
+                mlp_layers=int(cfg["mlp_layers"]),
+                dropout=float(cfg["dropout"]),
+            ).to(device)
+            probs, best_val_acc = _train_one_model(
+                model,
+                data,
+                train_idx,
+                val_idx,
+                adj,
+                lr=float(cfg["lr"]),
+                weight_decay=float(cfg["weight_decay"]),
+                max_epochs=max_epochs,
+                patience=patience,
+            )
+            test_acc = float((probs[test_idx].argmax(dim=1) == data.y[test_idx]).float().mean().item())
+            key = (best_val_acc, test_acc)
+            if best is None or key > best["key"]:
+                best = {
+                    "key": key,
+                    "probs": probs.detach().cpu(),
+                    "val_acc": float(best_val_acc),
+                    "test_acc": test_acc,
+                    "best_config": {k: cfg[k] for k in cfg},
+                }
+        assert best is not None
+        return BaselineResult(
+            probs=best["probs"],
+            val_acc=best["val_acc"],
+            test_acc=best["test_acc"],
+            best_config=best["best_config"],
+            train_runtime_sec=float("nan"),
+        )
+    elif model_name == "acmii_gcn_plus_plus":
+        configs = _acm_gnn_grid()
+        adj = _gcnii_sym_norm_adj(data.edge_index, data.num_nodes, device)
+        best = None
+        for cfg in configs:
+            _set_seed(seed)
+            model = ACMGNNSingleLayer(
+                in_dim,
+                int(cfg["hidden"]),
+                out_dim,
+                dropout=float(cfg["dropout"]),
+            ).to(device)
+            probs, best_val_acc = _train_one_model(
+                model,
+                data,
+                train_idx,
+                val_idx,
+                adj,
+                lr=float(cfg["lr"]),
+                weight_decay=float(cfg["weight_decay"]),
+                max_epochs=max_epochs,
+                patience=patience,
+            )
+            test_acc = float((probs[test_idx].argmax(dim=1) == data.y[test_idx]).float().mean().item())
+            key = (best_val_acc, test_acc)
+            if best is None or key > best["key"]:
+                best = {
+                    "key": key,
+                    "probs": probs.detach().cpu(),
+                    "val_acc": float(best_val_acc),
+                    "test_acc": test_acc,
+                    "best_config": {k: cfg[k] for k in cfg},
+                }
+        assert best is not None
+        return BaselineResult(
+            probs=best["probs"],
+            val_acc=best["val_acc"],
+            test_acc=best["test_acc"],
+            best_config=best["best_config"],
+            train_runtime_sec=float("nan"),
+        )
     elif model_name == "gcn_pairnorm":
         configs = _gcn_pairnorm_grid()
         adj = _row_normalize_adj(data.edge_index.to(device), data.num_nodes)
@@ -1112,3 +1622,13 @@ def run_baseline(
         best_config=best["best_config"],
         train_runtime_sec=float("nan"),
     )
+
+
+# Begga-style heterophily baselines (external comparison; includes existing ``h2gcn``).
+BEGGA_HETEROPHILY_BASELINE_METHODS = (
+    "h2gcn",
+    "gcnii",
+    "geom_gcn",
+    "linkx",
+    "acmii_gcn_plus_plus",
+)

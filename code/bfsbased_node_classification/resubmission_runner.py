@@ -5,6 +5,8 @@ Focused resubmission experiment runner.
 Adds:
   - compact standard graph baselines (GCN, APPNP)
   - external baseline (H2GCN; compact in-repo adaptation)
+  - Begga-style heterophily baselines (GCNII, Geom-GCN compact, LINKX, ACM-style
+    ``acmii_gcn_plus_plus``; see docs/BEGGA_HETEROPHILY_BASELINES.md)
   - external baseline (DeepGCN + PairNorm; lightweight in-repo implementation)
   - external baseline (FSGNN; lightweight in-repo implementation)
   - external baseline (GPRGNN; lightweight in-repo implementation)
@@ -372,14 +374,32 @@ def run_resubmission(
                 for method in [
                     m
                     for m in methods
-                    if m in {"gcn", "gcn_pairnorm", "appnp", "h2gcn", "fsgnn", "gprgnn", "sgc_wu2019"}
+                    if m
+                    in {
+                        "gcn",
+                        "gcn_pairnorm",
+                        "appnp",
+                        "h2gcn",
+                        "fsgnn",
+                        "gprgnn",
+                        "sgc_wu2019",
+                        "gcnii",
+                        "geom_gcn",
+                        "linkx",
+                        "acmii_gcn_plus_plus",
+                    }
                 ]:
                     rec = _build_record(**rec_base, method=method, method_family="baseline")
                     t0 = time.perf_counter()
                     try:
-                        baseline_kwargs: Dict[str, Any] = (
-                            {"max_epochs": 500, "patience": 100} if method == "gcn" else {}
-                        )
+                        baseline_kwargs: Dict[str, Any] = {}
+                        if method == "gcn" or method in {
+                            "gcnii",
+                            "geom_gcn",
+                            "linkx",
+                            "acmii_gcn_plus_plus",
+                        }:
+                            baseline_kwargs = {"max_epochs": 500, "patience": 100}
                         result = run_baseline(
                             method,
                             data,

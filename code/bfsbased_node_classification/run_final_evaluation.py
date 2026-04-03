@@ -56,8 +56,8 @@ def _load_module():
     return mod
 
 
-def _load_data(mod, ds):
-    dataset = mod.load_dataset(ds, "data/")
+def _load_data(mod, ds, root="data/"):
+    dataset = mod.load_dataset(ds, root)
     data = dataset[0]
     data.edge_index = torch.cat([data.edge_index, data.edge_index.flip(0)], dim=1)
     data.edge_index = torch.unique(data.edge_index, dim=1)

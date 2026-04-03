@@ -2,12 +2,12 @@
 
 ## A. Canonical method/path in the repo
 
-- **Canonical PRL method** is `FINAL_V3` (reliability-gated selective graph correction), implemented in `code/bfsbased_node_classification/final_method_v3.py` and evaluated by `code/bfsbased_node_classification/run_final_evaluation.py` on 10 GEO-GCN splits.  
+- **Canonical method** is `FINAL_V3` (reliability-gated selective graph correction), implemented in `code/bfsbased_node_classification/final_method_v3.py` and evaluated by `code/bfsbased_node_classification/run_final_evaluation.py` on 10 GEO-GCN splits.  
 - The `FINAL_V3` core loop is: MLP -> evidence build -> reliability score `R(v)` -> validation search over `(profile, tau, rho)` -> selective correction only for uncertain+reliable nodes.  
-- Frozen canonical results are in `reports/final_method_v3_results.csv`; manuscript-facing table uses `tables/main_results_prl.md`.
+- Frozen canonical results are in `reports/final_method_v3_results.csv`; manuscript-facing table uses `tables/main_results_selective_correction.md`.
 - Baseline/benchmark paths:
   - Canonical short-paper comparison: `MLP_ONLY`, `BASELINE_SGC_V1`, `V2_MULTIBRANCH`, `FINAL_V3` via `run_final_evaluation.py`.
-  - Extended (supplementary) benchmark path: `prl_resubmission_runner.py` + `standard_node_baselines.py` for `GCN`, `APPNP`, `SGC (Wu)`, and selective-correction ablations.
+  - Extended (supplementary) benchmark path: `resubmission_runner.py` + `standard_node_baselines.py` for `GCN`, `APPNP`, `SGC (Wu)`, and selective-correction ablations.
 
 ### Baseline family status vs requested list
 
@@ -19,7 +19,7 @@
 
 ## B. Track A: ranked model-improvement opportunities
 
-Ranking criterion used: expected benefit -> implementation effort -> scientific value -> fit with PRL feature-first selective-correction framing.
+Ranking criterion used: expected benefit -> implementation effort -> scientific value -> fit with feature-first selective-correction framing.
 
 ### 1) Reliability score upgrade with **continuous agreement** + calibrated degree prior
 
