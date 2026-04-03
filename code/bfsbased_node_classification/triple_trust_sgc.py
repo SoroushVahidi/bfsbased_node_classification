@@ -322,7 +322,13 @@ def triple_trust_sgc_predictclass(
         top2 = np.max(tmp, axis=1)
         score_gap = _norm01(top1 - top2)
 
-        agreement_signal = (mlp_pred == np.argmax(ns, axis=1)).astype(np.float64)
+        neighbor_vote = np.argmax(ns, axis=1)
+        has_trusted_neighbor_mass = neigh_mass > float(eps)
+        agreement_signal = np.where(
+            has_trusted_neighbor_mass,
+            (mlp_pred == neighbor_vote).astype(np.float64),
+            0.0,
+        )
         q = np.clip(w[0] * norm_margin + w[1] * score_gap + w[2] * ell + w[3] * agreement_signal, 0.0, 1.0)
 
         eligible_corr = mlp_margin < float(tau_uncertain)
