@@ -129,8 +129,11 @@ def run_bucket_safety(
             os.makedirs(d, exist_ok=True)
 
     _makedirs_for_output(out_per_node)
+    _makedirs_for_output(out_per_bucket)
+    _makedirs_for_output(out_per_split)
     _makedirs_for_output(out_report)
     _makedirs_for_output(out_table_csv)
+    _makedirs_for_output(out_table_md)
     mod = _load_module()
     per_node_rows: List[Dict[str, Any]] = []
     per_bucket_rows: List[Dict[str, Any]] = []
