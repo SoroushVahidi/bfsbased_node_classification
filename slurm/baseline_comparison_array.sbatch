@@ -11,11 +11,20 @@
 # One dataset per array task (6 tasks): 0=cora ... 5=wisconsin
 #SBATCH --array=0-5
 
+# Slurm opens --output/--error before this script runs; slurm/ must already exist.
+# Use scripts/baseline_comparison_wulver/launch_wulver.sh, or: mkdir -p slurm
+# (the repo tracks slurm/.gitkeep so a fresh clone has the directory).
+
 set -euo pipefail
 
 # Override with: export REPO_ROOT=/path/to/bfsbased_node_classification_git
 REPO_ROOT="${REPO_ROOT:-${SLURM_SUBMIT_DIR:-$(pwd)}}"
 cd "$REPO_ROOT"
+if [[ ! -f "$REPO_ROOT/code/bfsbased_node_classification/baseline_comparison_suite.py" ]]; then
+  echo "ERROR: REPO_ROOT=$REPO_ROOT is not this repository (missing baseline_comparison_suite.py)." >&2
+  echo "Fix: sbatch from the repo root, or export REPO_ROOT=/path/to/bfsbased_node_classification_git" >&2
+  exit 1
+fi
 
 # Compute nodes use bare Anaconda python3 — it does NOT include PyTorch.
 # Set BASELINE_CONDA_ENV to any env that has torch + torch_geometric (and this repo's deps).

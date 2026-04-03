@@ -38,7 +38,8 @@ and reviewer-safe.
    ready to be promoted.
 
 5. **New result files go in `logs/` (raw JSONL) and `reports/` (CSV summaries).**  
-   Use a descriptive `--output-tag` so the file name is self-documenting.
+   Use a descriptive `--output-tag` so the file name is self-documenting.  
+   Large cluster sweeps may write under `outputs/<suite>/` (gitignored); keep those separate from canonical frozen artifacts.
 
 6. **Documentation changes are welcome.**  
    If you improve `README.md`, `ANALYSIS_GUIDE.md`, or `REPO_STATUS.md`, keep

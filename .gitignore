@@ -12,6 +12,9 @@ venv/
 # OGB raw downloads (large; reproducible via `ogb` / prepare script)
 data/ogb/
 
+# PyG / torch-geometric disk cache (regenerates on load)
+data/pyg_cache/
+
 # Redundant local bundles (source of truth is logs/code dirs)
 diagnosis_bundle*.tar.gz
 _push_*.tar.gz
@@ -31,6 +34,8 @@ slurm/*.err
 
 # Large / reproducible benchmark outputs (regenerate via suite scripts and Slurm)
 outputs/baseline_comparison/
+outputs/label_budget/
+outputs/graph_noise_robustness/
 logs/djgnn/
 reports/djgnn/
 run_metadata/djgnn/

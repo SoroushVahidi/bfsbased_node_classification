@@ -4,7 +4,9 @@
 **Canonical claims and result files:** [`CANONICAL_CLAIMS.md`](CANONICAL_CLAIMS.md)  
 **Full reproduction guide:** [`scripts/README_REPRODUCE.md`](scripts/README_REPRODUCE.md)  
 **Repository status and classification:** [`REPO_STATUS.md`](REPO_STATUS.md)  
+**Scripts index:** [`scripts/README.md`](scripts/README.md) · **Slurm templates:** [`slurm/README.md`](slurm/README.md)  
 **AI / agent onboarding:** [`AGENTS.md`](AGENTS.md) · [Documentation index](docs/INDEX.md)
+
 This repository contains code and reproducible artifacts for a node-classification method that combines a strong feature-first MLP with **selective graph correction**.
 
 ## Start here
@@ -111,6 +113,14 @@ See [`docs/RESULTS_GUIDE.md`](docs/RESULTS_GUIDE.md) for a reviewer-oriented map
 ## Archived and exploratory material
 
 Older UG-SGC / structural-extension / venue-specific bundles are preserved under `archive/` with provenance intact and explicit non-canonical labeling.
+
+Beyond the high-level layout above, these paths matter for baselines and cluster work:
+
+- `code/baselines/djgnn/` — DJGNN helpers ([`docs/DJGNN_INTEGRATION.md`](docs/DJGNN_INTEGRATION.md))
+- `code/bfsbased_node_classification/baseline_comparison_suite.py` — JSONL comparison driver for large sweeps
+- `scripts/baseline_comparison_wulver/` — Slurm launch scripts and aggregation (see README inside)
+- `slurm/` — batch templates ([`slurm/README.md`](slurm/README.md))
+- `outputs/` — regenerated sweep JSONL (gitignored under `outputs/*/`; not canonical paper artifacts)
 
 If you need those materials, start with:
 - `archive/README.md`

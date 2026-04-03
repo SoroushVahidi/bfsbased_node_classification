@@ -4,6 +4,10 @@ Wulver-scale baseline comparison: internal methods + Begga external baselines.
 
 Writes JSONL (one object per line) under outputs/baseline_comparison/<tag>/per_run/
 Never overwrites canonical reports/final_method_v3_results.csv unless you opt in elsewhere.
+
+Use ``--external-baselines-only`` to run only ``--external-baselines`` after the
+manuscript MLP anchor (skips BASELINE_SGC_V1, V2_MULTIBRANCH, FINAL_V3) for
+feature-first / post-hoc baseline sweeps.
 """
 from __future__ import annotations
 
@@ -39,6 +43,7 @@ _EXTERNAL_DISPLAY = {
     "geom_gcn": "GeomGCN",
     "linkx": "LINKX",
     "acmii_gcn_plus_plus": "ACMII_GCN_PLUSPLUS",
+    "appnp": "APPNP",
     "clp": "CLP",
     "correct_and_smooth": "CORRECT_AND_SMOOTH",
     "cs": "CORRECT_AND_SMOOTH",
@@ -120,9 +125,12 @@ def run_suite(
     baseline_max_epochs: int = 500,
     baseline_patience: int = 100,
     output_jsonl: Optional[str] = None,
+    external_baselines_only: bool = False,
 ) -> str:
     if external_baselines is None:
         external_baselines = list(BEGGA_HETEROPHILY_BASELINE_METHODS)
+    if external_baselines_only and not external_baselines:
+        raise ValueError("external_baselines_only requires a non-empty external_baselines list")
 
     mod = _load_module()
     jsonl_path = output_jsonl or os.path.join(out_dir, "runs.jsonl")
@@ -200,160 +208,46 @@ def run_suite(
                 outf.flush()
                 print(f"  split={sid} MLP test={mlp_test_acc:.4f} val={mlp_val_acc:.4f}")
 
-                # --- BASELINE_SGC_V1 ---
-                t0 = time.perf_counter()
-                try:
-                    _, v1_acc, v1_info = mod.selective_graph_correction_predictclass(
-                        data,
-                        train_np,
-                        val_np,
-                        test_np,
-                        mlp_probs=mlp_probs,
-                        seed=seed,
-                        log_file=None,
-                        write_node_diagnostics=False,
-                    )
-                    v1_time = time.perf_counter() - t0
-                    r = _record_base(
-                        dataset=ds,
-                        split_id=sid,
-                        seed=seed,
-                        method="BASELINE_SGC_V1",
-                        output_tag=output_tag,
-                        mlp_test_acc=mlp_test_acc,
-                    )
-                    r["test_acc"] = float(v1_acc)
-                    r["val_acc"] = None
-                    r["train_acc"] = None
-                    r["delta_vs_mlp"] = float(v1_acc - mlp_test_acc)
-                    r["frac_corrected"] = float(v1_info.get("fraction_test_nodes_uncertain", 0))
-                    r["tau"] = v1_info.get("selected_threshold_high", 0.2)
-                    r["runtime_sec"] = float(v1_time)
-                    r["peak_rss_kb_after"] = _rss_kb()
-                    outf.write(json.dumps(r, default=str) + "\n")
-                    outf.flush()
-                    print(f"    SGC_V1: {v1_acc:.4f}")
-                except Exception as e:
-                    r = _record_base(
-                        dataset=ds,
-                        split_id=sid,
-                        seed=seed,
-                        method="BASELINE_SGC_V1",
-                        output_tag=output_tag,
-                        mlp_test_acc=mlp_test_acc,
-                    )
-                    r["success"] = False
-                    r["error"] = f"{e}\n{traceback.format_exc()}"
-                    outf.write(json.dumps(r, default=str) + "\n")
-                    outf.flush()
-                    print(f"    SGC_V1 FAILED: {e}")
-
-                # --- V2_MULTIBRANCH ---
-                t0 = time.perf_counter()
-                try:
-                    _v2_val, v2_acc, v2_info = v2_multibranch_correction(
-                        data,
-                        train_np,
-                        val_np,
-                        test_np,
-                        mlp_probs=mlp_probs,
-                        seed=seed,
-                        mod=mod,
-                    )
-                    v2_time = time.perf_counter() - t0
-                    r = _record_base(
-                        dataset=ds,
-                        split_id=sid,
-                        seed=seed,
-                        method="V2_MULTIBRANCH",
-                        output_tag=output_tag,
-                        mlp_test_acc=mlp_test_acc,
-                    )
-                    r["test_acc"] = float(v2_acc)
-                    r["delta_vs_mlp"] = float(v2_acc - mlp_test_acc)
-                    r["frac_confident"] = v2_info.get("fraction_test_no_correct")
-                    r["frac_unreliable"] = v2_info.get("fraction_test_feat_branch")
-                    r["frac_corrected"] = v2_info.get("fraction_test_full_branch")
-                    r["tau"] = v2_info.get("selected_threshold")
-                    r["rho"] = v2_info.get("selected_reliability_threshold")
-                    r["runtime_sec"] = float(v2_time)
-                    r["peak_rss_kb_after"] = _rss_kb()
-                    outf.write(json.dumps(r, default=str) + "\n")
-                    outf.flush()
-                    print(f"    V2_MULTI: {v2_acc:.4f}")
-                except Exception as e:
-                    r = _record_base(
-                        dataset=ds,
-                        split_id=sid,
-                        seed=seed,
-                        method="V2_MULTIBRANCH",
-                        output_tag=output_tag,
-                        mlp_test_acc=mlp_test_acc,
-                    )
-                    r["success"] = False
-                    r["error"] = f"{e}\n{traceback.format_exc()}"
-                    outf.write(json.dumps(r, default=str) + "\n")
-                    outf.flush()
-
-                # --- FINAL_V3 ---
-                gates_to_run = [gate_mode] if gate_mode != "both" else ["heuristic", "adaptive"]
-                for gate_name in gates_to_run:
+                if not external_baselines_only:
+                    # --- BASELINE_SGC_V1 ---
                     t0 = time.perf_counter()
                     try:
-                        _, v3_acc, v3_info = final_method_v3(
+                        _, v1_acc, v1_info = mod.selective_graph_correction_predictclass(
                             data,
                             train_np,
                             val_np,
                             test_np,
                             mlp_probs=mlp_probs,
                             seed=seed,
-                            mod=mod,
-                            gate=gate_name,
-                            split_id=sid,
+                            log_file=None,
+                            write_node_diagnostics=False,
                         )
-                        v3_time = time.perf_counter() - t0
-                        ca = v3_info["correction_analysis"]
-                        bf = v3_info["branch_fractions"]
-                        method_name = "FINAL_V3" if gate_mode != "both" else f"FINAL_V3_{gate_name.upper()}"
+                        v1_time = time.perf_counter() - t0
                         r = _record_base(
                             dataset=ds,
                             split_id=sid,
                             seed=seed,
-                            method=method_name,
+                            method="BASELINE_SGC_V1",
                             output_tag=output_tag,
                             mlp_test_acc=mlp_test_acc,
                         )
-                        r["test_acc"] = float(v3_acc)
-                        r["val_acc"] = v3_info.get("val_acc_v3")
-                        r["delta_vs_mlp"] = float(v3_acc - mlp_test_acc)
-                        r["n_helped"] = ca["n_helped"]
-                        r["n_hurt"] = ca["n_hurt"]
-                        r["n_changed"] = ca.get("n_changed")
-                        r["correction_precision"] = ca["correction_precision"]
-                        r["frac_confident"] = bf["confident_keep_mlp"]
-                        r["frac_unreliable"] = bf["uncertain_unreliable_keep_mlp"]
-                        r["frac_corrected"] = bf["uncertain_reliable_corrected"]
-                        r["changed_fraction_test"] = ca.get("changed_fraction_test")
-                        r["harmful_overwrite_rate"] = ca.get("harmful_overwrite_rate_non_neutral")
-                        r["tau"] = v3_info.get("selected_tau")
-                        r["rho"] = v3_info.get("selected_rho")
-                        r["gate_mode"] = v3_info.get("gate_mode")
-                        r["runtime_sec"] = float(v3_time)
-                        r["mlp_runtime_sec"] = float(v3_info.get("runtime_sec", {}).get("mlp", mlp_time))
+                        r["test_acc"] = float(v1_acc)
+                        r["val_acc"] = None
+                        r["train_acc"] = None
+                        r["delta_vs_mlp"] = float(v1_acc - mlp_test_acc)
+                        r["frac_corrected"] = float(v1_info.get("fraction_test_nodes_uncertain", 0))
+                        r["tau"] = v1_info.get("selected_threshold_high", 0.2)
+                        r["runtime_sec"] = float(v1_time)
                         r["peak_rss_kb_after"] = _rss_kb()
-                        r["v3_runtime_breakdown"] = v3_info.get("runtime_sec")
                         outf.write(json.dumps(r, default=str) + "\n")
                         outf.flush()
-                        print(
-                            f"    {method_name}: {v3_acc:.4f} "
-                            f"[helped={ca['n_helped']} hurt={ca['n_hurt']}]"
-                        )
+                        print(f"    SGC_V1: {v1_acc:.4f}")
                     except Exception as e:
                         r = _record_base(
                             dataset=ds,
                             split_id=sid,
                             seed=seed,
-                            method="FINAL_V3",
+                            method="BASELINE_SGC_V1",
                             output_tag=output_tag,
                             mlp_test_acc=mlp_test_acc,
                         )
@@ -361,6 +255,121 @@ def run_suite(
                         r["error"] = f"{e}\n{traceback.format_exc()}"
                         outf.write(json.dumps(r, default=str) + "\n")
                         outf.flush()
+                        print(f"    SGC_V1 FAILED: {e}")
+
+                    # --- V2_MULTIBRANCH ---
+                    t0 = time.perf_counter()
+                    try:
+                        _v2_val, v2_acc, v2_info = v2_multibranch_correction(
+                            data,
+                            train_np,
+                            val_np,
+                            test_np,
+                            mlp_probs=mlp_probs,
+                            seed=seed,
+                            mod=mod,
+                        )
+                        v2_time = time.perf_counter() - t0
+                        r = _record_base(
+                            dataset=ds,
+                            split_id=sid,
+                            seed=seed,
+                            method="V2_MULTIBRANCH",
+                            output_tag=output_tag,
+                            mlp_test_acc=mlp_test_acc,
+                        )
+                        r["test_acc"] = float(v2_acc)
+                        r["delta_vs_mlp"] = float(v2_acc - mlp_test_acc)
+                        r["frac_confident"] = v2_info.get("fraction_test_no_correct")
+                        r["frac_unreliable"] = v2_info.get("fraction_test_feat_branch")
+                        r["frac_corrected"] = v2_info.get("fraction_test_full_branch")
+                        r["tau"] = v2_info.get("selected_threshold")
+                        r["rho"] = v2_info.get("selected_reliability_threshold")
+                        r["runtime_sec"] = float(v2_time)
+                        r["peak_rss_kb_after"] = _rss_kb()
+                        outf.write(json.dumps(r, default=str) + "\n")
+                        outf.flush()
+                        print(f"    V2_MULTI: {v2_acc:.4f}")
+                    except Exception as e:
+                        r = _record_base(
+                            dataset=ds,
+                            split_id=sid,
+                            seed=seed,
+                            method="V2_MULTIBRANCH",
+                            output_tag=output_tag,
+                            mlp_test_acc=mlp_test_acc,
+                        )
+                        r["success"] = False
+                        r["error"] = f"{e}\n{traceback.format_exc()}"
+                        outf.write(json.dumps(r, default=str) + "\n")
+                        outf.flush()
+
+                    # --- FINAL_V3 ---
+                    gates_to_run = [gate_mode] if gate_mode != "both" else ["heuristic", "adaptive"]
+                    for gate_name in gates_to_run:
+                        t0 = time.perf_counter()
+                        try:
+                            _, v3_acc, v3_info = final_method_v3(
+                                data,
+                                train_np,
+                                val_np,
+                                test_np,
+                                mlp_probs=mlp_probs,
+                                seed=seed,
+                                mod=mod,
+                                gate=gate_name,
+                                split_id=sid,
+                            )
+                            v3_time = time.perf_counter() - t0
+                            ca = v3_info["correction_analysis"]
+                            bf = v3_info["branch_fractions"]
+                            method_name = "FINAL_V3" if gate_mode != "both" else f"FINAL_V3_{gate_name.upper()}"
+                            r = _record_base(
+                                dataset=ds,
+                                split_id=sid,
+                                seed=seed,
+                                method=method_name,
+                                output_tag=output_tag,
+                                mlp_test_acc=mlp_test_acc,
+                            )
+                            r["test_acc"] = float(v3_acc)
+                            r["val_acc"] = v3_info.get("val_acc_v3")
+                            r["delta_vs_mlp"] = float(v3_acc - mlp_test_acc)
+                            r["n_helped"] = ca["n_helped"]
+                            r["n_hurt"] = ca["n_hurt"]
+                            r["n_changed"] = ca.get("n_changed")
+                            r["correction_precision"] = ca["correction_precision"]
+                            r["frac_confident"] = bf["confident_keep_mlp"]
+                            r["frac_unreliable"] = bf["uncertain_unreliable_keep_mlp"]
+                            r["frac_corrected"] = bf["uncertain_reliable_corrected"]
+                            r["changed_fraction_test"] = ca.get("changed_fraction_test")
+                            r["harmful_overwrite_rate"] = ca.get("harmful_overwrite_rate_non_neutral")
+                            r["tau"] = v3_info.get("selected_tau")
+                            r["rho"] = v3_info.get("selected_rho")
+                            r["gate_mode"] = v3_info.get("gate_mode")
+                            r["runtime_sec"] = float(v3_time)
+                            r["mlp_runtime_sec"] = float(v3_info.get("runtime_sec", {}).get("mlp", mlp_time))
+                            r["peak_rss_kb_after"] = _rss_kb()
+                            r["v3_runtime_breakdown"] = v3_info.get("runtime_sec")
+                            outf.write(json.dumps(r, default=str) + "\n")
+                            outf.flush()
+                            print(
+                                f"    {method_name}: {v3_acc:.4f} "
+                                f"[helped={ca['n_helped']} hurt={ca['n_hurt']}]"
+                            )
+                        except Exception as e:
+                            r = _record_base(
+                                dataset=ds,
+                                split_id=sid,
+                                seed=seed,
+                                method="FINAL_V3",
+                                output_tag=output_tag,
+                                mlp_test_acc=mlp_test_acc,
+                            )
+                            r["success"] = False
+                            r["error"] = f"{e}\n{traceback.format_exc()}"
+                            outf.write(json.dumps(r, default=str) + "\n")
+                            outf.flush()
 
                 # --- External baselines (same MLP seed; independent training) ---
                 for bname in external_baselines:
@@ -441,7 +450,15 @@ def main() -> None:
         default=None,
         help=(
             "Keys passed to run_baseline. Default: Begga heterophily set. "
-            "Also supported: " + ", ".join(PAPER_GRAPH_BASELINE_METHODS)
+            "Also supported: " + ", ".join(PAPER_GRAPH_BASELINE_METHODS) + ", appnp"
+        ),
+    )
+    parser.add_argument(
+        "--external-baselines-only",
+        action="store_true",
+        help=(
+            "After MLP_ONLY, skip BASELINE_SGC_V1 / V2_MULTIBRANCH / FINAL_V3; "
+            "only run --external-baselines (requires explicit baseline list)."
         ),
     )
     parser.add_argument("--dry-run", action="store_true")
@@ -463,6 +480,7 @@ def main() -> None:
         print("  splits:", args.splits)
         print("  tag:", args.output_tag)
         print("  external:", args.external_baselines or list(BEGGA_HETEROPHILY_BASELINE_METHODS))
+        print("  external_baselines_only:", args.external_baselines_only)
         return
 
     os.makedirs(out_dir, exist_ok=True)
@@ -479,6 +497,7 @@ def main() -> None:
         baseline_max_epochs=args.baseline_max_epochs,
         baseline_patience=args.baseline_patience,
         output_jsonl=args.output_jsonl,
+        external_baselines_only=bool(args.external_baselines_only),
     )
     print(f"\nWrote: {path}")
 
