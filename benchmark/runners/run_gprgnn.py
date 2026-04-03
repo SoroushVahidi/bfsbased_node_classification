@@ -7,7 +7,6 @@ import os
 import argparse
 import json
 import time
-import math
 
 _BENCH_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _REPO_ROOT = os.path.dirname(_BENCH_DIR)

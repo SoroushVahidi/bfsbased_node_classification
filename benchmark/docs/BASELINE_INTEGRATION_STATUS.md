@@ -29,7 +29,7 @@ This document tracks the integration status of all 8 GNN baselines for the node 
 - **Status:** Wrapped (inline reimplementation)
 - **What was done:** Implemented initial residual connections and identity mapping. beta = log(theta/l + 1) per layer. W^(l) = (1-beta)*I + beta*W_tilde.
 - **Architecture:** Linear embedding → num_layers GCNII convolutions → Linear classifier
-- **Config:** Default 64 layers (set via `num_layers` in `gcnii.yaml`; config file takes precedence over the code default of 16).
+- **Config:** 64 layers as set in `gcnii.yaml` (`num_layers: 64`). Reduce if memory is constrained on large datasets.
 
 ### H2GCN (Beyond Homophily in Graph Neural Networks)
 - **Paper:** Zhu et al., NeurIPS 2020
