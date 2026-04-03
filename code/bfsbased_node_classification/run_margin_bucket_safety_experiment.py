@@ -13,7 +13,6 @@ Also supports a targeted structural extension comparison via:
 from __future__ import annotations
 
 import argparse
-import csv
 import importlib.util
 import os
 import sys
