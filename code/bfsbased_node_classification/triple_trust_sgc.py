@@ -115,11 +115,18 @@ def _compute_prototypes(
 
 def _feature_similarity_from_prototypes(x_np: np.ndarray, prototypes: np.ndarray, eps: float) -> np.ndarray:
     x_norm = np.linalg.norm(x_np, axis=1, keepdims=True) + eps
-    p_norm = np.linalg.norm(prototypes, axis=1, keepdims=True).T + eps
-    sim = (x_np @ prototypes.T) / (x_norm * p_norm)
-    return np.clip((sim + 1.0) / 2.0, 0.0, 1.0)
+    proto_norm = np.linalg.norm(prototypes, axis=1)
+    valid_proto = proto_norm > eps
 
+    transformed = np.zeros((x_np.shape[0], prototypes.shape[0]), dtype=np.float64)
+    if not np.any(valid_proto):
+        return transformed
 
+    valid_prototypes = prototypes[valid_proto]
+    valid_p_norm = proto_norm[valid_proto][np.newaxis, :]
+    sim = (x_np @ valid_prototypes.T) / (x_norm * valid_p_norm)
+    transformed[:, valid_proto] = np.clip((sim + 1.0) / 2.0, 0.0, 1.0)
+    return transformed
 def _compute_trust_neighbor_and_labelability(
     neighbors: list[list[int]],
     yhat: np.ndarray,
