@@ -5,6 +5,12 @@
 **Full reproduction guide:** [`scripts/README_REPRODUCE.md`](scripts/README_REPRODUCE.md)  
 **Repository status and classification:** [`REPO_STATUS.md`](REPO_STATUS.md)
 
+**Summary.** Code and manuscript-artifact repository for *Uncertainty-Gated Selective Graph Correction for Node Classification*: feature-first MLP baseline, selective graph correction, frozen FINAL_V3 package, and baseline/structural-upgrade artifacts.
+
+**Preprints**
+- **SSRN:** https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6462436
+- **arXiv:** https://arxiv.org/abs/2512.22221
+
 > **What this is.** A frozen evidence package for a research paper proposing a
 > conservative, MLP-first graph correction strategy. The method identifies
 > low-reliability nodes via an MLP confidence score and applies selective

@@ -13,7 +13,7 @@ This directory contains the implementation code for the research paper.
 | `analyze_final_v3_regimes.py` | Regime analysis helper |
 | `build_final_v3_regime_analysis.py` | Regime analysis builder |
 | `bfsbased-full-investigate-homophil.py` | Core module (all method variants) |
-| `standard_node_baselines.py` | GCN/APPNP training helpers |
+| `standard_node_baselines.py` | GCN/APPNP + external baselines (incl. Begga-style heterophily set; see below) |
 | `make_splits.py` | Split generation utility |
 
 ## Legacy / exploratory scripts (kept for provenance)
@@ -49,6 +49,7 @@ Additional legacy and exploratory scripts have been moved to
 | Bucket-safety diagnostics (exploratory) | `archive/exploratory_code/run_margin_bucket_safety_experiment.py` |
 | Resubmission analysis | `archive/exploratory_code/analyze_resubmission_results.py` |
 | Grouped-run merge helper | `archive/exploratory_code/merge_resubmission_runs.py` |
+| Begga heterophily baselines (H2GCN, GCNII, Geom-GCN, LINKX, ACM-style `acmii_gcn_plus_plus`) | `standard_node_baselines.py` · [`docs/BEGGA_HETEROPHILY_BASELINES.md`](../../docs/BEGGA_HETEROPHILY_BASELINES.md) |
 
 ## Notes
 
@@ -64,7 +65,7 @@ Additional legacy and exploratory scripts have been moved to
   scripts.
 - Some older files reflect earlier heterophily-oriented wording and should not
   be treated as the current paper framing.
-- `FINAL_V3` remains the canonical frozen PRL method; experimental variants
+- `FINAL_V3` remains the canonical frozen method; experimental variants
   (`TRIPLE_TRUST_SGC`, optional low-confidence structural term) are
   supplementary and opt-in.
 - `FINAL_V3` includes an optional local graph-reliability gate in
@@ -76,11 +77,13 @@ Additional legacy and exploratory scripts have been moved to
   Canonical defaults are unchanged unless these options are enabled.
 - `GPRGNN` is included as an **external baseline** for comparison only. It is
   not part of the canonical `FINAL_V3` package.
-- `H2GCN` is included as an **external baseline** for comparison only. Its
-  in-repo implementation is a compact PyTorch adaptation aligned with
-  https://github.com/GitEventhandler/H2GCN-PyTorch (and conceptually with the
-  original H2GCN work), while reusing this repository's split/logging protocol.
-  It is not part of the canonical `FINAL_V3` package.
+- `H2GCN` is included as an **external baseline** for comparison only. Official
+  reference: https://github.com/GemsLab/H2GCN. The in-repo code is a compact
+  PyTorch adaptation (see also https://github.com/GitEventhandler/H2GCN-PyTorch)
+  using this repository's split/logging protocol. **GCNII**, **Geom-GCN**
+  (compact), **LINKX**, and **`acmii_gcn_plus_plus`** (ACM-GNN-style mixer) are
+  integrated the same way; see [`docs/BEGGA_HETEROPHILY_BASELINES.md`](../../docs/BEGGA_HETEROPHILY_BASELINES.md).
+  None of these are part of the canonical `FINAL_V3` package.
 - `FSGNN` is included as an **external baseline** for comparison only. It is
   not part of the canonical `FINAL_V3` package.
 - `PairNorm` is included here as **DeepGCN+PairNorm** external baseline for

@@ -2,7 +2,7 @@
 
 ### Overview
 
-This is a Python research codebase for the paper "Uncertainty-Gated Selective Graph Correction for Node Classification." The **submission method** is **FINAL_V3** (reliability-gated selective graph correction on top of an MLP). The repo also retains the original **selective graph correction (SGC v1)** path via `manuscript_runner.py` for baselines and historical logs. There are no web servers, databases, or Docker services — all work is Python script execution.
+This is a Python research codebase for the paper "Uncertainty-Gated Selective Graph Correction for Node Classification." Public links: [SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6462436), [arXiv](https://arxiv.org/abs/2512.22221). The **canonical method** is **FINAL_V3** (reliability-gated selective graph correction on top of an MLP). The repo also retains the original **selective graph correction (SGC v1)** path via `manuscript_runner.py` for baselines and historical logs. There are no web servers, databases, or Docker services — all work is Python script execution.
 
 ### Key dependencies
 

@@ -5,6 +5,7 @@ __pycache__/
 .Python
 *.so
 .venv/
+.venv_begga/
 venv/
 .env
 
@@ -20,3 +21,14 @@ code/bfsbased_node_classification/diagnosis/
 .idea/
 .vscode/
 *.swp
+
+# Slurm stdout/stderr (cluster-local; regenerate by re-running jobs)
+slurm/*.out
+slurm/*.err
+
+# Large / reproducible benchmark outputs (regenerate via suite scripts and Slurm)
+outputs/baseline_comparison/
+logs/djgnn/
+reports/djgnn/
+run_metadata/djgnn/
+tables/djgnn/
