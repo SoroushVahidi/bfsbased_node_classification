@@ -63,7 +63,7 @@ bash scripts/run_all_selective_correction_results.sh
 | Category | Location | Description |
 |----------|----------|-------------|
 | **Canonical / frozen** | `reports/final_method_v3_results.csv`, `tables/main_results_selective_correction.*`, `figures/graphical_abstract_selective_correction_v3.*` | Do not edit; reproduce only from the frozen CSV |
-| **Legacy / supplementary** | `logs/*manuscript_final_validation*`, `archive/legacy_venue_specific/tables_prl_final_additions/`, `archive/legacy_venue_specific/reports_prl_final_additions/`, `archive/legacy_venue_specific/results_prl/` | UG-SGC line; useful provenance but not the paper's main evidence |
+| **Legacy / supplementary** | `archive/legacy_logs/`, `archive/legacy_venue_specific/tables_prl_final_additions/`, `archive/legacy_venue_specific/reports_prl_final_additions/`, `archive/legacy_venue_specific/results_prl/` | UG-SGC line; useful provenance but not the paper's main evidence |
 | **Exploratory / partial** | `archive/legacy_venue_specific/logs_prl_resubmission/`, `archive/legacy_venue_specific/tables_prl_resubmission/`, `archive/legacy_venue_specific/reports_resubmission_protocols/` | UG-SGC-S structural extension; some runs may still be incomplete |
 | **Historical / superseded** | `reports/archive/` | Older exports; kept for provenance only |
 
@@ -91,7 +91,6 @@ bash scripts/run_all_selective_correction_results.sh
 ### GCN baseline (Table 1 comparison row)
 
 - Log: `logs/gcn_runs_gcn_table1.jsonl`
-- Summary CSV: `reports/gcn_results_gcn_table1.csv`
 - Runner: `code/bfsbased_node_classification/gcn_baseline_runner.py`
 
 ### Threshold sensitivity (supplementary)
@@ -108,7 +107,7 @@ bash scripts/run_all_selective_correction_results.sh
    The canonical results are in `reports/final_method_v3_results.csv` and
    `tables/main_results_selective_correction.*`, not in
    `archive/legacy_venue_specific/tables_prl_final_additions/` or
-   `logs/manuscript_*`.
+   `archive/legacy_logs/`.
 
 2. **Confusing archived threshold-sensitivity with FINAL_V3 outputs.**  
    `archive/legacy_venue_specific/results_prl/` contains a threshold-sensitivity cross-run package from the
@@ -136,8 +135,8 @@ bash scripts/run_all_selective_correction_results.sh
 ## Read this first (ordered reading list)
 
 1. `README.md` — high-level overview and quick start
-2. `REPO_STATUS.md` — what is canonical, legacy, and exploratory
-3. `reports/final_method_v3_analysis.md` — frozen submission analysis
-4. `tables/main_results_selective_correction.md` — main benchmark table
-5. `reports/safety_analysis.md` — harmful-split analysis
-6. `README_MANUSCRIPT_ARTIFACTS.md` — full manuscript artifact index
+2. `CANONICAL_CLAIMS.md` — exact claims, evidence files, and what is excluded
+3. `REPO_STATUS.md` — what is canonical, legacy, and exploratory
+4. `reports/final_method_v3_analysis.md` — frozen submission analysis
+5. `tables/main_results_selective_correction.md` — main benchmark table
+6. `reports/safety_analysis.md` — harmful-split analysis
