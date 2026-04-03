@@ -247,8 +247,8 @@ def run_bucket_safety(
                     precision = float(bene_n / changed_n)
                     harm_rate = float(harm_n / changed_n)
                 else:
-                    precision = None
-                    harm_rate = None
+                    precision = 0.0
+                    harm_rate = 0.0
                 per_bucket_rows.append(
                     {
                         "dataset": ds,
