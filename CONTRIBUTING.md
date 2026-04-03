@@ -2,8 +2,7 @@
 
 Thank you for your interest in this repository.
 
-This is primarily a **frozen evidence package** for a Pattern Recognition
-Letters submission, not an actively developed library. Contributions are
+This is primarily a **frozen evidence package** for a research paper submission, not an actively developed library. Contributions are
 welcome, but please follow these guidelines to keep the repository organized
 and reviewer-safe.
 
@@ -12,10 +11,10 @@ and reviewer-safe.
 ## Ground rules
 
 1. **Do not modify canonical frozen files.**  
-   The following files are frozen evidence for the PRL submission.  
+   The following files are frozen evidence for the research paper submission.  
    Do not edit their contents:
    - `reports/final_method_v3_results.csv`
-   - `tables/main_results_prl.{md,csv}`
+   - `tables/main_results_selective_correction.{md,csv}`
    - All files in `reports/archive/`
 
 2. **Never overwrite canonical outputs when re-running experiments.**  

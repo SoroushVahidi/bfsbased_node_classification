@@ -1,6 +1,6 @@
-# Reproducing PRL evidence (FINAL_V3)
+# Reproducing canonical evidence (FINAL_V3)
 
-This repository is the **evidence package** for a Pattern Recognition Letters submission. The canonical numerical results are **frozen** in `reports/final_method_v3_results.csv` (**10 GEO-GCN splits** per dataset, indices 0–9).
+This repository is the **evidence package** for a research paper submission. The canonical numerical results are **frozen** in `reports/final_method_v3_results.csv` (**10 GEO-GCN splits** per dataset, indices 0–9).
 
 > ⚠️ **Safety rule:** Always pass `--output-tag <name>` when running any
 > experiment script. Without a tag, some scripts write to the default canonical
@@ -12,16 +12,16 @@ This repository is the **evidence package** for a Pattern Recognition Letters su
 From the repository root:
 
 ```bash
-bash scripts/run_all_prl_results.sh
+bash scripts/run_all_selective_correction_results.sh
 ```
 
 This regenerates:
 
-- `tables/main_results_prl.md` and `tables/main_results_prl.csv`
-- `tables/experimental_setup_prl.md`, `tables/ablation_prl.md`, `tables/sensitivity_prl.md` (and `.csv` partners)
-- `figures/prl_graphical_abstract_v3.png`
-- `figures/prl_graphical_abstract_v3.pdf`
-- `figures/prl_graphical_abstract_v3.svg`
+- `tables/main_results_selective_correction.md` and `tables/main_results_selective_correction.csv`
+- `tables/experimental_setup_selective_correction.md`, `tables/ablation_selective_correction.md`, `tables/sensitivity_selective_correction.md` (and `.csv` partners)
+- `figures/graphical_abstract_selective_correction_v3.png`
+- `figures/graphical_abstract_selective_correction_v3.pdf`
+- `figures/graphical_abstract_selective_correction_v3.svg`
 - `figures/correction_rate_vs_homophily.png`
 - `figures/safety_comparison.png`
 - `figures/reliability_vs_accuracy.png`
@@ -44,8 +44,8 @@ splits for the main benchmark and harmful-split counts.
 If you edit the archived per-split export, regenerate the canonical log before refreshing tables:
 
 ```bash
-python3 scripts/prl_final_additions/rebuild_final_v3_results_10split.py
-bash scripts/run_all_prl_results.sh
+python3 scripts/build_artifacts/rebuild_final_v3_results_10split.py
+bash scripts/run_all_selective_correction_results.sh
 ```
 
 ## If you must re-evaluate from scratch (heavy)
@@ -78,23 +78,23 @@ python3 code/bfsbased_node_classification/run_final_evaluation.py \
   --output-tag scratch
 ```
 
-## Optional: broader PRL artifact bundle
+## Optional: broader artifact bundle
 
-Additional tables/figures derived from `logs/` and `prl_final_additions/`:
+Additional tables/figures derived from `logs/` and `scripts/build_artifacts/`:
 
 ```bash
-python3 scripts/prl_final_additions/build_all_prl_artifacts.py
+python3 scripts/build_artifacts/build_all_artifacts.py
 ```
 
-This runs several plotting/table scripts and mirrors `prl_final_additions/` into `tables/prl_final_additions/` and `figures/prl_final_additions/`. Expect **tens of seconds** if Matplotlib is warm.
+This runs several plotting/table scripts. Expect **tens of seconds** if Matplotlib is warm.
 
 ## Full Python stack
 
-For training runs (not required for `run_all_prl_results.sh`):
+For training runs (not required for `run_all_selective_correction_results.sh`):
 
 ```bash
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 pip install torch_geometric numpy networkx sortedcontainers matplotlib
 ```
 
-See also the root [README.md](../README.md) and [README_PRL_MANUSCRIPT.md](../README_PRL_MANUSCRIPT.md).
+See also the root [README.md](../README.md) and [README_MANUSCRIPT_ARTIFACTS.md](../README_MANUSCRIPT_ARTIFACTS.md).

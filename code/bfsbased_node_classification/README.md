@@ -1,6 +1,6 @@
 # Node-classification code directory
 
-This directory contains the main implementation code used by the current PRL
+This directory contains the main implementation code used by the current research paper
 repository workflow. It now includes both the frozen submission package and the
 newer resubmission / structural-extension line.
 
@@ -24,14 +24,14 @@ on `main`.
 | Core implementation | `bfsbased-full-investigate-homophil.py` |
 | Original manuscript driver | `manuscript_runner.py` |
 
-### 3. Structural extension / PRL resubmission package
+### 3. Structural extension / resubmission package
 
 | Artifact | Path |
 |----------|------|
-| Focused resubmission runner | `prl_resubmission_runner.py` |
+| Focused resubmission runner | `resubmission_runner.py` |
 | Compact GCN/APPNP baselines | `standard_node_baselines.py` |
-| Resubmission analysis | `analyze_prl_resubmission.py` |
-| Grouped-run merge helper | `merge_prl_resubmission_runs.py` |
+| Resubmission analysis | `analyze_resubmission_results.py` |
+| Grouped-run merge helper | `merge_resubmission_runs.py` |
 
 ## Notes
 
@@ -45,7 +45,7 @@ on `main`.
 For the manuscript-facing map, prefer:
 
 - repository root `README.md`
-- `README_PRL_MANUSCRIPT.md`
-- `reports/prl_resubmission/`
+- `README_MANUSCRIPT_ARTIFACTS.md`
+- `archive/legacy_venue_specific/reports_resubmission_protocols/`
 
 License: [MIT](../../LICENSE)

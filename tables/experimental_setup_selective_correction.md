@@ -1,4 +1,4 @@
-# Experimental setup (PRL main benchmark)
+# Experimental setup (main benchmark)
 
 Dataset statistics and edge homophily are merged from `logs/manuscript_regime_analysis_final_validation_main.csv` and, where needed, `logs/regime_analysis_manuscript_final_validation_job2.csv` (PubMed homophily), using the same homophily column as `figures/correction_rate_vs_homophily.png`.
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Analyze focused PRL-resubmission runs.
+Analyze resubmission runs.
 
 Outputs:
-  - tables/prl_resubmission/*.csv
-  - reports/prl_resubmission/*.md
+  - tables/resubmission_analysis/*.csv
+  - reports/resubmission_analysis/*.md
   - protocol summary JSON/MD for manuscript rewriting
 """
 from __future__ import annotations
@@ -106,8 +106,8 @@ def analyze(runs_path: str, output_tag: str) -> Dict[str, str]:
     for r in ok:
         by_ds_method[r["dataset"]][r["method"]].append(r)
 
-    tables_dir = os.path.join(REPO_ROOT, "tables", "prl_resubmission")
-    reports_dir = os.path.join(REPO_ROOT, "reports", "prl_resubmission")
+    tables_dir = os.path.join(REPO_ROOT, "tables", "resubmission_analysis")
+    reports_dir = os.path.join(REPO_ROOT, "reports", "resubmission_analysis")
     os.makedirs(tables_dir, exist_ok=True)
     os.makedirs(reports_dir, exist_ok=True)
 
@@ -230,7 +230,7 @@ def analyze(runs_path: str, output_tag: str) -> Dict[str, str]:
     # 4) Method specification / claims-facing markdown
     summary_md = os.path.join(reports_dir, f"summary_{output_tag}.md")
     with open(summary_md, "w", encoding="utf-8") as f:
-        f.write("# PRL resubmission experiment summary\n\n")
+        f.write("# Resubmission experiment summary\n\n")
         f.write("## Datasets\n\n")
         for ds in datasets:
             f.write(f"- `{ds}`\n")
@@ -246,7 +246,7 @@ def analyze(runs_path: str, output_tag: str) -> Dict[str, str]:
 
     claims_md = os.path.join(reports_dir, f"claims_and_risks_{output_tag}.md")
     with open(claims_md, "w", encoding="utf-8") as f:
-        f.write("# Claims and risks for PRL rewrite\n\n")
+        f.write("# Claims and risks for manuscript rewrite\n\n")
         f.write("## Supportable if results are favorable\n\n")
         f.write("- Selective graph correction can be compared against a small but standard graph-baseline set.\n")
         f.write("- The uncertainty gate and score terms can now be examined with real controlled variants.\n")
@@ -267,7 +267,7 @@ def analyze(runs_path: str, output_tag: str) -> Dict[str, str]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Analyze PRL resubmission runs.")
+    parser = argparse.ArgumentParser(description="Analyze resubmission runs.")
     parser.add_argument("--runs-file", required=True)
     parser.add_argument("--output-tag", required=True)
     args = parser.parse_args()

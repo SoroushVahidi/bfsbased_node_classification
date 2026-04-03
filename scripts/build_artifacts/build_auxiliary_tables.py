@@ -3,9 +3,9 @@
 Manuscript-facing auxiliary tables (no training).
 
 Writes:
-  tables/experimental_setup_prl.{csv,md}
-  tables/ablation_prl.{csv,md}
-  tables/sensitivity_prl.{csv,md}
+  tables/experimental_setup_selective_correction.{csv,md}
+  tables/ablation_selective_correction.{csv,md}
+  tables/sensitivity_selective_correction.{csv,md}
 
 Experimental setup: dataset stats + homophily from logs/manuscript_regime_analysis_final_validation_main.csv.
 
@@ -101,12 +101,12 @@ def write_experimental_setup(regime: dict[str, dict[str, str]]) -> None:
         "split_protocol",
         "compared_methods",
     ]
-    csv_path = TBL / "experimental_setup_prl.csv"
-    md_path = TBL / "experimental_setup_prl.md"
+    csv_path = TBL / "experimental_setup_selective_correction.csv"
+    md_path = TBL / "experimental_setup_selective_correction.md"
     TBL.mkdir(parents=True, exist_ok=True)
 
     lines_md = [
-        "# Experimental setup (PRL main benchmark)",
+        "# Experimental setup (main benchmark)",
         "",
         "Dataset statistics and edge homophily are merged from "
         "`logs/manuscript_regime_analysis_final_validation_main.csv` and, where needed, "
@@ -140,8 +140,8 @@ def write_experimental_setup(regime: dict[str, dict[str, str]]) -> None:
 def write_ablation(rows: list[dict]) -> None:
     dpp = mean_delta_v3(rows, ABLATION_SUBSET)
     mean3 = float(np.mean(list(dpp.values())))
-    csv_path = TBL / "ablation_prl.csv"
-    md_path = TBL / "ablation_prl.md"
+    csv_path = TBL / "ablation_selective_correction.csv"
+    md_path = TBL / "ablation_selective_correction.md"
     header = [
         "variant",
         "chameleon_delta_pp",
@@ -151,7 +151,7 @@ def write_ablation(rows: list[dict]) -> None:
         "source",
     ]
     lines_md = [
-        "# Ablation-style variants (PRL supplementary)",
+        "# Ablation-style variants (supplementary)",
         "",
         "**FINAL_V3** row: mean test Δ vs MLP (percentage points) over **10 splits**, recomputed from "
         "`reports/final_method_v3_results.csv` for Chameleon, Cora, and Texas.",
@@ -192,8 +192,8 @@ def write_ablation(rows: list[dict]) -> None:
 
 
 def write_sensitivity() -> None:
-    csv_path = TBL / "sensitivity_prl.csv"
-    md_path = TBL / "sensitivity_prl.md"
+    csv_path = TBL / "sensitivity_selective_correction.csv"
+    md_path = TBL / "sensitivity_selective_correction.md"
     header = [
         "rho",
         "chameleon_delta_pp",
@@ -205,7 +205,7 @@ def write_sensitivity() -> None:
     ]
     src = "archived final_tables_prl.md Table 8 (3-split ρ grid; historical)"
     lines_md = [
-        "# Reliability threshold ρ — sensitivity (PRL supplementary)",
+        "# Reliability threshold ρ — sensitivity (supplementary)",
         "",
         "Mean test Δ vs MLP (percentage points) on **Chameleon, Cora, Texas** when ρ is fixed in a grid "
         "and other hyperparameters follow the historical evaluation protocol.",

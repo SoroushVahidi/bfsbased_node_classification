@@ -1,4 +1,4 @@
-# Ablation-style variants (PRL supplementary)
+# Ablation-style variants (supplementary)
 
 **FINAL_V3** row: mean test Δ vs MLP (percentage points) over **10 splits**, recomputed from `reports/final_method_v3_results.csv` for Chameleon, Cora, and Texas.
 
