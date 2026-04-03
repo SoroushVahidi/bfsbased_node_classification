@@ -230,6 +230,12 @@ def triple_trust_sgc_predictclass(
     """
     _ = seed  # deterministic behavior comes from caller-set seeds in current runners.
 
+    if mod is None:
+        raise ValueError(
+            "mod must be provided; it is required for compute_mlp_margin and related utilities. "
+            "Pass the manuscript module as mod=, and optionally supply pre-computed mlp_probs."
+        )
+
     y_true = data.y.detach().cpu().numpy().astype(np.int64)
     n_nodes = int(data.num_nodes)
     n_classes = int(max(int(y_true.max()) + 1, int(data.y.max().item()) + 1))
@@ -242,11 +248,6 @@ def triple_trust_sgc_predictclass(
     pseudo_mask = ~train_mask
 
     if mlp_probs is None:
-        if mod is None:
-            raise ValueError(
-                "mod must be provided when mlp_probs is None; "
-                "pass the manuscript module as mod=, or supply pre-computed mlp_probs."
-            )
         mlp_probs, _ = mod.train_mlp_and_predict(
             data,
             train_np,
@@ -254,10 +255,6 @@ def triple_trust_sgc_predictclass(
             log_file=None,
         )
 
-    if mod is None:
-        raise ValueError(
-            "mod must be provided; it is required for compute_mlp_margin and related utilities."
-        )
     mlp_info = mod.compute_mlp_margin(mlp_probs)
     mlp_probs_np = mlp_info["mlp_probs_np"]
     mlp_pred = mlp_info["mlp_pred_all"]
