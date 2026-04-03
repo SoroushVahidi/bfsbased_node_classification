@@ -41,6 +41,36 @@ python3 scripts/baseline_comparison_wulver/aggregate_and_report.py \
 
 This writes `summaries/mean_std_by_method_dataset.csv` and `BASELINE_COMPARISON_REPORT.md`.
 
+## Label-budget sweep (scarce labels vs FINAL_V3)
+
+Subsamples **only** the official training nodes (val/test unchanged). Fractions **0.1, 0.2, 0.4, 1.0**; seeds are deterministic per `(split_id, train_fraction)`.
+
+```bash
+./scripts/baseline_comparison_wulver/launch_label_budget_wulver.sh
+```
+
+- **Driver:** `code/bfsbased_node_classification/label_budget_sweep.py`
+- **Slurm:** `slurm/label_budget_sweep_array.sbatch` (20 tasks: 5 datasets × 4 fractions, **72G** RAM, **56h**, CPU-only)
+- **Outputs:** `outputs/label_budget/<TAG>/per_run/runs_<dataset>_p{10,20,40,100}.jsonl`
+- **Aggregate:**
+
+```bash
+python3 scripts/baseline_comparison_wulver/aggregate_label_budget.py \
+  --glob "outputs/label_budget/<TAG>/per_run/runs_*.jsonl" \
+  --output-dir "outputs/label_budget/<TAG>"
+```
+
+## Feature-first / post-hoc baselines (Applied Intelligence competitors)
+
+SGC (Wu), Correct & Smooth, CLP, GraphSAGE, APPNP — **MLP anchor** + these methods only (skips BASELINE_SGC_V1, V2, FINAL_V3 in-suite to save time vs the full comparison job).
+
+```bash
+./scripts/baseline_comparison_wulver/launch_feature_posthoc_wulver.sh
+# Optional: export FEATURE_POSTHOC_OUTPUT_TAG=my_tag
+```
+
+Slurm: `slurm/baseline_comparison_feature_posthoc_array.sbatch` (9 datasets, **64G** RAM, 48h, `general` / `standard` / `ikoutis`). Aggregation uses the same `aggregate_and_report.py` as above.
+
 ## Driver (local / debug)
 
 ```bash
@@ -48,6 +78,15 @@ python3 code/bfsbased_node_classification/baseline_comparison_suite.py \
   --datasets texas \
   --splits 0 \
   --output-tag debug_cmp \
+  --dry-run
+```
+
+```bash
+python3 code/bfsbased_node_classification/baseline_comparison_suite.py \
+  --datasets cora --splits 0 \
+  --output-tag debug_featph \
+  --external-baselines-only \
+  --external-baselines sgc correct_and_smooth clp graphsage appnp \
   --dry-run
 ```
 
