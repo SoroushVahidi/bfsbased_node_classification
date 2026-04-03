@@ -105,8 +105,9 @@ def compute_buckets(margins: np.ndarray) -> Tuple[np.ndarray, float, float]:
     bucket_ids : integer array (0=low, 1=medium, 2=high) per test node.
     q33, q67   : the 33rd and 67th percentile cut-points.
     """
-    q33 = float(np.percentile(margins, 100 / 3))
-    q67 = float(np.percentile(margins, 200 / 3))
+    # Use exact thirds: 33.333...% and 66.666...%
+    q33, q67 = np.percentile(margins, [100.0 * 1 / 3, 100.0 * 2 / 3])
+    q33, q67 = float(q33), float(q67)
     bucket_ids = np.where(margins < q33, 0, np.where(margins < q67, 1, 2))
     return bucket_ids.astype(np.int64), q33, q67
 
@@ -163,8 +164,12 @@ def _bucket_accuracy_metrics(
         hurt = changed & ~method_correct & mlp_correct
         n_helped = int(helped.sum())
         n_hurt = int(hurt.sum())
-        # Among changed nodes, fraction that were net improvements (helped / (helped+hurt))
-        correction_precision = n_helped / max(n_helped + n_hurt, 1)
+        # Among changed nodes that changed correctness, fraction that improved.
+        # Undefined (nan) when all changes were neutral (no help or hurt).
+        if n_helped + n_hurt > 0:
+            correction_precision = n_helped / (n_helped + n_hurt)
+        else:
+            correction_precision = float("nan")
         # Among changed nodes, fraction that hurt accuracy
         hurt_rate = n_hurt / changed_count
     else:
@@ -273,8 +278,8 @@ def _run_one_split(
     )
     gcn_time = time.perf_counter() - t0
 
-    # GCN probs are for all nodes
-    gcn_preds_test = gcn_result.probs[test_idx].argmax(dim=1).numpy().astype(np.int64)
+    # GCN probs are for all nodes (returned as CPU tensor by run_baseline)
+    gcn_preds_test = gcn_result.probs[test_idx.cpu()].argmax(dim=1).cpu().numpy().astype(np.int64)
 
     return {
         "dataset": dataset_key,
@@ -554,13 +559,17 @@ def write_markdown_report(
         if not np.isnan(v3_hurt_all) and not np.isnan(gcn_hurt_all):
             h3_evidence.append(v3_hurt_all <= gcn_hurt_all)
 
+    # Verdict thresholds: "supported" if ≥2/3 datasets agree, "mixed" if ≥1/3.
+    _SUPPORTED_THRESHOLD = 2.0 / 3.0   # ≥ 67% of datasets agree
+    _MIXED_THRESHOLD = 1.0 / 3.0       # ≥ 33% of datasets agree
+
     def _verdict(evidence):
         if not evidence:
             return "insufficient data"
         frac = sum(evidence) / len(evidence)
-        if frac >= 0.67:
+        if frac >= _SUPPORTED_THRESHOLD:
             return "supported"
-        if frac >= 0.34:
+        if frac >= _MIXED_THRESHOLD:
             return "mixed"
         return "not supported"
 
