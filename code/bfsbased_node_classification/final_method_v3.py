@@ -113,6 +113,7 @@ def final_method_v3(
     seed: int = 1337,
     mod=None,
     weights: Optional[Dict[str, float]] = None,
+    include_node_arrays: bool = False,
 ) -> Tuple[float, float, Dict[str, Any]]:
     """
     Reliability-Gated Selective Graph Correction (v3).
@@ -128,6 +129,8 @@ def final_method_v3(
     weights : optional single weight dict. If set, **only** this profile is evaluated
         (ablation: single-profile / fixed-weight runs). Default: both `WEIGHT_PROFILES`
         are searched on validation together with τ and ρ.
+    include_node_arrays : if True, include per-node arrays for the test split in
+        info["node_arrays"]. Useful for downstream bucket analysis. Default: False.
 
     Returns
     -------
@@ -294,4 +297,12 @@ def final_method_v3(
         },
         "search_space_size": len(tau_candidates) * len(rho_candidates) * len(profiles),
     }
+    if include_node_arrays:
+        info["node_arrays"] = {
+            "test_indices": test_np.copy(),
+            "mlp_predictions": mlp_pred_all[test_np].copy(),
+            "final_predictions": final_pred[test_np].copy(),
+            "mlp_margins": mlp_margin_all[test_np].copy(),
+            "true_labels": y_true[test_np].copy(),
+        }
     return val_acc, test_acc, info
