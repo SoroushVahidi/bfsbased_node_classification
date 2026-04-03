@@ -13,8 +13,8 @@ Also supports a targeted structural extension comparison via:
 from __future__ import annotations
 
 import argparse
-import csv
 import importlib.util
+import json
 import os
 import sys
 from typing import Any, Dict, List, Tuple
@@ -228,7 +228,7 @@ def run_bucket_safety(
                         "selected_tau": float(node_out["selected_tau"]),
                         "selected_rho": float(node_out["selected_rho"]),
                         "selected_b6": float(v3_info.get("selected_b6", 0.0)),
-                        "selected_weights_json": str(node_out["selected_weights"]),
+                        "selected_weights_json": json.dumps(node_out["selected_weights"], sort_keys=True),
                         "combined_top_score": float(node_out["combined_top_score"][i]),
                         "combined_top_label": int(node_out["combined_top_label"][i]),
                     }
