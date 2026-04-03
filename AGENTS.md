@@ -26,6 +26,7 @@ This file is the **primary map** for navigating the repository. For a link-only 
 | Heterophily-heavy baselines (GCNII, LINKX, …) | [`docs/BEGGA_HETEROPHILY_BASELINES.md`](docs/BEGGA_HETEROPHILY_BASELINES.md) |
 | Slurm / cluster jobs | `slurm/` |
 | Verify repo integrity | `python3 scripts/check_canonical.py` |
+| Large Slurm sweeps (baseline comparison, label budget, graph noise, feature-posthoc) | [`scripts/baseline_comparison_wulver/README.md`](scripts/baseline_comparison_wulver/README.md) + [`slurm/README.md`](slurm/README.md) |
 
 ---
 

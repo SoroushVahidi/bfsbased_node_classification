@@ -1,6 +1,6 @@
 # Reproducing canonical evidence (FINAL_V3)
 
-Repository navigation for scripts and runners: [`../AGENTS.md`](../AGENTS.md).
+Repository navigation: [`README.md`](README.md) (scripts index), [`../AGENTS.md`](../AGENTS.md), [`../slurm/README.md`](../slurm/README.md).
 
 This repository is the **evidence package** for a research paper submission. The canonical numerical results are **frozen** in `reports/final_method_v3_results.csv` (**10 GEO-GCN splits** per dataset, indices 0–9).
 

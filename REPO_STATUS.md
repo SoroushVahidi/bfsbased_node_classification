@@ -107,6 +107,14 @@ Additional standard and paper baselines (APPNP, H2GCN, SGC, GraphSAGE, Correct &
 
 ---
 
+## Regenerated cluster outputs (`outputs/`)
+
+**Status: 🔁 Not versioned — safe to delete locally**
+
+Large JSONL sweep results land under `outputs/baseline_comparison/`, `outputs/label_budget/`, and `outputs/graph_noise_robustness/` (see root `.gitignore`). Regenerate with the drivers and Slurm launch scripts in `scripts/baseline_comparison_wulver/`. They do **not** replace frozen canonical CSVs in `reports/` and `tables/`.
+
+---
+
 ## Archived / superseded
 
 **Status: 🗄️ Kept for provenance — do not use for paper claims**

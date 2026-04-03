@@ -4,6 +4,7 @@
 **Canonical claims and result files:** [`CANONICAL_CLAIMS.md`](CANONICAL_CLAIMS.md)  
 **Full reproduction guide:** [`scripts/README_REPRODUCE.md`](scripts/README_REPRODUCE.md)  
 **Repository status and classification:** [`REPO_STATUS.md`](REPO_STATUS.md)  
+**Scripts index:** [`scripts/README.md`](scripts/README.md) · **Slurm templates:** [`slurm/README.md`](slurm/README.md)  
 **AI / agent onboarding:** [`AGENTS.md`](AGENTS.md) · [Documentation index](docs/INDEX.md)
 
 **Summary.** Code and manuscript-artifact repository for *Uncertainty-Gated Selective Graph Correction for Node Classification*: feature-first MLP baseline, selective graph correction, frozen FINAL_V3 package, and baseline/structural-upgrade artifacts.
@@ -70,9 +71,11 @@ bfsbased_node_classification/
 │
 ├── code/
 │   ├── final_method_v3.py                  ← stable canonical import
+│   ├── baselines/djgnn/                    ← DJGNN helper modules (see docs/DJGNN_INTEGRATION.md)
 │   └── bfsbased_node_classification/
 │       ├── final_method_v3.py              ← FINAL_V3 implementation  [CANONICAL]
 │       ├── run_final_evaluation.py         ← 10-split benchmark driver [CANONICAL]
+│       ├── baseline_comparison_suite.py    ← JSONL comparison (cluster-scale sweeps)
 │       ├── gcn_baseline_runner.py          ← GCN Table 1 baseline      [CANONICAL]
 │       ├── analyze_final_v3_regimes.py     ← regime analysis           [CANONICAL]
 │       ├── build_final_v3_regime_analysis.py                           [CANONICAL]
@@ -101,9 +104,14 @@ bfsbased_node_classification/
 ├── figures/                        ← all canonical figures
 ├── logs/                           ← canonical run logs (FINAL_V3 + GCN baseline)
 ├── scripts/
+│   ├── README.md                     ← index of script drivers
 │   ├── run_all_selective_correction_results.sh  ← one-command canonical refresh
 │   ├── README_REPRODUCE.md
-│   └── build_artifacts/
+│   ├── baseline_comparison_wulver/ ← Slurm launch + aggregate (see README inside)
+│   ├── check_canonical.py
+│   └── build_artifacts/              ← table/figure Python builders
+│
+├── outputs/                          ← large sweep JSONL (gitignored subdirs; regenerate via suite scripts)
 │
 ├── archive/                        ← all legacy / exploratory / historical material
 │   ├── legacy_venue_specific/      ← UG-SGC and UG-SGC-S evidence from earlier submission
@@ -114,11 +122,11 @@ bfsbased_node_classification/
 │   ├── exploratory/                ← benchmark baseline suite and external baselines
 │   └── legacy_material/            ← run metadata, HPC output, broken job backups
 │
-├── slurm/                          ← HPC job templates (Wulver)
+├── slurm/                          ← HPC job templates + README (Wulver / Slurm)
 ├── docs/
 │   ├── INDEX.md                    ← link hub for all documentation
-│   ├── BASELINES_SUITE.md        ← baseline names, papers, CLI keys
-│   ├── DATASETS_EXTENDED.md       ← OGB / hm-categories
+│   ├── BASELINES_SUITE.md          ← baseline names, papers, CLI keys
+│   ├── DATASETS_EXTENDED.md        ← OGB / hm-categories
 │   └── …
 ├── CANONICAL_CLAIMS.md             ← what the paper claims and what files support it
 ├── REPO_STATUS.md                  ← canonical / legacy / exploratory inventory

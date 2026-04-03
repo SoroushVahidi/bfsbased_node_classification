@@ -13,10 +13,16 @@
 # Nine datasets (same list as DJ-GNN / extended Wulver comparison).
 #SBATCH --array=0-8
 
+# Slurm opens slurm/ logs before this script; ensure slurm/ exists (launch_*.sh or mkdir -p slurm).
+
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT:-${SLURM_SUBMIT_DIR:-$(pwd)}}"
 cd "$REPO_ROOT"
+if [[ ! -f "$REPO_ROOT/code/bfsbased_node_classification/baseline_comparison_suite.py" ]]; then
+  echo "ERROR: REPO_ROOT=$REPO_ROOT is not this repository (missing baseline_comparison_suite.py)." >&2
+  exit 1
+fi
 
 CONDA_SH="/apps/easybuild/software/Anaconda3/2023.09-0/etc/profile.d/conda.sh"
 if [[ -f "$CONDA_SH" ]]; then
