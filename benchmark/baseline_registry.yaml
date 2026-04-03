@@ -81,7 +81,7 @@ baselines:
 
   - method_name: FSGNN
     source_repo_url: "https://github.com/sunilkmaurya/FSGNN"
-    paper_name: "Understanding over-squashing and bottlenecks on graphs via curvature"
+    paper_name: "FSGNN: Improving Simple Graph Neural Networks with Feature Selection"
     official_or_unofficial: true
     license_if_known: MIT
     expected_entrypoint: "benchmark/runners/run_fsgnn.py"

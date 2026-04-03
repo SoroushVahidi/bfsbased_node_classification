@@ -6,4 +6,3 @@ epochs: 1000
 patience: 100
 alpha: 0.1
 K: 10
-init: PPR
