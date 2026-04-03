@@ -242,8 +242,12 @@ def run_bucket_safety(
                 changed_n = int(changed[mask].sum())
                 bene_n = int(beneficial[mask].sum())
                 harm_n = int(harmful[mask].sum())
-                precision = float(bene_n / max(bene_n + harm_n, 1))
-                harm_rate = float(harm_n / max(changed_n, 1)) if changed_n > 0 else 0.0
+                if changed_n > 0:
+                    precision = float(bene_n / changed_n)
+                    harm_rate = float(harm_n / changed_n)
+                else:
+                    precision = None
+                    harm_rate = None
                 per_bucket_rows.append(
                     {
                         "dataset": ds,
