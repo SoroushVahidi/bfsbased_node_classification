@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Merge multiple PRL-resubmission JSONL files and regenerate analysis outputs."""
+"""Merge multiple resubmission JSONL files and regenerate analysis outputs."""
 from __future__ import annotations
 
 import argparse
@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from analyze_prl_resubmission import analyze
+from analyze_resubmission_results import analyze
 
 
 def _read_jsonl(path: Path) -> List[Dict[str, Any]]:
@@ -45,14 +45,14 @@ def merge_runs(inputs: List[Path], output_path: Path) -> Tuple[int, int]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Merge PRL-resubmission run files.")
+    parser = argparse.ArgumentParser(description="Merge resubmission run files.")
     parser.add_argument("--inputs", nargs="+", required=True)
     parser.add_argument("--output-tag", required=True)
     args = parser.parse_args()
 
     inputs = [Path(p) for p in args.inputs]
     repo_root = Path(__file__).resolve().parents[2]
-    out_path = repo_root / "logs" / "prl_resubmission" / f"comparison_runs_{args.output_tag}.jsonl"
+    out_path = repo_root / "logs" / "resubmission_runs" / f"comparison_runs_{args.output_tag}.jsonl"
     n_rows, _ = merge_runs(inputs, out_path)
     print(f"Merged {n_rows} records into {out_path}")
     artifacts = analyze(str(out_path), args.output_tag)

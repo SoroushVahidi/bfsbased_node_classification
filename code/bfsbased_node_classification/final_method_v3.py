@@ -3,7 +3,7 @@
 FINAL METHOD v3: Reliability-Gated Selective Graph Correction.
 
 A clean, principled simplification of V2_MULTIBRANCH, designed for
-a Pattern Recognition Letters submission.
+a research paper submission.
 
 Method summary:
   1. Train feature-only MLP as base classifier
@@ -278,6 +278,7 @@ def final_method_v3(
     weights: Optional[Dict[str, float]] = None,
     gate: str = "heuristic",
     split_id: Optional[int] = None,
+    include_node_arrays: bool = False,
 ) -> Tuple[float, float, Dict[str, Any]]:
     """
     Reliability-Gated Selective Graph Correction (v3).
@@ -295,6 +296,9 @@ def final_method_v3(
         are searched on validation together with gate and ρ.
     gate : uncertainty gate type; one of {"heuristic", "adaptive"}.
     split_id : optional split index for diagnostics logging.
+        are searched on validation together with τ and ρ.
+    include_node_arrays : if True, include per-node arrays for the test split in
+        info["node_arrays"]. Useful for downstream bucket analysis. Default: False.
 
     Returns
     -------
@@ -537,4 +541,12 @@ def final_method_v3(
             f"{100.0 * info['gate_stats']['uncertain_fraction_test']:.1f}% of test nodes | "
             f"gate BCE loss: {info['gate_stats']['gate_bce_loss']:.3f}"
         )
+    if include_node_arrays:
+        info["node_arrays"] = {
+            "test_indices": test_np.copy(),
+            "mlp_predictions": mlp_pred_all[test_np].copy(),
+            "final_predictions": final_pred[test_np].copy(),
+            "mlp_margins": mlp_margin_all[test_np].copy(),
+            "true_labels": y_true[test_np].copy(),
+        }
     return val_acc, test_acc, info

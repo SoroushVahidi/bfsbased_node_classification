@@ -1,11 +1,10 @@
 # Uncertainty-Gated Selective Graph Correction for Node Classification
 
-**Paper target:** Pattern Recognition Letters (short paper)  
 **Canonical method:** `FINAL_V3` — reliability-gated selective graph correction on top of a strong MLP  
 **Best entry point for external readers:** [`ANALYSIS_GUIDE.md`](ANALYSIS_GUIDE.md)  
 **Full reproduction guide:** [`scripts/README_REPRODUCE.md`](scripts/README_REPRODUCE.md)
 
-> **What this is.** An evidence package for a short PRL submission proposing a
+> **What this is.** A companion repository for a research paper submission proposing a
 > conservative, MLP-first graph correction strategy. The method identifies
 > low-reliability nodes via an MLP confidence score and applies selective
 > feature/graph correction only to those nodes. It is **not** a claim of
@@ -19,7 +18,7 @@
 **Regenerate canonical tables and figures (no model training, ~5 s):**
 
 ```bash
-bash scripts/run_all_prl_results.sh
+bash scripts/run_all_selective_correction_results.sh
 ```
 
 **Smoke test (Cora, split 0 only, ~2 s):**
@@ -51,11 +50,11 @@ python3 code/bfsbased_node_classification/run_final_evaluation.py \
 | Purpose | Path |
 |---------|------|
 | Frozen per-split log (10 splits × 6 datasets) | `reports/final_method_v3_results.csv` |
-| **Main results table** | `tables/main_results_prl.md` · `tables/main_results_prl.csv` |
-| Experimental setup table | `tables/experimental_setup_prl.md` |
-| Ablation table | `tables/ablation_prl.md` |
-| Sensitivity table | `tables/sensitivity_prl.md` |
-| Graphical abstract | `figures/prl_graphical_abstract_v3.{png,pdf,svg}` |
+| **Main results table** | `tables/main_results_selective_correction.md` · `tables/main_results_selective_correction.csv` |
+| Experimental setup table | `tables/experimental_setup_selective_correction.md` |
+| Ablation table | `tables/ablation_selective_correction.md` |
+| Sensitivity table | `tables/sensitivity_selective_correction.md` |
+| Graphical abstract | `figures/graphical_abstract_selective_correction_v3.{png,pdf,svg}` |
 | Safety / harmful-split summary | `reports/safety_analysis.md` |
 | Method analysis write-up | `reports/final_method_v3_analysis.md` |
 | Canonical method implementation | `code/final_method_v3.py` (stable import) |
@@ -73,7 +72,7 @@ bfsbased_node_classification/
 │       ├── final_method_v3.py          ← FINAL_V3 implementation
 │       ├── run_final_evaluation.py     ← 10-split benchmark driver
 │       ├── manuscript_runner.py        ← MLP vs SGC runner (UG-SGC line)
-│       ├── prl_resubmission_runner.py  ← GCN/APPNP baselines + ablations
+│       ├── resubmission_runner.py      ← GCN/APPNP baselines + ablations
 │       ├── gcn_baseline_runner.py      ← standalone GCN Table 1 baseline
 │       ├── standard_node_baselines.py  ← shared GCN/APPNP training helpers
 │       ├── bfsbased-full-investigate-homophil.py  ← core module (all variants)
@@ -85,36 +84,31 @@ bfsbased_node_classification/
 │   ├── final_method_v3_results.csv     ← CANONICAL FROZEN LOG (do not edit)
 │   ├── final_method_v3_analysis.md     ← main method analysis
 │   ├── safety_analysis.md
-│   ├── prl_resubmission/               ← legacy resubmission/structural docs
-│   ├── prl_final_additions/            ← UG-SGC line audit and analysis
 │   └── archive/                        ← superseded tables and exports
 │
 ├── tables/
-│   ├── main_results_prl.{md,csv}       ← CANONICAL TABLE (regenerated from CSV)
-│   ├── ablation_prl.{md,csv}
-│   ├── sensitivity_prl.{md,csv}
-│   ├── experimental_setup_prl.{md,csv}
-│   ├── prl_final_additions/            ← UG-SGC line supplementary tables
-│   └── prl_resubmission/               ← structural-upgrade line tables
+│   ├── main_results_selective_correction.{md,csv}       ← CANONICAL TABLE
+│   ├── ablation_selective_correction.{md,csv}
+│   ├── sensitivity_selective_correction.{md,csv}
+│   └── experimental_setup_selective_correction.{md,csv}
 │
 ├── figures/
-│   ├── prl_graphical_abstract_v3.*     ← CANONICAL FIGURE
+│   ├── graphical_abstract_selective_correction_v3.*     ← CANONICAL FIGURE
 │   ├── correction_rate_vs_homophily.png
 │   ├── safety_comparison.png
-│   ├── reliability_vs_accuracy.png
-│   └── prl_final_additions/            ← supplementary UG-SGC figures
+│   └── reliability_vs_accuracy.png
 │
 ├── logs/                               ← run logs (JSONL + CSV)
-├── results_prl/                        ← threshold-sensitivity package (UG-SGC)
 ├── scripts/
-│   ├── run_all_prl_results.sh          ← one-command canonical refresh
+│   ├── run_all_selective_correction_results.sh  ← one-command canonical refresh
 │   ├── README_REPRODUCE.md             ← full reproduction guide
-│   └── prl_final_additions/            ← individual build scripts
+│   └── build_artifacts/               ← individual build scripts
 │
+├── archive/legacy_venue_specific/      ← archived venue-specific materials
 ├── slurm/                              ← HPC job templates (Wulver)
 ├── ANALYSIS_GUIDE.md                   ← best single entry point for reviewers
 ├── REPO_STATUS.md                      ← what is canonical / legacy / exploratory
-├── README_PRL_MANUSCRIPT.md            ← manuscript-oriented artifact index
+├── README_MANUSCRIPT_ARTIFACTS.md      ← manuscript-oriented artifact index
 └── CONTRIBUTING.md                     ← contribution guidelines
 ```
 
@@ -129,7 +123,7 @@ mix them:
 |------|-------|--------|-----------|
 | Reliability-gated selective correction | **FINAL_V3** | ✅ Canonical / frozen | `code/final_method_v3.py` |
 | Uncertainty-gated selective correction | **UG-SGC** | 📁 Legacy / supplementary | `code/bfsbased_node_classification/manuscript_runner.py` |
-| Structural extension | **UG-SGC-S** | 🔬 Exploratory / partial | `code/bfsbased_node_classification/prl_resubmission_runner.py` |
+| Structural extension | **UG-SGC-S** | 🔬 Exploratory / partial | `code/bfsbased_node_classification/resubmission_runner.py` |
 
 See [`REPO_STATUS.md`](REPO_STATUS.md) for a complete inventory.
 
@@ -140,13 +134,13 @@ See [`REPO_STATUS.md`](REPO_STATUS.md) for a complete inventory.
 - **`FINAL_V3` ≠ `UG-SGC`** — FINAL_V3 uses a reliability gate; UG-SGC uses
   uncertainty/confidence thresholding. Only FINAL_V3 is the canonical
   submission-facing package.
-- **`tables/main_results_prl.*` ≠ `tables/prl_final_additions/prl_benchmark_summary.csv`**
-  — the latter is the older UG-SGC line; use only `main_results_prl.*` for the
-  main manuscript table.
-- **`results_prl/`** is a threshold-sensitivity cross-run package from the
-  UG-SGC line, not FINAL_V3.
-- **`reports/prl_resubmission/`** and **`tables/prl_resubmission/`** are the
-  structural extension (UG-SGC-S) exploratory package.
+- **`tables/main_results_selective_correction.*`** is the canonical main table.
+  Older UG-SGC tables live in `archive/legacy_venue_specific/`.
+- **`archive/legacy_venue_specific/results_prl/`** is a threshold-sensitivity
+  cross-run package from the UG-SGC line, not FINAL_V3.
+- **`archive/legacy_venue_specific/reports_resubmission_protocols/`** and
+  **`archive/legacy_venue_specific/tables_prl_resubmission/`** are the structural
+  extension (UG-SGC-S) exploratory package.
 
 ---
 
@@ -165,7 +159,7 @@ Or use the bundled requirements file:
 pip install -r requirements.txt
 ```
 
-Table/figure regeneration (`bash scripts/run_all_prl_results.sh`) only needs
+Table/figure regeneration (`bash scripts/run_all_selective_correction_results.sh`) only needs
 NumPy and Matplotlib — no PyTorch required.
 
 ---

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Focused PRL-resubmission experiment runner.
+Focused resubmission experiment runner.
 
 Adds:
   - compact standard graph baselines (GCN, APPNP)
@@ -26,7 +26,7 @@ import manuscript_runner as mr
 from standard_node_baselines import run_baseline
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-LOGS_DIR = os.path.join(REPO_ROOT, "logs", "prl_resubmission")
+LOGS_DIR = os.path.join(REPO_ROOT, "logs", "resubmission_runs")
 
 CORE_DATASETS = ["cora", "citeseer", "pubmed", "chameleon", "texas", "wisconsin"]
 
@@ -151,13 +151,13 @@ def _build_record(**kwargs: Any) -> Dict[str, Any]:
     return rec
 
 
-def run_prl_resubmission(
+def run_resubmission(
     datasets: Optional[List[str]] = None,
     split_ids: Optional[List[int]] = None,
     repeats: int = 1,
     methods: Optional[List[str]] = None,
     split_dir: Optional[str] = None,
-    output_tag: str = "prl_resubmission_core_r1",
+    output_tag: str = "resubmission_core_r1",
     rs_num_samples: int = 30,
     rs_n_splits: int = 3,
 ) -> Dict[str, Any]:
@@ -174,7 +174,7 @@ def run_prl_resubmission(
     coverage = mr.check_split_coverage(datasets, split_ids, split_dir)  # type: ignore[attr-defined]
     runnable_datasets = [ds for ds in datasets if coverage[ds]]
     if not runnable_datasets:
-        raise SystemExit("No runnable datasets found for PRL resubmission package.")
+        raise SystemExit("No runnable datasets found for resubmission package.")
 
     dataset_meta: Dict[str, Dict[str, Any]] = {}
     all_records: List[Dict[str, Any]] = []
@@ -536,18 +536,18 @@ def run_prl_resubmission(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Focused PRL resubmission experiment runner.")
+    parser = argparse.ArgumentParser(description="Focused resubmission experiment runner.")
     parser.add_argument("--split-dir", default=None)
     parser.add_argument("--datasets", nargs="+", default=None)
     parser.add_argument("--splits", nargs="+", type=int, default=list(range(10)))
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--methods", nargs="+", default=None)
-    parser.add_argument("--output-tag", default="prl_resubmission_core_r1")
+    parser.add_argument("--output-tag", default="resubmission_core_r1")
     parser.add_argument("--rs-num-samples", type=int, default=30)
     parser.add_argument("--rs-n-splits", type=int, default=3)
     args = parser.parse_args()
 
-    out = run_prl_resubmission(
+    out = run_resubmission(
         datasets=args.datasets,
         split_ids=args.splits,
         repeats=args.repeats,

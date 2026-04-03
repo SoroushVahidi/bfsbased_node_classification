@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-PRL figure + table bundle for FINAL_V3 (no experiments — reads existing CSVs only).
+Figure + table bundle for FINAL_V3 (no experiments — reads existing CSVs only).
 
 Outputs:
-  figures/prl_graphical_abstract_v3.png
-  figures/prl_graphical_abstract_v3.pdf
-  figures/prl_graphical_abstract_v3.svg
+  figures/graphical_abstract_selective_correction_v3.png
+  figures/graphical_abstract_selective_correction_v3.pdf
+  figures/graphical_abstract_selective_correction_v3.svg
   figures/correction_rate_vs_homophily.png
   figures/safety_comparison.png
   figures/reliability_vs_accuracy.png
-  tables/main_results_prl.csv
-  tables/main_results_prl.md
+  tables/main_results_selective_correction.csv
+  tables/main_results_selective_correction.md
 """
 from __future__ import annotations
 
@@ -440,8 +440,8 @@ def write_md(path: Path, header: list[str], rows: list[list[str]]) -> None:
         "",
         "Source: `reports/final_method_v3_results.csv` — **10 GEO-GCN splits** (indices 0–9) per dataset, same protocol as the FINAL_V3 evaluation logs.",
         "",
-        "Regenerate this table and the PRL v3 figure set:",
-        "`python3 scripts/prl_final_additions/build_prl_v3_figures_and_tables.py`",
+        "Regenerate this table and the figure set:",
+        "`python3 scripts/build_artifacts/build_v3_figures_and_tables.py`",
         "(reads existing CSVs only; no experiments).",
         "",
         "| " + " | ".join(header) + " |",
@@ -463,14 +463,14 @@ def main() -> None:
     FIG.mkdir(parents=True, exist_ok=True)
     TBL.mkdir(parents=True, exist_ok=True)
 
-    plot_graphical_abstract_v3(FIG / "prl_graphical_abstract_v3.png")
+    plot_graphical_abstract_v3(FIG / "graphical_abstract_selective_correction_v3.png")
     plot_correction_vs_homophily(rows, homophily, FIG / "correction_rate_vs_homophily.png")
     plot_safety(rows, FIG / "safety_comparison.png")
     plot_reliability_vs_accuracy(rows, FIG / "reliability_vs_accuracy.png")
 
     table, header = build_main_tables(rows)
-    write_csv(TBL / "main_results_prl.csv", header, table)
-    write_md(TBL / "main_results_prl.md", header, table)
+    write_csv(TBL / "main_results_selective_correction.csv", header, table)
+    write_md(TBL / "main_results_selective_correction.md", header, table)
     print("Wrote figures to", FIG)
     print("Wrote tables to", TBL)
 
