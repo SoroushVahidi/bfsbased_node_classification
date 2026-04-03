@@ -265,6 +265,7 @@ def triple_trust_sgc_predictclass(
 
     # init state
     yhat = mlp_pred.copy()
+    yhat[train_mask] = y_true[train_mask]
     q = norm_margin.copy()
     tau_class = np.full(n_classes, 1.0 / float(n_classes), dtype=np.float64)
     s = _compute_source_trust(train_mask, pseudo_mask, yhat, q, tau_class, deg, gamma_source, lambda_deg)
