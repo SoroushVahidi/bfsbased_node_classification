@@ -21,7 +21,7 @@ and add a thin wrapper under `code/bfsbased_node_classification/`.
 ## How to Clone
 
 ```bash
-cd external_baselines/
+cd archive/exploratory/external_baselines/
 git clone https://github.com/LUMIA-Group/OrderedGNN orderedgnn
 git clone https://github.com/BUPT-GAMMA/DJ-GNN djgnn
 ```
@@ -38,15 +38,15 @@ The following baselines are implemented inline and do **not** require cloning:
 - **GPRGNN**:
   - model helper: `code/bfsbased_node_classification/standard_node_baselines.py`
   - standalone runner: `code/bfsbased_node_classification/gprgnn_baseline_runner.py`
-  - integration note: `external_baselines/GPRGNN_EXTERNAL_BASELINE.md`
+  - integration note: `archive/exploratory/external_baselines/GPRGNN_EXTERNAL_BASELINE.md`
 - **FSGNN**:
   - model helper: `code/bfsbased_node_classification/standard_node_baselines.py`
   - standalone runner: `code/bfsbased_node_classification/fsgnn_baseline_runner.py`
-  - integration note: `external_baselines/FSGNN_EXTERNAL_BASELINE.md`
+  - integration note: `archive/exploratory/external_baselines/FSGNN_EXTERNAL_BASELINE.md`
 - **PairNorm (DeepGCN + PairNorm)**:
   - model helper: `code/bfsbased_node_classification/standard_node_baselines.py`
   - standalone runner: `code/bfsbased_node_classification/pairnorm_baseline_runner.py`
-  - integration note: `external_baselines/PAIRNORM_EXTERNAL_BASELINE.md`
+  - integration note: `archive/exploratory/external_baselines/PAIRNORM_EXTERNAL_BASELINE.md`
 
 ## Notes
 

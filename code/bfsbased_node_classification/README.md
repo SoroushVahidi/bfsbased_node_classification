@@ -1,30 +1,40 @@
 # Node-classification code directory
 
-This directory contains the main implementation code used by the current research paper
-repository workflow. It now includes both the frozen submission package and the
-newer resubmission / structural-extension line.
+This directory contains the implementation code for the research paper.
 
-## Main method lines
+## Canonical FINAL_V3 scripts
 
-### 1. Frozen submission method: `FINAL_V3`
+| File | Role |
+|------|------|
+| `final_method_v3.py` | Core FINAL_V3 implementation |
+| `../final_method_v3.py` | Stable import path (one level up) |
+| `run_final_evaluation.py` | 10-split benchmark driver |
+| `gcn_baseline_runner.py` | Standalone GCN baseline (Table 1) |
+| `analyze_final_v3_regimes.py` | Regime analysis helper |
+| `build_final_v3_regime_analysis.py` | Regime analysis builder |
+| `bfsbased-full-investigate-homophil.py` | Core module (all method variants) |
+| `standard_node_baselines.py` | GCN/APPNP training helpers |
+| `make_splits.py` | Split generation utility |
 
-| Artifact | Path |
-|----------|------|
-| Implementation | `final_method_v3.py` |
-| Stable import from `code/` | `../final_method_v3.py` |
-| Benchmark runner | `run_final_evaluation.py` |
+## Legacy / exploratory scripts (kept for provenance)
 
-`FINAL_V3` is the cleanest frozen submission-facing package currently available
-on `main`.
+| File | Status | Notes |
+|------|--------|------|
+| `manuscript_runner.py` | 📁 **Legacy** (UG-SGC) | Original uncertainty-gated runner; not canonical FINAL_V3 |
+| `resubmission_runner.py` | 🔬 **Exploratory** (UG-SGC-S) | Structural extension + GCN/APPNP baselines |
+| `experimental_archived/` | 🗄️ **Archived** | Older diagnostic scripts |
 
-### 2. Original uncertainty-gated selective correction
+Additional legacy and exploratory scripts have been moved to
+`archive/legacy_code/` and `archive/exploratory_code/`.
+
+### Original uncertainty-gated selective correction (UG-SGC)
 
 | Artifact | Path |
 |----------|------|
 | Core implementation | `bfsbased-full-investigate-homophil.py` |
 | Original manuscript driver | `manuscript_runner.py` |
 
-### 3. Structural extension / resubmission package
+### Structural extension / resubmission package
 
 | Artifact | Path |
 |----------|------|
@@ -36,14 +46,18 @@ on `main`.
 | External FSGNN baseline (inline) | `standard_node_baselines.py` + `fsgnn_baseline_runner.py` |
 | Triple-trust experimental variant | `triple_trust_sgc.py` |
 | Triple-trust dedicated runner | `run_triple_trust_experiments.py` |
-| Canonical bucket-safety runner | `run_margin_bucket_safety_experiment.py` |
-| Resubmission analysis | `analyze_prl_resubmission.py` |
-| Resubmission analysis (alt) | `analyze_resubmission_results.py` |
-| Grouped-run merge helper | `merge_prl_resubmission_runs.py` |
-| Grouped-run merge helper (alt) | `merge_resubmission_runs.py` |
+| Bucket-safety diagnostics (exploratory) | `archive/exploratory_code/run_margin_bucket_safety_experiment.py` |
+| Resubmission analysis | `archive/exploratory_code/analyze_resubmission_results.py` |
+| Grouped-run merge helper | `archive/exploratory_code/merge_resubmission_runs.py` |
 
 ## Notes
 
+- Do not mix FINAL_V3 result files with UG-SGC or UG-SGC-S artifacts.
+- `bfsbased-full-investigate-homophil.py` is dynamically loaded by
+  `manuscript_runner.py` — it is not directly importable due to the hyphenated
+  filename and notebook-style top-level code.
+- Always pass `--output-tag` when re-running experiments to avoid overwriting
+  canonical evidence files.
 - `bfsbased-full-investigate-homophil.py` remains the main location for the
   original `UG-SGC` logic and the structural `UG-SGC-S` extension.
 - `experimental_archived/` contains older diagnostic and pre-final exploration
@@ -72,10 +86,10 @@ on `main`.
 - `PairNorm` is included here as **DeepGCN+PairNorm** external baseline for
   comparison only. It is not part of the canonical `FINAL_V3` package.
 
-For the manuscript-facing map, prefer:
+For the full repository map see the root `README.md` and `REPO_STATUS.md`.
 
-- repository root `README.md`
-- `README_MANUSCRIPT_ARTIFACTS.md`
-- `archive/legacy_venue_specific/reports_resubmission_protocols/`
+For manuscript-oriented artifact notes (historical / superseded top-level doc),
+see [`archive/legacy_docs/README_MANUSCRIPT_ARTIFACTS.md`](../../archive/legacy_docs/README_MANUSCRIPT_ARTIFACTS.md) and
+`archive/legacy_venue_specific/reports_resubmission_protocols/`.
 
 License: [MIT](../../LICENSE)

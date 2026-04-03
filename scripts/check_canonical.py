@@ -41,8 +41,7 @@ CANONICAL_DATA_FILES = [
     # Analysis docs
     "reports/final_method_v3_analysis.md",
     "reports/safety_analysis.md",
-    # GCN baseline results
-    "reports/gcn_results_gcn_table1.csv",
+    # GCN baseline log
     "logs/gcn_runs_gcn_table1.jsonl",
 ]
 
@@ -62,7 +61,7 @@ CANONICAL_DOCS = [
     "README.md",
     "ANALYSIS_GUIDE.md",
     "REPO_STATUS.md",
-    "README_MANUSCRIPT_ARTIFACTS.md",
+    "CANONICAL_CLAIMS.md",
     "scripts/README_REPRODUCE.md",
 ]
 
