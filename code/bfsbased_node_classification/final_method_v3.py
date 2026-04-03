@@ -251,9 +251,16 @@ def final_method_v3(
 
     # --- Step 3: Reliability score ---
     reliability = compute_graph_reliability(mlp_probs_np, evidence)
-    local_agreement_scores = compute_soft_local_agreement(
-        data, train_np, mlp_probs_np, mlp_pred_all, y_true
+    need_local_agreement = bool(
+        locals().get("use_local_agreement_gate", False)
+        or locals().get("include_node_arrays", False)
     )
+    if need_local_agreement:
+        local_agreement_scores = compute_soft_local_agreement(
+            data, train_np, mlp_probs_np, mlp_pred_all, y_true
+        )
+    else:
+        local_agreement_scores = np.ones_like(reliability, dtype=np.float32)
 
     # --- Step 4–5: Select (weights, τ, ρ) jointly on validation ---
     t_sel = time.perf_counter()
