@@ -9,6 +9,9 @@ __pycache__/
 venv/
 .env
 
+# OGB raw downloads (large; reproducible via `ogb` / prepare script)
+data/ogb/
+
 # Redundant local bundles (source of truth is logs/code dirs)
 diagnosis_bundle*.tar.gz
 _push_*.tar.gz

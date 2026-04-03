@@ -3,7 +3,8 @@
 **Canonical method:** `FINAL_V3` — reliability-gated selective graph correction on top of a strong MLP  
 **Canonical claims and result files:** [`CANONICAL_CLAIMS.md`](CANONICAL_CLAIMS.md)  
 **Full reproduction guide:** [`scripts/README_REPRODUCE.md`](scripts/README_REPRODUCE.md)  
-**Repository status and classification:** [`REPO_STATUS.md`](REPO_STATUS.md)
+**Repository status and classification:** [`REPO_STATUS.md`](REPO_STATUS.md)  
+**AI / agent onboarding:** [`AGENTS.md`](AGENTS.md) · [Documentation index](docs/INDEX.md)
 
 **Summary.** Code and manuscript-artifact repository for *Uncertainty-Gated Selective Graph Correction for Node Classification*: feature-first MLP baseline, selective graph correction, frozen FINAL_V3 package, and baseline/structural-upgrade artifacts.
 
@@ -39,6 +40,10 @@ python3 code/bfsbased_node_classification/run_final_evaluation.py \
 
 > ⚠️ Always pass `--output-tag` when re-running experiments to avoid
 > overwriting frozen evidence. See [`scripts/README_REPRODUCE.md`](scripts/README_REPRODUCE.md).
+
+**Extended datasets (feature-rich nodes + official benchmark splits):** `ogbn-arxiv`, `ogbn-products`, and TabGraphs `hm-categories` are supported via `load_dataset` and the usual runners when split `.npz` files are prepared. See [`docs/DATASETS_EXTENDED.md`](docs/DATASETS_EXTENDED.md).
+
+**Standard baselines (GCN, APPNP, SGC, GraphSAGE, Correct & Smooth, CLP, …):** method names, paper links, and implementation fidelity notes are in [`docs/BASELINES_SUITE.md`](docs/BASELINES_SUITE.md).
 
 ---
 
@@ -76,7 +81,7 @@ bfsbased_node_classification/
 │       ├── pairnorm_baseline_runner.py     ← standalone DeepGCN+PairNorm baseline
 │       ├── fsgnn_baseline_runner.py        ← standalone FSGNN baseline
 │       ├── gprgnn_baseline_runner.py       ← standalone GPRGNN baseline
-│       ├── standard_node_baselines.py      ← GCN/APPNP + external baseline helpers
+│       ├── standard_node_baselines.py      ← GCN/APPNP/SGC/C&S/CLP/GraphSAGE + Begga helpers
 │       ├── triple_trust_sgc.py             ← experimental triple-trust (opt-in)
 │       ├── run_triple_trust_experiments.py ← triple-trust runner
 │       ├── bfsbased-full-investigate-homophil.py  ← core module (all variants)
@@ -110,8 +115,14 @@ bfsbased_node_classification/
 │   └── legacy_material/            ← run metadata, HPC output, broken job backups
 │
 ├── slurm/                          ← HPC job templates (Wulver)
+├── docs/
+│   ├── INDEX.md                    ← link hub for all documentation
+│   ├── BASELINES_SUITE.md        ← baseline names, papers, CLI keys
+│   ├── DATASETS_EXTENDED.md       ← OGB / hm-categories
+│   └── …
 ├── CANONICAL_CLAIMS.md             ← what the paper claims and what files support it
 ├── REPO_STATUS.md                  ← canonical / legacy / exploratory inventory
+├── AGENTS.md                       ← onboarding for AI assistants / new devs
 ├── ANALYSIS_GUIDE.md               ← reviewer reading guide
 └── CONTRIBUTING.md
 ```

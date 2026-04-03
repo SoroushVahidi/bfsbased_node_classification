@@ -9,9 +9,17 @@ These models intentionally stay small and dependency-light:
   - Optional Begga-style heterophily baselines: GCNII, Geom-GCN (compact),
     LINKX, ACM-GNN-style channel mixing (labeled ``acmii_gcn_plus_plus`` for
     comparison tables; see docs/BEGGA_HETEROPHILY_BASELINES.md)
+  - Paper-oriented baselines (see docs/BASELINES_SUITE.md): CLP (compatible LP,
+    in-repo from Zhong et al., TMLR), Correct and Smooth (Huang et al.; adapted
+    from the official CUAI pipeline), SGC (``sgc`` / ``sgc_wu2019``), GraphSAGE
+    mean-aggregator (Hamilton et al., via PyG)
 
 They reuse the same GEO-GCN-style train/val/test split protocol as the rest of
 the repo and tune from a compact validation-based config grid.
+
+**Dispatch:** ``run_baseline(model_name, ...)`` is the single public entry for
+standard models. Method names, papers, and fidelity notes live in
+``docs/BASELINES_SUITE.md``; repo-wide orientation in ``AGENTS.md``.
 
 H2GCN note:
   Official reference: https://github.com/GemsLab/H2GCN (TensorFlow/signac).
@@ -32,6 +40,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch_geometric.nn import SAGEConv
+from torch_geometric.utils import to_undirected
 
 
 def _set_seed(seed: int) -> None:
@@ -136,6 +146,38 @@ class APPNPNet(nn.Module):
         for _ in range(self.k_steps):
             z = (1.0 - self.alpha) * torch.sparse.mm(adj_rw, z) + self.alpha * h0
         return z
+
+
+class GraphSAGE2Mean(nn.Module):
+    """Two-layer GraphSAGE with mean aggregation (Hamilton et al., NeurIPS 2017)."""
+
+    def __init__(self, in_dim: int, hidden: int, out_dim: int, dropout: float) -> None:
+        super().__init__()
+        self.conv1 = SAGEConv(in_dim, hidden, aggr="mean")
+        self.conv2 = SAGEConv(hidden, out_dim, aggr="mean")
+        self.dropout = float(dropout)
+
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = self.conv1(x, edge_index).relu()
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        return self.conv2(x, edge_index)
+
+
+class BaselineMLP(nn.Module):
+    """Two-layer MLP for feature-only base predictors (C&S, CLP post-hoc stages)."""
+
+    def __init__(self, in_dim: int, hidden: int, out_dim: int, dropout: float) -> None:
+        super().__init__()
+        self.lin1 = nn.Linear(in_dim, hidden)
+        self.lin2 = nn.Linear(hidden, out_dim)
+        self.dropout = float(dropout)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = F.relu(self.lin1(x))
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        return self.lin2(x)
 
 
 class H2GCNCompact(nn.Module):
@@ -596,6 +638,532 @@ def _train_one_model(
         logits = model(data.x, adj)
         probs = F.softmax(logits, dim=1)
     return probs, float(best_val_acc)
+
+
+def _y_flat(y: torch.Tensor) -> torch.Tensor:
+    return y.view(-1).long() if y.dim() > 1 else y.long()
+
+
+# Full-batch GraphSAGE is not practical on multi-million-node OGB graphs in this repo.
+_GRAPHSAGE_MAX_NODES = 500_000
+
+
+def _train_baseline_mlp(
+    model: nn.Module,
+    data,
+    train_idx: torch.Tensor,
+    val_idx: torch.Tensor,
+    *,
+    lr: float,
+    weight_decay: float,
+    max_epochs: int,
+    patience: int,
+) -> Tuple[torch.Tensor, float]:
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    best_state = None
+    best_val_loss = None
+    best_val_acc = None
+    bad_epochs = 0
+    y = _y_flat(data.y)
+
+    for _epoch in range(max_epochs):
+        model.train()
+        optimizer.zero_grad()
+        logits = model(data.x)
+        loss = F.cross_entropy(logits[train_idx], y[train_idx])
+        loss.backward()
+        optimizer.step()
+
+        model.eval()
+        with torch.no_grad():
+            logits = model(data.x)
+            val_acc, val_loss = _val_objective(logits, y, val_idx)
+        if best_val_loss is None or val_loss < best_val_loss:
+            best_val_loss = float(val_loss)
+            best_val_acc = float(val_acc)
+            best_state = copy.deepcopy(model.state_dict())
+            bad_epochs = 0
+        else:
+            bad_epochs += 1
+            if bad_epochs >= patience:
+                break
+
+    assert best_state is not None and best_val_acc is not None
+    model.load_state_dict(best_state)
+    model.eval()
+    with torch.no_grad():
+        logits = model(data.x)
+        probs = F.softmax(logits, dim=1)
+    return probs, float(best_val_acc)
+
+
+def _train_graphsage_model(
+    model: nn.Module,
+    data,
+    train_idx: torch.Tensor,
+    val_idx: torch.Tensor,
+    edge_index: torch.Tensor,
+    *,
+    lr: float,
+    weight_decay: float,
+    max_epochs: int,
+    patience: int,
+) -> Tuple[torch.Tensor, float]:
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    best_state = None
+    best_val_loss = None
+    best_val_acc = None
+    bad_epochs = 0
+    y = _y_flat(data.y)
+    x = data.x
+
+    for _epoch in range(max_epochs):
+        model.train()
+        optimizer.zero_grad()
+        logits = model(x, edge_index)
+        loss = F.cross_entropy(logits[train_idx], y[train_idx])
+        loss.backward()
+        optimizer.step()
+
+        model.eval()
+        with torch.no_grad():
+            logits = model(x, edge_index)
+            val_acc, val_loss = _val_objective(logits, y, val_idx)
+        if best_val_loss is None or val_loss < best_val_loss:
+            best_val_loss = float(val_loss)
+            best_val_acc = float(val_acc)
+            best_state = copy.deepcopy(model.state_dict())
+            bad_epochs = 0
+        else:
+            bad_epochs += 1
+            if bad_epochs >= patience:
+                break
+
+    assert best_state is not None and best_val_acc is not None
+    model.load_state_dict(best_state)
+    model.eval()
+    with torch.no_grad():
+        logits = model(x, edge_index)
+        probs = F.softmax(logits, dim=1)
+    return probs, float(best_val_acc)
+
+
+def _mlp_backbone_grid() -> List[Dict[str, float]]:
+    return [
+        {"hidden": 64, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4},
+        {"hidden": 64, "dropout": 0.5, "lr": 0.01, "weight_decay": 1e-3},
+        {"hidden": 128, "dropout": 0.5, "lr": 0.01, "weight_decay": 5e-4},
+    ]
+
+
+def _correct_smooth_grid() -> List[Dict[str, float]]:
+    """Post-hoc hyperparameters (Huang et al. use similar alpha / iteration ranges on OGB)."""
+    return [
+        {"alpha1": 0.8, "n1": 50.0, "alpha2": 0.8, "n2": 50.0},
+        {"alpha1": 0.9, "n1": 30.0, "alpha2": 0.9, "n2": 30.0},
+        {"alpha1": 0.7, "n1": 50.0, "alpha2": 0.7, "n2": 50.0},
+        {"alpha1": 0.8, "n1": 30.0, "alpha2": 0.9, "n2": 50.0},
+    ]
+
+
+def _clp_grid() -> List[Dict[str, float]]:
+    return [
+        {"alpha": 0.5, "num_iter": 10.0},
+        {"alpha": 0.7, "num_iter": 10.0},
+        {"alpha": 0.5, "num_iter": 20.0},
+        {"alpha": 0.9, "num_iter": 5.0},
+    ]
+
+
+def _general_outcome_correlation(
+    adj: torch.Tensor,
+    y: torch.Tensor,
+    alpha: float,
+    num_propagations: int,
+    post_step,
+    *,
+    alpha_term: bool,
+    device: torch.device,
+) -> torch.Tensor:
+    """Personalized PageRank-style propagation (same recurrence as CUAI outcome_correlation.py)."""
+    adj = adj.coalesce().to(device)
+    orig_device = y.device
+    y = y.to(device)
+    result = y.clone()
+    for _ in range(int(num_propagations)):
+        propagated = torch.sparse.mm(adj, result)
+        result = float(alpha) * propagated
+        if alpha_term:
+            result = result + (1.0 - float(alpha)) * y
+        else:
+            result = result + y
+        result = post_step(result)
+    return result.to(orig_device)
+
+
+def _cs_pre_residual(
+    labels_1d: torch.Tensor,
+    model_out: torch.Tensor,
+    label_idx: torch.Tensor,
+    num_classes: int,
+) -> torch.Tensor:
+    n, c = model_out.shape
+    y = torch.zeros((n, c), dtype=model_out.dtype, device=model_out.device)
+    li = label_idx.to(model_out.device)
+    y[li] = F.one_hot(labels_1d[li], num_classes).float() - model_out[li]
+    return y
+
+
+def _cs_pre_outcome(
+    labels_1d: torch.Tensor,
+    model_out: torch.Tensor,
+    label_idx: torch.Tensor,
+    num_classes: int,
+) -> torch.Tensor:
+    n, c = model_out.shape
+    y = model_out.clone()
+    li = label_idx.to(model_out.device)
+    y[li] = F.one_hot(labels_1d[li], num_classes).float()
+    return y
+
+
+def _cs_double_correlation_autoscale(
+    labels_1d: torch.Tensor,
+    model_out: torch.Tensor,
+    label_idx: torch.Tensor,
+    adj: torch.Tensor,
+    *,
+    alpha1: float,
+    n1: int,
+    alpha2: float,
+    n2: int,
+    device: torch.device,
+) -> torch.Tensor:
+    """Correct + smooth from Huang et al.; autoscale variant matching CUAI/outcome_correlation.py."""
+    num_classes = int(model_out.size(1))
+    li = label_idx.to(device)
+    residual_idx = li
+
+    y_res = _cs_pre_residual(labels_1d, model_out, residual_idx, num_classes)
+
+    def post_res(z: torch.Tensor) -> torch.Tensor:
+        return z.clamp(-1.0, 1.0)
+
+    resid = _general_outcome_correlation(
+        adj,
+        y_res,
+        alpha1,
+        n1,
+        post_res,
+        alpha_term=True,
+        device=device,
+    )
+    orig_diff = y_res[li].abs().sum() / max(li.numel(), 1)
+    denom = resid.abs().sum(dim=1, keepdim=True).clamp(min=1e-12)
+    resid_scale = orig_diff / denom
+    resid_scale = torch.where(torch.isfinite(resid_scale), resid_scale, torch.ones_like(resid_scale))
+    resid_scale = torch.where(resid_scale > 1000.0, torch.ones_like(resid_scale), resid_scale)
+    res_result = model_out + resid_scale * resid
+    res_result = torch.where(torch.isnan(res_result), model_out, res_result)
+
+    y_out = _cs_pre_outcome(labels_1d, res_result, li, num_classes)
+
+    def post_smooth(z: torch.Tensor) -> torch.Tensor:
+        return z.clamp(0.0, 1.0)
+
+    out = _general_outcome_correlation(
+        adj,
+        y_out,
+        alpha2,
+        n2,
+        post_smooth,
+        alpha_term=True,
+        device=device,
+    )
+    out = out / out.sum(dim=1, keepdim=True).clamp(min=1e-12)
+    return out
+
+
+def _clp_compatibility_matrix(
+    edge_index: torch.Tensor,
+    y: torch.Tensor,
+    train_mask: torch.Tensor,
+    num_classes: int,
+    *,
+    device: torch.device,
+    dtype: torch.dtype,
+) -> torch.Tensor:
+    """Row-normalized co-occurrence H[c, c'] on training-labeled endpoints (Zhong et al., TMLR)."""
+    src = edge_index[0]
+    dst = edge_index[1]
+    m = train_mask[src] & train_mask[dst]
+    ys = y[src[m]]
+    yt = y[dst[m]]
+    idx = ys.long() * num_classes + yt.long()
+    hist = torch.bincount(idx.cpu(), minlength=num_classes * num_classes).to(
+        device=device, dtype=dtype
+    )
+    h = hist.view(num_classes, num_classes) + 1e-6
+    h = h / h.sum(dim=1, keepdim=True).clamp(min=1e-12)
+    return h
+
+
+def _clp_iterate(
+    base_probs: torch.Tensor,
+    adj_rw: torch.Tensor,
+    h_compat: torch.Tensor,
+    *,
+    alpha: float,
+    num_iter: int,
+) -> torch.Tensor:
+    """One common CLP form: aggregate neighbor posteriors then right-multiply by H (compatibility)."""
+    z = base_probs
+    bp = base_probs
+    for _ in range(int(num_iter)):
+        agg = torch.sparse.mm(adj_rw, z)
+        z = agg @ h_compat
+        z = float(alpha) * z + (1.0 - float(alpha)) * bp
+        z = z / z.sum(dim=1, keepdim=True).clamp(min=1e-12)
+    return z
+
+
+def run_correct_and_smooth(
+    data,
+    train_idx: torch.Tensor,
+    val_idx: torch.Tensor,
+    test_idx: torch.Tensor,
+    *,
+    seed: int,
+    max_epochs: int = 500,
+    patience: int = 100,
+) -> BaselineResult:
+    """Correct and Smooth (Huang et al., 2020): MLP base + residual diffusion + outcome diffusion.
+
+    Adapted from the official CUAI implementation (outcome_correlation.py): same autoscale
+    correction and clamped smoothing; uses symmetric normalized adjacency with self-loops
+    (``_normalize_adj``) for both stages to match common OGB usage.
+    """
+    _set_seed(seed)
+    device = data.x.device
+    if int(data.num_nodes) > _GRAPHSAGE_MAX_NODES:
+        raise RuntimeError(
+            "correct_and_smooth: full-graph post-processing exceeds the repository safety "
+            f"threshold (num_nodes={data.num_nodes} > {_GRAPHSAGE_MAX_NODES}). "
+            "Use a smaller dataset or extend the runner with sampling."
+        )
+    in_dim = int(data.x.size(1))
+    out_dim = int(_y_flat(data.y).max().item()) + 1
+    edge_index = data.edge_index.to(device)
+    adj = _normalize_adj(edge_index, data.num_nodes)
+    y = _y_flat(data.y)
+
+    best: Dict[str, Any] | None = None
+    label_idx = torch.cat([train_idx, val_idx]).unique()
+
+    for mcfg in _mlp_backbone_grid():
+        _set_seed(seed)
+        model = BaselineMLP(
+            in_dim,
+            int(mcfg["hidden"]),
+            out_dim,
+            float(mcfg["dropout"]),
+        ).to(device)
+        base_probs, _ = _train_baseline_mlp(
+            model,
+            data,
+            train_idx,
+            val_idx,
+            lr=float(mcfg["lr"]),
+            weight_decay=float(mcfg["weight_decay"]),
+            max_epochs=max_epochs,
+            patience=patience,
+        )
+        model_out = base_probs.to(device)
+
+        for pcfg in _correct_smooth_grid():
+            out_probs = _cs_double_correlation_autoscale(
+                y,
+                model_out,
+                label_idx,
+                adj,
+                alpha1=float(pcfg["alpha1"]),
+                n1=int(pcfg["n1"]),
+                alpha2=float(pcfg["alpha2"]),
+                n2=int(pcfg["n2"]),
+                device=device,
+            )
+            val_acc = float((out_probs[val_idx].argmax(dim=1) == y[val_idx]).float().mean().item())
+            test_acc = float((out_probs[test_idx].argmax(dim=1) == y[test_idx]).float().mean().item())
+            key = (val_acc, test_acc)
+            merged_cfg = {**mcfg, **pcfg}
+            if best is None or key > best["key"]:
+                best = {
+                    "key": key,
+                    "probs": out_probs.detach().cpu(),
+                    "val_acc": val_acc,
+                    "test_acc": test_acc,
+                    "best_config": {k: float(v) if isinstance(v, float) else int(v) for k, v in merged_cfg.items()},
+                }
+
+    assert best is not None
+    return BaselineResult(
+        probs=best["probs"],
+        val_acc=best["val_acc"],
+        test_acc=best["test_acc"],
+        best_config=best["best_config"],
+        train_runtime_sec=float("nan"),
+    )
+
+
+def run_clp(
+    data,
+    train_idx: torch.Tensor,
+    val_idx: torch.Tensor,
+    test_idx: torch.Tensor,
+    *,
+    seed: int,
+    max_epochs: int = 500,
+    patience: int = 100,
+) -> BaselineResult:
+    """Compatible Label Propagation–style baseline (Zhong et al., TMLR 2022).
+
+    Faithful in-repo reimplementation of the usual recipe in that line of work: train a
+    feature MLP, estimate a class compatibility matrix H from *training* edges, then
+    iterate row-normalized propagation with Z <- (1-a)Z_base + a · normalize(S Z H).
+    No official code was used; see docs/BASELINES_SUITE.md.
+    """
+    _set_seed(seed)
+    device = data.x.device
+    if int(data.num_nodes) > _GRAPHSAGE_MAX_NODES:
+        raise RuntimeError(
+            f"clp: num_nodes={data.num_nodes} > {_GRAPHSAGE_MAX_NODES} "
+            "(safety threshold; extend with sampling if needed)."
+        )
+    in_dim = int(data.x.size(1))
+    y = _y_flat(data.y)
+    out_dim = int(y.max().item()) + 1
+    edge_index = data.edge_index.to(device)
+    adj_rw = _row_normalize_adj(edge_index, data.num_nodes)
+
+    train_mask = torch.zeros(data.num_nodes, dtype=torch.bool, device=device)
+    train_mask[train_idx] = True
+
+    best: Dict[str, Any] | None = None
+    for mcfg in _mlp_backbone_grid():
+        _set_seed(seed)
+        model = BaselineMLP(
+            in_dim,
+            int(mcfg["hidden"]),
+            out_dim,
+            float(mcfg["dropout"]),
+        ).to(device)
+        base_probs, _ = _train_baseline_mlp(
+            model,
+            data,
+            train_idx,
+            val_idx,
+            lr=float(mcfg["lr"]),
+            weight_decay=float(mcfg["weight_decay"]),
+            max_epochs=max_epochs,
+            patience=patience,
+        )
+        h_mat = _clp_compatibility_matrix(edge_index, y, train_mask, out_dim, device=device, dtype=base_probs.dtype)
+
+        for pcfg in _clp_grid():
+            z = _clp_iterate(
+                base_probs,
+                adj_rw,
+                h_mat,
+                alpha=float(pcfg["alpha"]),
+                num_iter=int(pcfg["num_iter"]),
+            )
+            val_acc = float((z[val_idx].argmax(dim=1) == y[val_idx]).float().mean().item())
+            test_acc = float((z[test_idx].argmax(dim=1) == y[test_idx]).float().mean().item())
+            key = (val_acc, test_acc)
+            merged_cfg = {**mcfg, **pcfg}
+            if best is None or key > best["key"]:
+                best = {
+                    "key": key,
+                    "probs": z.detach().cpu(),
+                    "val_acc": val_acc,
+                    "test_acc": test_acc,
+                    "best_config": {k: float(v) if isinstance(v, float) else int(v) for k, v in merged_cfg.items()},
+                }
+
+    assert best is not None
+    return BaselineResult(
+        probs=best["probs"],
+        val_acc=best["val_acc"],
+        test_acc=best["test_acc"],
+        best_config=best["best_config"],
+        train_runtime_sec=float("nan"),
+    )
+
+
+def run_graphsage(
+    data,
+    train_idx: torch.Tensor,
+    val_idx: torch.Tensor,
+    test_idx: torch.Tensor,
+    *,
+    seed: int,
+    max_epochs: int = 500,
+    patience: int = 100,
+) -> BaselineResult:
+    if int(data.num_nodes) > _GRAPHSAGE_MAX_NODES:
+        raise RuntimeError(
+            f"graphsage: full-batch GraphSAGE is not enabled for num_nodes={data.num_nodes} "
+            f"(>{_GRAPHSAGE_MAX_NODES}). Use ogbn-arxiv-sized graphs or smaller, or add a neighbor sampler."
+        )
+    _set_seed(seed)
+    device = data.x.device
+    in_dim = int(data.x.size(1))
+    out_dim = int(_y_flat(data.y).max().item()) + 1
+    edge_index = to_undirected(data.edge_index.to(device), num_nodes=data.num_nodes)
+
+    configs = _gcn_grid()
+    best: Dict[str, Any] | None = None
+    for cfg in configs:
+        _set_seed(seed)
+        model = GraphSAGE2Mean(
+            in_dim,
+            int(cfg["hidden"]),
+            out_dim,
+            float(cfg["dropout"]),
+        ).to(device)
+        probs, best_val_acc = _train_graphsage_model(
+            model,
+            data,
+            train_idx,
+            val_idx,
+            edge_index,
+            lr=float(cfg["lr"]),
+            weight_decay=float(cfg["weight_decay"]),
+            max_epochs=max_epochs,
+            patience=patience,
+        )
+        test_acc = float((probs[test_idx].argmax(dim=1) == _y_flat(data.y)[test_idx]).float().mean().item())
+        key = (float(best_val_acc), test_acc)
+        if best is None or key > best["key"]:
+            best = {
+                "key": key,
+                "probs": probs.detach().cpu(),
+                "val_acc": float(best_val_acc),
+                "test_acc": test_acc,
+                "best_config": {
+                    k: float(v) if isinstance(v, float) else int(v) if isinstance(v, int) else v
+                    for k, v in cfg.items()
+                },
+            }
+
+    assert best is not None
+    return BaselineResult(
+        probs=best["probs"],
+        val_acc=best["val_acc"],
+        test_acc=best["test_acc"],
+        best_config=best["best_config"],
+        train_runtime_sec=float("nan"),
+    )
 
 
 def _precompute_sgc_features(
@@ -1381,8 +1949,38 @@ def run_baseline(
                 float(cfg["dprate"]),
                 str(cfg["init_mode"]),
             ).to(device)
-    elif model_name == "sgc_wu2019":
+    elif model_name in ("sgc_wu2019", "sgc"):
         return run_sgc_wu2019(data, train_idx, val_idx, test_idx, seed=seed)
+    elif model_name == "clp":
+        return run_clp(
+            data,
+            train_idx,
+            val_idx,
+            test_idx,
+            seed=seed,
+            max_epochs=max_epochs,
+            patience=patience,
+        )
+    elif model_name in ("correct_and_smooth", "cs"):
+        return run_correct_and_smooth(
+            data,
+            train_idx,
+            val_idx,
+            test_idx,
+            seed=seed,
+            max_epochs=max_epochs,
+            patience=patience,
+        )
+    elif model_name == "graphsage":
+        return run_graphsage(
+            data,
+            train_idx,
+            val_idx,
+            test_idx,
+            seed=seed,
+            max_epochs=max_epochs,
+            patience=patience,
+        )
     elif model_name == "fsgnn":
         return run_fsgnn(
             data,
@@ -1631,4 +2229,14 @@ BEGGA_HETEROPHILY_BASELINE_METHODS = (
     "geom_gcn",
     "linkx",
     "acmii_gcn_plus_plus",
+)
+
+# Feature-first / post-hoc graph correction / simple GNN baselines (see docs/BASELINES_SUITE.md).
+PAPER_GRAPH_BASELINE_METHODS = (
+    "clp",
+    "correct_and_smooth",
+    "cs",
+    "graphsage",
+    "sgc",
+    "sgc_wu2019",
 )

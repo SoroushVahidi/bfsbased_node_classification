@@ -1,5 +1,7 @@
 # Reproducing canonical evidence (FINAL_V3)
 
+Repository navigation for scripts and runners: [`../AGENTS.md`](../AGENTS.md).
+
 This repository is the **evidence package** for a research paper submission. The canonical numerical results are **frozen** in `reports/final_method_v3_results.csv` (**10 GEO-GCN splits** per dataset, indices 0–9).
 
 > ⚠️ **Safety rule:** Always pass `--output-tag <name>` when running any

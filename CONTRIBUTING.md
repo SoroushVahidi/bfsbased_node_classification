@@ -2,6 +2,8 @@
 
 Thank you for your interest in this repository.
 
+**New here or using an AI coding agent?** Read [`AGENTS.md`](AGENTS.md) and [`docs/INDEX.md`](docs/INDEX.md) before making changes.
+
 This is primarily a **frozen evidence package** for a research paper submission, not an actively developed library. Contributions are
 welcome, but please follow these guidelines to keep the repository organized
 and reviewer-safe.

@@ -7,6 +7,8 @@ canonical, which are legacy, and which are still exploratory.
 > material has been moved to `archive/`. See `archive/README.md` for the full
 > inventory of archived material.
 
+**Navigation for tooling / AI agents:** start with [`AGENTS.md`](AGENTS.md) and [`docs/INDEX.md`](docs/INDEX.md).
+
 ---
 
 ## Canonical package (FINAL_V3)
@@ -100,6 +102,8 @@ Standalone GCN baseline for Table 1 comparison.
 
 - Runner: `code/bfsbased_node_classification/gcn_baseline_runner.py`
 - Log: `logs/gcn_runs_gcn_table1.jsonl`
+
+Additional standard and paper baselines (APPNP, H2GCN, SGC, GraphSAGE, Correct & Smooth, CLP, Begga-style models) are implemented in `code/bfsbased_node_classification/standard_node_baselines.py` and selectable from `resubmission_runner.py`. See [`docs/BASELINES_SUITE.md`](docs/BASELINES_SUITE.md) for names, references, and fidelity notes.
 
 ---
 

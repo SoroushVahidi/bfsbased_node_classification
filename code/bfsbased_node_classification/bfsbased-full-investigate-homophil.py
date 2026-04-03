@@ -72,6 +72,18 @@ def load_dataset(dataset_key: str, root: str):
     if k == "actor":
         return Actor(root=f"{root}/Film")
 
+    # OGB node-property prediction (official loaders; see docs/DATASETS_EXTENDED.md)
+    if k.replace("_", "-") in {"ogbn-arxiv", "ogbn-products"}:
+        from extended_graph_datasets import load_ogb_node_dataset
+
+        return load_ogb_node_dataset(dataset_key, root)
+
+    # TabGraphs hm-categories (Zenodo CSV layout under data/tabgraphs/hm-categories/)
+    if k in {"hm-categories", "hm_categories"}:
+        from extended_graph_datasets import load_hm_categories_dataset
+
+        return load_hm_categories_dataset(root)
+
     # if k == "penn94":
     #     return LINKXDataset(root=root, name="penn94")
 

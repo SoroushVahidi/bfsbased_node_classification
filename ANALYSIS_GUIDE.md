@@ -3,6 +3,8 @@
 > **Best single entry point** for an external reader or reviewer.  
 > Read this file before anything else.
 
+For **code navigation and runners**, use [`AGENTS.md`](AGENTS.md) and [`docs/INDEX.md`](docs/INDEX.md).
+
 ---
 
 ## One-sentence summary
