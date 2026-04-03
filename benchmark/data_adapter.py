@@ -36,7 +36,6 @@ def _get_default_split_dir():
 def load_dataset(dataset_key: str, data_root=None):
     """Load a PyG dataset object for the given key."""
     try:
-        import torch
         from torch_geometric import datasets as pyg_datasets
     except ImportError as e:
         raise ImportError(f"PyTorch Geometric is required: {e}")
@@ -112,7 +111,6 @@ def build_data_bundle(dataset_key: str, split_id: int, data_root=None, split_dir
       train_idx, val_idx, test_idx,
       n_nodes, n_features, n_classes, dataset_key, split_id, split_file
     """
-    import torch
     from torch_geometric.utils import to_undirected
 
     dataset = load_dataset(dataset_key, data_root=data_root)

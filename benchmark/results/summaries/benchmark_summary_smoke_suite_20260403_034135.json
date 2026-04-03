@@ -1,0 +1,52 @@
+[
+  {
+    "method": "gprgnn",
+    "dataset": "cora",
+    "split_id": 0,
+    "seed": 42,
+    "success": true,
+    "val_acc": 0.889447,
+    "test_acc": 0.871227,
+    "best_epoch": 23,
+    "runtime_sec": 10.1,
+    "source_repo": "https://github.com/jianhao2016/GPRGNN",
+    "config_used": {
+      "hidden_channels": 64,
+      "dropout": 0.5,
+      "lr": 0.01,
+      "weight_decay": 0.0005,
+      "epochs": 1000,
+      "patience": 100,
+      "alpha": 0.1,
+      "K": 10
+    },
+    "stdout_log_path": null,
+    "stderr_log_path": null,
+    "notes": "Inline reimplementation. Best epoch: 23.",
+    "commit_or_version_if_available": "inline-reimplementation"
+  },
+  {
+    "method": "h2gcn",
+    "dataset": "cora",
+    "split_id": 0,
+    "seed": 42,
+    "success": true,
+    "val_acc": 0.880653,
+    "test_acc": 0.863179,
+    "best_epoch": 11,
+    "runtime_sec": 3.013,
+    "source_repo": "https://github.com/GemsLab/H2GCN",
+    "config_used": {
+      "hidden_channels": 64,
+      "dropout": 0.5,
+      "lr": 0.01,
+      "weight_decay": 0.0005,
+      "epochs": 1000,
+      "patience": 100
+    },
+    "stdout_log_path": null,
+    "stderr_log_path": null,
+    "notes": "Inline reimplementation, ego+1hop+2hop. Best epoch: 11.",
+    "commit_or_version_if_available": "inline-reimplementation"
+  }
+]

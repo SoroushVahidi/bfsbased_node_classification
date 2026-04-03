@@ -10,6 +10,7 @@ import json
 
 _BENCH_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _REPO_ROOT = os.path.dirname(_BENCH_DIR)
+sys.path.insert(0, _REPO_ROOT)
 sys.path.insert(0, _BENCH_DIR)
 sys.path.insert(0, os.path.join(_REPO_ROOT, 'code', 'bfsbased_node_classification'))
 

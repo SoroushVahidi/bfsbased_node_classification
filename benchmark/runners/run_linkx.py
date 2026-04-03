@@ -10,6 +10,7 @@ import time
 
 _BENCH_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _REPO_ROOT = os.path.dirname(_BENCH_DIR)
+sys.path.insert(0, _REPO_ROOT)
 sys.path.insert(0, _BENCH_DIR)
 sys.path.insert(0, os.path.join(_REPO_ROOT, 'code', 'bfsbased_node_classification'))
 
@@ -17,7 +18,7 @@ try:
     import torch
     import torch.nn as nn
     import torch.nn.functional as F
-    from torch_geometric.utils import add_self_loops, degree
+    from torch_geometric.utils import degree
 except ImportError as e:
     print(f"ERROR: Required packages not available: {e}", file=sys.stderr)
     sys.exit(1)
