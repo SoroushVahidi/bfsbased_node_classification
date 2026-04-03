@@ -9,9 +9,10 @@ Method summary:
   1. Train feature-only MLP as base classifier
   2. Build graph/feature evidence for all nodes
   3. Compute per-node graph reliability score R(v) from 3 signals
-  4. Select uncertainty threshold τ and reliability threshold ρ on validation
-  5. For each test node:
-       - If MLP is confident (margin ≥ τ): keep MLP prediction
+  4. Build a split-conformal uncertainty gate on validation calibration nodes
+  5. Select reliability threshold ρ (and optional CP alpha) on validation
+  6. For each test node:
+       - If CP prediction set is singleton: keep MLP prediction
        - If MLP is uncertain AND graph is reliable (R(v) ≥ ρ): correct with
          combined evidence scores
        - If MLP is uncertain AND graph is unreliable: keep MLP prediction
@@ -19,17 +20,15 @@ Method summary:
 Key design vs V2:
   - **Two evidence weight profiles** (`WEIGHT_PROFILES`: balanced vs graph-heavy). The
     best profile is chosen **on the validation split**, jointly with τ and ρ (not fixed a priori).
-  - **Three tuned choices on validation:** weight profile, uncertainty threshold τ, and
-    reliability threshold ρ, searched over ~|τ|×|ρ|×2 profiles (see implementation).
+  - **Conformal uncertainty gate** (LAC by default; optional RAPS) calibrated on val.
+  - **Tuned choices on validation:** weight profile, CP α (optional), and reliability
+    threshold ρ, searched over ~|α|×|ρ|×2 profiles (see implementation).
   - 3-signal reliability formula R(v) with equal weights (no ad-hoc coefficients).
   - No feature-only branch (dropped — the reliability gate provides safety).
   - Cleaner search space than V2’s multibranch / multi-config grid.
 """
 from __future__ import annotations
 
-import csv
-import json
-import os
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -47,6 +46,170 @@ def _simple_accuracy(y_true, y_pred):
     if y_true.size == 0:
         return 0.0
     return float((y_true == y_pred).mean())
+
+
+def _compute_node_context_features(
+    data,
+    mlp_probs_np: np.ndarray,
+    mlp_margin_all: np.ndarray,
+    evidence: Dict[str, np.ndarray],
+) -> np.ndarray:
+    """Build 9-D node context features used by the adaptive gate."""
+    n_nodes = mlp_probs_np.shape[0]
+    eps = 1e-12
+    mlp_pred_all = np.argmax(mlp_probs_np, axis=1)
+    feat_entropy = -np.sum(mlp_probs_np * np.log(np.clip(mlp_probs_np, eps, 1.0)), axis=1)
+
+    deg = evidence["node_degree"].astype(np.float64)
+    max_deg = float(np.max(deg)) if deg.size else 1.0
+    deg_norm = np.log1p(deg) / max(np.log1p(max_deg), eps)
+    deg_sat = np.minimum(deg, 10.0) / 10.0
+
+    graph_ns = evidence["graph_neighbor_support"]
+    conc = np.clip(graph_ns.max(axis=1), 0.0, 1.0)
+    graph_pred = np.argmax(graph_ns, axis=1)
+    agree = (mlp_pred_all == graph_pred).astype(np.float64)
+    homophily_local = np.clip(graph_ns[np.arange(n_nodes), mlp_pred_all], 0.0, 1.0)
+
+    edge_index = data.edge_index.detach().cpu().numpy()
+    src = edge_index[0].astype(np.int64)
+    dst = edge_index[1].astype(np.int64)
+    nbr_margin_sum = np.zeros(n_nodes, dtype=np.float64)
+    nbr_entropy_sum = np.zeros(n_nodes, dtype=np.float64)
+    nbr_count = np.zeros(n_nodes, dtype=np.float64)
+    np.add.at(nbr_margin_sum, dst, mlp_margin_all[src])
+    np.add.at(nbr_entropy_sum, dst, feat_entropy[src])
+    np.add.at(nbr_count, dst, 1.0)
+    safe_cnt = np.maximum(nbr_count, 1.0)
+    nbr_confidence = nbr_margin_sum / safe_cnt
+    nbr_entropy = nbr_entropy_sum / safe_cnt
+
+    return np.column_stack([
+        mlp_margin_all,
+        feat_entropy,
+        deg_norm,
+        homophily_local,
+        nbr_confidence,
+        nbr_entropy,
+        conc,
+        agree,
+        deg_sat,
+    ]).astype(np.float32)
+
+
+def _search_heuristic_uncertainty(
+    y_true: np.ndarray,
+    mlp_pred_all: np.ndarray,
+    mlp_margin_all: np.ndarray,
+    reliability: np.ndarray,
+    val_np: np.ndarray,
+    profiles: List[Dict[str, float]],
+    mod,
+    mlp_probs_np: np.ndarray,
+    evidence: Dict[str, np.ndarray],
+):
+    """Original FINAL_V3 τ-based uncertainty search."""
+    val_margins = mlp_margin_all[val_np]
+    tau_candidates = sorted(set(np.round(np.concatenate([
+        np.quantile(val_margins, [0.25, 0.40, 0.50, 0.60, 0.75]),
+        np.array([0.05, 0.10, 0.20, 0.30]),
+    ]), 5).tolist()))
+    rho_candidates = [0.3, 0.4, 0.5, 0.6]
+
+    best_key = None
+    best = {}
+    for w in profiles:
+        comps = mod.build_selective_correction_scores(
+            mlp_probs_np, evidence,
+            b1=w["b1"], b2=w["b2"], b3=w["b3"],
+            b4=w["b4"], b5=w["b5"], b6=w.get("b6", 0.0),
+        )
+        combined_scores = comps["combined_scores"]
+        for tau in tau_candidates:
+            uncertain_all = mlp_margin_all < tau
+            uncertain_val = uncertain_all[val_np]
+            for rho in rho_candidates:
+                reliable_val = reliability[val_np] >= rho
+                apply_val = uncertain_val & reliable_val
+                final_val = mlp_pred_all[val_np].copy()
+                if apply_val.any():
+                    final_val[apply_val] = np.argmax(combined_scores[val_np][apply_val], axis=1).astype(np.int64)
+                val_acc = _simple_accuracy(y_true[val_np], final_val)
+                changed_frac = float((final_val != mlp_pred_all[val_np]).mean())
+                key = (val_acc, -changed_frac)
+                if best_key is None or key > best_key:
+                    best_key = key
+                    best = {
+                        "combined_scores": combined_scores,
+                        "weights": dict(w),
+                        "selected_tau": float(tau),
+                        "selected_rho": float(rho),
+                        "uncertain_all": uncertain_all,
+                        "search_space_size": len(tau_candidates) * len(rho_candidates) * len(profiles),
+                    }
+    return best
+
+
+def _train_adaptive_gate(
+    features_all: np.ndarray,
+    val_np: np.ndarray,
+    y_gate_val: np.ndarray,
+    seed: int,
+):
+    """Train gate MLP on validation nodes and return gate probabilities for all nodes."""
+    torch.manual_seed(seed + 17)
+    val_x = features_all[val_np]
+    mu = val_x.mean(axis=0, keepdims=True)
+    sigma = val_x.std(axis=0, keepdims=True)
+    sigma[sigma < 1e-8] = 1.0
+    x_norm = (features_all - mu) / sigma
+
+    x_t = torch.from_numpy(x_norm).float()
+    x_val_t = x_t[val_np]
+    y_val_t = torch.from_numpy(y_gate_val.astype(np.float32)).view(-1, 1)
+
+    model = torch.nn.Sequential(
+        torch.nn.Linear(9, 16),
+        torch.nn.ReLU(),
+        torch.nn.Linear(16, 1),
+    )
+    n_pos = int(y_gate_val.sum())
+    n_neg = int(y_gate_val.size - n_pos)
+    if n_pos > 0 and (n_pos / max(y_gate_val.size, 1)) < 0.2:
+        pos_weight = torch.tensor([n_neg / max(n_pos, 1)], dtype=torch.float32)
+        loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    else:
+        loss_fn = torch.nn.BCEWithLogitsLoss()
+    opt = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-4)
+
+    best_state = None
+    best_loss = float("inf")
+    patience = 20
+    no_improve = 0
+    for _ in range(200):
+        model.train()
+        opt.zero_grad()
+        logits = model(x_val_t)
+        loss = loss_fn(logits, y_val_t)
+        loss.backward()
+        opt.step()
+
+        cur_loss = float(loss.detach().cpu().item())
+        if cur_loss < (best_loss - 1e-6):
+            best_loss = cur_loss
+            best_state = {k: v.detach().clone() for k, v in model.state_dict().items()}
+            no_improve = 0
+        else:
+            no_improve += 1
+        if no_improve >= patience:
+            break
+
+    if best_state is not None:
+        model.load_state_dict(best_state)
+    model.eval()
+    with torch.no_grad():
+        probs = torch.sigmoid(model(x_t)).squeeze(1).cpu().numpy()
+    return probs, best_loss
 
 
 # ---------------------------------------------------------------------------
@@ -183,6 +346,8 @@ def final_method_v3(
     seed: int = 1337,
     mod=None,
     weights: Optional[Dict[str, float]] = None,
+    gate: str = "heuristic",
+    split_id: Optional[int] = None,
     include_node_arrays: bool = False,
     use_local_agreement_gate: bool = False,
     local_agreement_mode: str = "none",
@@ -203,6 +368,9 @@ def final_method_v3(
     mod : the loaded bfsbased-full-investigate module
     weights : optional single weight dict. If set, **only** this profile is evaluated
         (ablation: single-profile / fixed-weight runs). Default: both `WEIGHT_PROFILES`
+        are searched on validation together with gate and ρ.
+    gate : uncertainty gate type; one of {"heuristic", "adaptive"}.
+    split_id : optional split index for diagnostics logging.
         are searched on validation together with τ and ρ.
     include_node_arrays : if True, include per-node arrays for the test split in
         info["node_arrays"]. Useful for downstream bucket analysis. Default: False.
@@ -262,17 +430,8 @@ def final_method_v3(
     else:
         local_agreement_scores = np.ones_like(reliability, dtype=np.float32)
 
-    # --- Step 4–5: Select (weights, τ, ρ) jointly on validation ---
+    # --- Step 4–5: Select (weights, gate, ρ) jointly on validation ---
     t_sel = time.perf_counter()
-    val_margins = mlp_margin_all[val_np]
-
-    tau_candidates = sorted(set(np.round(np.concatenate([
-        np.quantile(val_margins, [0.25, 0.40, 0.50, 0.60, 0.75]),
-        np.array([0.05, 0.10, 0.20, 0.30]),
-    ]), 5).tolist()))
-
-    rho_candidates = [0.3, 0.4, 0.5, 0.6]
-
     profiles = [weights] if weights else WEIGHT_PROFILES
     eta_candidates = local_agreement_eta_candidates or [0.3, 0.4, 0.5, 0.6, 0.7]
     if local_agreement_search_modes is not None:
@@ -354,7 +513,7 @@ def final_method_v3(
     local_multiplier_all = best_local_multiplier
 
     # --- Step 6: Apply correction ---
-    uncertain_all = mlp_margin_all < best_tau
+    uncertain_all = best["uncertain_all"]
     reliable_all = reliability >= best_rho
     correct_mask = uncertain_all & reliable_all
 
@@ -376,6 +535,14 @@ def final_method_v3(
     test_corrected = correct_mask[test_np]
     test_changed = (final_pred[test_np] != mlp_pred_all[test_np])
     test_local_multiplier = local_multiplier_all[test_np]
+    test_uncertain = uncertain_all[test_np]
+
+    if test_uncertain.any():
+        acc_test_uncertain_mlp = _simple_accuracy(y_true[test_np][test_uncertain], mlp_pred_all[test_np][test_uncertain])
+        acc_test_uncertain_v3 = _simple_accuracy(y_true[test_np][test_uncertain], final_pred[test_np][test_uncertain])
+    else:
+        acc_test_uncertain_mlp = None
+        acc_test_uncertain_v3 = None
 
     # Correction precision: among actually changed nodes, what fraction improved?
     changed_test_idx = test_np[test_changed]
@@ -399,7 +566,8 @@ def final_method_v3(
         "test_acc_mlp": float(mlp_test_acc),
         "test_acc_v3": float(test_acc),
         "delta_vs_mlp": float(test_acc - mlp_test_acc),
-        "selected_tau": float(best_tau),
+        "gate_mode": gate,
+        "selected_tau": float(selected_tau) if selected_tau is not None else None,
         "selected_rho": float(best_rho),
         "weights": {k: float(v) for k, v in w.items()},
         "local_agreement": {
@@ -415,12 +583,25 @@ def final_method_v3(
             "uncertain_unreliable_keep_mlp": float(test_uncertain_unreliable.mean()),
             "uncertain_reliable_corrected": float(test_corrected.mean()),
         },
+        "gate_stats": {
+            "uncertain_fraction_test": float(uncertain_all[test_np].mean()),
+            "gate_bce_loss": float(best_gate_loss) if best_gate_loss is not None else None,
+            "n_pos_val": int(n_pos) if n_pos is not None else None,
+            "n_neg_val": int(n_neg) if n_neg is not None else None,
+            "low_conf_gain_vs_mlp_test": (
+                float(acc_test_uncertain_v3 - acc_test_uncertain_mlp)
+                if (acc_test_uncertain_mlp is not None and acc_test_uncertain_v3 is not None)
+                else None
+            ),
+        },
         "correction_analysis": {
             "n_changed": int(test_changed.sum()),
             "n_helped": n_helped,
             "n_hurt": n_hurt,
             "n_neutral": n_neutral,
             "correction_precision": float(correction_precision),
+            "changed_fraction_test": float(test_changed.mean()),
+            "harmful_overwrite_rate_non_neutral": float(1.0 - correction_precision),
         },
         "reliability_stats": {
             "mean_all": float(reliability.mean()),
@@ -434,10 +615,18 @@ def final_method_v3(
             "selection": float(selection_time),
             "total": float(total_time),
         },
-        "search_space_size": len(tau_candidates) * len(rho_candidates) * len(profiles),
+        "search_space_size": int(best.get("search_space_size", 0)),
     }
     if local_configs:
         info["search_space_size"] *= len(local_configs)
+    if info["gate_mode"] == "adaptive":
+        split_label = split_id if split_id is not None else "?"
+        print(
+            f"[AdaptiveGate] split={split_label} | n_pos={info['gate_stats']['n_pos_val']} "
+            f"n_neg={info['gate_stats']['n_neg_val']} | routed to correction: "
+            f"{100.0 * info['gate_stats']['uncertain_fraction_test']:.1f}% of test nodes | "
+            f"gate BCE loss: {info['gate_stats']['gate_bce_loss']:.3f}"
+        )
     if include_node_arrays:
         test_idx_local = test_np
         was_correct_before_test = (mlp_pred_all[test_idx_local] == y_true[test_idx_local])
