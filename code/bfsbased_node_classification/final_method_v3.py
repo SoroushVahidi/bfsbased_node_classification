@@ -3,7 +3,7 @@
 FINAL METHOD v3: Reliability-Gated Selective Graph Correction.
 
 A clean, principled simplification of V2_MULTIBRANCH, designed for
-a Pattern Recognition Letters submission.
+a research paper submission.
 
 Method summary:
   1. Train feature-only MLP as base classifier

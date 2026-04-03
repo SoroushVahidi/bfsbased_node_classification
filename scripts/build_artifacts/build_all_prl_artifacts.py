@@ -3,7 +3,7 @@
 Regenerate all cheap PRL manuscript artifacts from canonical logs/ and results_prl/.
 
 Run from repo root:
-  python3 scripts/prl_final_additions/build_all_prl_artifacts.py
+  python3 scripts/build_artifacts/build_all_prl_artifacts.py
 """
 from __future__ import annotations
 

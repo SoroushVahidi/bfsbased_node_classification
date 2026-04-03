@@ -1,7 +1,8 @@
-# Repository Status
+# Repository status
 
 This file describes the current state of the repository: which packages are
-canonical, which are legacy, and which are still exploratory.
+canonical, which are legacy, and which are still exploratory. See
+[`REPO_STATUS.md`](../REPO_STATUS.md) for a shorter version at the root level.
 
 ---
 
@@ -9,8 +10,8 @@ canonical, which are legacy, and which are still exploratory.
 
 **Status: ✅ Frozen — do not modify result files**
 
-The canonical package for the research paper submission is **FINAL_V3** (reliability-gated
-selective graph correction on top of a strong MLP).
+The canonical package for this research paper submission is **FINAL_V3**
+(reliability-gated selective graph correction on top of a strong MLP).
 
 ### Frozen evidence files
 
@@ -46,10 +47,10 @@ selective graph correction on top of a strong MLP).
 The original uncertainty-gated selective correction line. Useful as background
 and supplementary context but **not** the paper's main evidence.
 
-### Key locations
+### Key locations (archived)
 
 - Runner: `code/bfsbased_node_classification/manuscript_runner.py`
-- Core module (all variants): `code/bfsbased_node_classification/bfsbased-full-investigate-homophil.py`
+- Core module: `code/bfsbased_node_classification/bfsbased-full-investigate-homophil.py`
 - Tables: `archive/legacy_venue_specific/tables_prl_final_additions/`
 - Figures: `archive/legacy_venue_specific/figures_prl_final_additions/`
 - Reports: `archive/legacy_venue_specific/reports_prl_final_additions/`
@@ -65,13 +66,12 @@ and supplementary context but **not** the paper's main evidence.
 The structural extension adds a far-structural support term to the selective
 correction. Evidence is promising but mixed; not a replacement for FINAL_V3.
 
-### Key locations
+### Key locations (archived)
 
 - Runner: `code/bfsbased_node_classification/resubmission_runner.py`
 - Tables: `archive/legacy_venue_specific/tables_prl_resubmission/`
 - Logs: `archive/legacy_venue_specific/logs_prl_resubmission/`
 - Reports: `archive/legacy_venue_specific/reports_resubmission_protocols/`
-- Status: `archive/legacy_venue_specific/reports_resubmission_protocols/RUN_STATUS.md`
 
 ---
 
@@ -87,13 +87,26 @@ Standalone GCN baseline for Table 1 comparison.
 
 ---
 
-## Archived / superseded
+## Benchmark suite
+
+**Status: 🔧 Integration-ready — runners exist, full sweep not yet complete**
+
+External graph learning baselines integrated via `benchmark/`.
+
+- Registry: `benchmark/baseline_registry.yaml`
+- Runner: `benchmark/run_benchmark_suite.py`
+- Docs: `benchmark/docs/`
+
+---
+
+## Archived materials
 
 **Status: 🗄️ Kept for provenance — do not use for paper claims**
 
 | Location | Description |
 |----------|-------------|
 | `reports/archive/` | Superseded exports and older result files |
+| `archive/legacy_venue_specific/` | Materials from earlier venue-specific submission cycle |
 | `code/bfsbased_node_classification/experimental_archived/` | Legacy diagnostic scripts |
 
 ---
@@ -106,4 +119,5 @@ Standalone GCN baseline for Table 1 comparison.
 | Uncertainty-gated SGC | **UG-SGC** | 📁 Legacy / supplementary |
 | Structural extension | **UG-SGC-S** | 🔬 Exploratory / partial |
 | GCN/APPNP baselines | **baselines** | ✅ Complete |
+| Benchmark suite | **benchmark** | 🔧 Integration-ready |
 | Superseded exports | — | 🗄️ Archived |

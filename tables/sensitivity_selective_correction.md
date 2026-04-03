@@ -1,4 +1,4 @@
-# Reliability threshold ρ — sensitivity (PRL supplementary)
+# Reliability threshold ρ — sensitivity (supplementary)
 
 Mean test Δ vs MLP (percentage points) on **Chameleon, Cora, Texas** when ρ is fixed in a grid and other hyperparameters follow the historical evaluation protocol.
 

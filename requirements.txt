@@ -18,4 +18,4 @@ matplotlib>=3.6.0
 
 # ── Table/figure regeneration only (no PyTorch needed) ───────────────────────
 # numpy and matplotlib (already listed above) are sufficient for:
-#   bash scripts/run_all_prl_results.sh
+#   bash scripts/run_all_selective_correction_results.sh

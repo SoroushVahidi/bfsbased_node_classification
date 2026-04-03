@@ -9,7 +9,7 @@
 
 This repository is a frozen evidence package for **FINAL_V3** — a
 reliability-gated selective graph correction method that wraps a strong MLP —
-submitted as a short paper to Pattern Recognition Letters (PRL).
+accompanying a research paper submission.
 
 ---
 
@@ -32,7 +32,7 @@ graph correction only to those low-reliability nodes.
 - `UG-SGC` (older uncertainty-gated line; uses confidence thresholding, not
   reliability gating; lives in `manuscript_runner.py`)
 - `UG-SGC-S` (structural extension; exploratory; lives in
-  `prl_resubmission_runner.py`)
+  `resubmission_runner.py`)
 
 ---
 
@@ -41,19 +41,19 @@ graph correction only to those low-reliability nodes.
 | Artifact | Path | Note |
 |----------|------|------|
 | Per-split numerical log | `reports/final_method_v3_results.csv` | **FROZEN** — do not overwrite |
-| Main results table (MD) | `tables/main_results_prl.md` | Regenerated from CSV |
-| Main results table (CSV) | `tables/main_results_prl.csv` | Regenerated from CSV |
-| Experimental setup table | `tables/experimental_setup_prl.{md,csv}` | |
-| Ablation table | `tables/ablation_prl.{md,csv}` | |
-| Sensitivity table | `tables/sensitivity_prl.{md,csv}` | |
+| Main results table (MD) | `tables/main_results_selective_correction.md` | Regenerated from CSV |
+| Main results table (CSV) | `tables/main_results_selective_correction.csv` | Regenerated from CSV |
+| Experimental setup table | `tables/experimental_setup_selective_correction.{md,csv}` | |
+| Ablation table | `tables/ablation_selective_correction.{md,csv}` | |
+| Sensitivity table | `tables/sensitivity_selective_correction.{md,csv}` | |
 | Safety analysis | `reports/safety_analysis.md` | |
 | Method analysis narrative | `reports/final_method_v3_analysis.md` | |
-| Graphical abstract | `figures/prl_graphical_abstract_v3.{png,pdf,svg}` | |
+| Graphical abstract | `figures/graphical_abstract_selective_correction_v3.{png,pdf,svg}` | |
 
 Regenerate all tables and figures (no training, ~5 s):
 
 ```bash
-bash scripts/run_all_prl_results.sh
+bash scripts/run_all_selective_correction_results.sh
 ```
 
 ---
@@ -62,9 +62,9 @@ bash scripts/run_all_prl_results.sh
 
 | Category | Location | Description |
 |----------|----------|-------------|
-| **Canonical / frozen** | `reports/final_method_v3_results.csv`, `tables/main_results_prl.*`, `figures/prl_graphical_abstract_v3.*` | Do not edit; reproduce only from the frozen CSV |
-| **Legacy / supplementary** | `logs/*manuscript_final_validation*`, `tables/prl_final_additions/`, `reports/prl_final_additions/`, `results_prl/` | UG-SGC line; useful provenance but not the paper's main evidence |
-| **Exploratory / partial** | `logs/prl_resubmission/`, `tables/prl_resubmission/`, `reports/prl_resubmission/` | UG-SGC-S structural extension; some runs may still be incomplete |
+| **Canonical / frozen** | `reports/final_method_v3_results.csv`, `tables/main_results_selective_correction.*`, `figures/graphical_abstract_selective_correction_v3.*` | Do not edit; reproduce only from the frozen CSV |
+| **Legacy / supplementary** | `logs/*manuscript_final_validation*`, `archive/legacy_venue_specific/tables_prl_final_additions/`, `archive/legacy_venue_specific/reports_prl_final_additions/`, `archive/legacy_venue_specific/results_prl/` | UG-SGC line; useful provenance but not the paper's main evidence |
+| **Exploratory / partial** | `archive/legacy_venue_specific/logs_prl_resubmission/`, `archive/legacy_venue_specific/tables_prl_resubmission/`, `archive/legacy_venue_specific/reports_resubmission_protocols/` | UG-SGC-S structural extension; some runs may still be incomplete |
 | **Historical / superseded** | `reports/archive/` | Older exports; kept for provenance only |
 
 ---
@@ -74,19 +74,19 @@ bash scripts/run_all_prl_results.sh
 ### Main benchmark (Table 1 equivalent)
 
 - Source data: `reports/final_method_v3_results.csv`
-- Rendered table: `tables/main_results_prl.md`
-- Build script: `scripts/prl_final_additions/build_prl_v3_figures_and_tables.py`
+- Rendered table: `tables/main_results_selective_correction.md`
+- Build script: `scripts/build_artifacts/build_prl_v3_figures_and_tables.py`
 
 ### Graphical abstract / correction-rate figure
 
-- `figures/prl_graphical_abstract_v3.png`
+- `figures/graphical_abstract_selective_correction_v3.png`
 - `figures/correction_rate_vs_homophily.png`
-- Build script: `scripts/prl_final_additions/build_prl_v3_figures_and_tables.py`
+- Build script: `scripts/build_artifacts/build_prl_v3_figures_and_tables.py`
 
 ### Safety analysis
 
 - `reports/safety_analysis.md` (harmful-split counts, table)
-- Build script: `scripts/prl_final_additions/build_prl_v3_figures_and_tables.py`
+- Build script: `scripts/build_artifacts/build_prl_v3_figures_and_tables.py`
 
 ### GCN baseline (Table 1 comparison row)
 
@@ -96,9 +96,9 @@ bash scripts/run_all_prl_results.sh
 
 ### Threshold sensitivity (supplementary)
 
-- `results_prl/threshold_sensitivity_crossruns.jsonl`
-- `results_prl/threshold_sensitivity_mini_table_tertiles.csv`
-- Build script: `results_prl/build_threshold_sensitivity_artifacts.py`
+- `archive/legacy_venue_specific/results_prl/threshold_sensitivity_crossruns.jsonl`
+- `archive/legacy_venue_specific/results_prl/threshold_sensitivity_mini_table_tertiles.csv`
+- Build script: `archive/legacy_venue_specific/results_prl/build_threshold_sensitivity_artifacts.py`
 
 ---
 
@@ -106,11 +106,12 @@ bash scripts/run_all_prl_results.sh
 
 1. **Treating UG-SGC results as the paper's main numbers.**  
    The canonical results are in `reports/final_method_v3_results.csv` and
-   `tables/main_results_prl.*`, not in `tables/prl_final_additions/` or
+   `tables/main_results_selective_correction.*`, not in
+   `archive/legacy_venue_specific/tables_prl_final_additions/` or
    `logs/manuscript_*`.
 
-2. **Confusing `results_prl/` with FINAL_V3 outputs.**  
-   `results_prl/` contains a threshold-sensitivity cross-run package from the
+2. **Confusing archived threshold-sensitivity with FINAL_V3 outputs.**  
+   `archive/legacy_venue_specific/results_prl/` contains a threshold-sensitivity cross-run package from the
    older UG-SGC line. It is supplementary context, not the main evidence.
 
 3. **Thinking the structural extension (UG-SGC-S) replaces FINAL_V3.**  
@@ -136,7 +137,7 @@ bash scripts/run_all_prl_results.sh
 
 1. `README.md` — high-level overview and quick start
 2. `REPO_STATUS.md` — what is canonical, legacy, and exploratory
-3. `reports/final_method_v3_analysis.md` — frozen PRL submission analysis
-4. `tables/main_results_prl.md` — main benchmark table
+3. `reports/final_method_v3_analysis.md` — frozen submission analysis
+4. `tables/main_results_selective_correction.md` — main benchmark table
 5. `reports/safety_analysis.md` — harmful-split analysis
-6. `README_PRL_MANUSCRIPT.md` — full manuscript artifact index
+6. `README_MANUSCRIPT_ARTIFACTS.md` — full manuscript artifact index

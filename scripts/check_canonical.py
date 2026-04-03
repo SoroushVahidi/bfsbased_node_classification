@@ -27,14 +27,14 @@ CANONICAL_DATA_FILES = [
     # Frozen numerical evidence
     "reports/final_method_v3_results.csv",
     # Main benchmark table
-    "tables/main_results_prl.md",
-    "tables/main_results_prl.csv",
+    "tables/main_results_selective_correction.md",
+    "tables/main_results_selective_correction.csv",
     # Supporting tables
-    "tables/experimental_setup_prl.md",
-    "tables/ablation_prl.md",
-    "tables/sensitivity_prl.md",
+    "tables/experimental_setup_selective_correction.md",
+    "tables/ablation_selective_correction.md",
+    "tables/sensitivity_selective_correction.md",
     # Figures
-    "figures/prl_graphical_abstract_v3.png",
+    "figures/graphical_abstract_selective_correction_v3.png",
     "figures/correction_rate_vs_homophily.png",
     "figures/safety_comparison.png",
     "figures/reliability_vs_accuracy.png",
@@ -55,14 +55,14 @@ CANONICAL_SCRIPTS = [
     "code/bfsbased_node_classification/manuscript_runner.py",
     "code/bfsbased_node_classification/gcn_baseline_runner.py",
     # Build / refresh
-    "scripts/run_all_prl_results.sh",
+    "scripts/run_all_selective_correction_results.sh",
 ]
 
 CANONICAL_DOCS = [
     "README.md",
     "ANALYSIS_GUIDE.md",
     "REPO_STATUS.md",
-    "README_PRL_MANUSCRIPT.md",
+    "README_MANUSCRIPT_ARTIFACTS.md",
     "scripts/README_REPRODUCE.md",
 ]
 

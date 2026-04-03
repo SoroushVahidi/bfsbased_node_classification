@@ -17,7 +17,7 @@ Full benchmark reproduction (MLP, SGC v1, V2 ablation, FINAL_V3)::
 
 Regenerate tables and figures from the frozen per-split CSV (no training)::
 
-    bash scripts/run_all_prl_results.sh
+    bash scripts/run_all_selective_correction_results.sh
 """
 from __future__ import annotations
 
