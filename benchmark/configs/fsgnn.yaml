@@ -1,0 +1,7 @@
+hidden_channels: 64
+dropout: 0.5
+lr: 0.01
+weight_decay: 5.0e-4
+epochs: 1000
+patience: 100
+K: 3

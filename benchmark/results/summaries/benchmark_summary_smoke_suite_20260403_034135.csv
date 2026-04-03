@@ -1,0 +1,3 @@
+method,dataset,split_id,seed,success,val_acc,test_acc,runtime_sec,notes
+gprgnn,cora,0,42,True,0.889447,0.871227,10.1,Inline reimplementation. Best epoch: 23.
+h2gcn,cora,0,42,True,0.880653,0.863179,3.013,"Inline reimplementation, ego+1hop+2hop. Best epoch: 11."
