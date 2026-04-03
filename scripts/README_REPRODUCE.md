@@ -2,6 +2,11 @@
 
 This repository is the **evidence package** for a Pattern Recognition Letters submission. The canonical numerical results are **frozen** in `reports/final_method_v3_results.csv` (**10 GEO-GCN splits** per dataset, indices 0–9).
 
+> ⚠️ **Safety rule:** Always pass `--output-tag <name>` when running any
+> experiment script. Without a tag, some scripts write to the default canonical
+> output path and may overwrite frozen evidence. See the "If you must re-evaluate
+> from scratch" section below for the safe pattern.
+
 ## One-command refresh (recommended)
 
 From the repository root:
@@ -54,7 +59,13 @@ python3 code/bfsbased_node_classification/run_final_evaluation.py \
   --splits 0 1 2 3 4 5 6 7 8 9
 ```
 
-That **overwrites** `reports/final_method_v3_results.csv` in the default configuration; keep backups if you are comparing against the shipped evidence package.
+That **overwrites** `reports/final_method_v3_results.csv` in the default
+configuration; keep backups if you are comparing against the shipped evidence
+package.
+
+> ⚠️ **Always** use `--output-tag <name>` for any re-run you do not intend to
+> make canonical. This writes results to `reports/final_method_v3_results_<name>.csv`
+> instead of the frozen canonical path.
 
 Use `--output-tag <name>` if you want a side-by-side rerun without touching the
 canonical CSV:
