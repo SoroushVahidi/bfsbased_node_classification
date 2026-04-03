@@ -356,7 +356,7 @@ def final_method_v3(
             * len(rho_candidates)
             * len(profiles)
             * len(b6_candidates)
-            * (len(local_configs) if local_configs is not None else 1)
+            * (len(local_cfgs) if local_configs is not None else 1)
         ),
     }
     if include_node_arrays:
