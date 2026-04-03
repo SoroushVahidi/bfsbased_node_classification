@@ -117,7 +117,6 @@ def final_method_v3(
     gate: Optional[str] = None,
     include_node_arrays: bool = True,
     enable_lowconf_structural_term: bool = False,
-    lowconf_structural_mode: str = "diffusion",
     lowconf_structural_b6_candidates: Optional[List[float]] = None,
     local_configs: Optional[List[Dict[str, float]]] = None,
     test_local_multiplier: float = 1.0,
