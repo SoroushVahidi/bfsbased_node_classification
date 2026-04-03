@@ -124,10 +124,14 @@ def run_bucket_safety(
     out_table_csv: str,
     out_table_md: str,
 ) -> Dict[str, Any]:
-    os.makedirs(os.path.dirname(out_per_node), exist_ok=True)
-    os.makedirs(os.path.dirname(out_report), exist_ok=True)
-    os.makedirs(os.path.dirname(out_table_csv), exist_ok=True)
+    def _makedirs_for_output(path: str) -> None:
+        d = os.path.dirname(path)
+        if d:
+            os.makedirs(d, exist_ok=True)
 
+    _makedirs_for_output(out_per_node)
+    _makedirs_for_output(out_report)
+    _makedirs_for_output(out_table_csv)
     mod = _load_module()
     per_node_rows: List[Dict[str, Any]] = []
     per_bucket_rows: List[Dict[str, Any]] = []
