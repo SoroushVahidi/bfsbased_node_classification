@@ -20,9 +20,23 @@ import sys
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
-import pandas as pd
 import torch
 
+
+class _MissingPandas:
+    def __getattr__(self, name: str):
+        raise ImportError(
+            "pandas is required only for dataframe/export functionality in "
+            "run_margin_bucket_safety_experiment.py, but it is not installed. "
+            "Install pandas to use those output paths, or run in an environment "
+            "where pandas is available."
+        )
+
+
+try:
+    import pandas as pd
+except ImportError:
+    pd = _MissingPandas()
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 if HERE not in sys.path:
