@@ -1,0 +1,160 @@
+baselines:
+  - method_name: GPRGNN
+    source_repo_url: "https://github.com/jianhao2016/GPRGNN"
+    paper_name: "Adaptive Universal Generalized PageRank Graph Neural Network"
+    official_or_unofficial: true
+    license_if_known: MIT
+    expected_entrypoint: "benchmark/runners/run_gprgnn.py"
+    expected_env_notes: "PyTorch >= 1.9, PyTorch Geometric >= 2.0"
+    dataset_support:
+      - cora
+      - citeseer
+      - pubmed
+      - chameleon
+      - squirrel
+      - texas
+      - cornell
+      - wisconsin
+      - actor
+    status: wrapped
+    blocker_notes: "Inline reimplementation using PyG sparse ops. No external repo clone needed."
+
+  - method_name: GCNII
+    source_repo_url: "https://github.com/chennnM/GCNII"
+    paper_name: "Simple and Deep Graph Convolutional Networks"
+    official_or_unofficial: true
+    license_if_known: MIT
+    expected_entrypoint: "benchmark/runners/run_gcnii.py"
+    expected_env_notes: "PyTorch >= 1.9, PyTorch Geometric >= 2.0"
+    dataset_support:
+      - cora
+      - citeseer
+      - pubmed
+      - chameleon
+      - squirrel
+      - texas
+      - cornell
+      - wisconsin
+      - actor
+    status: wrapped
+    blocker_notes: "Inline reimplementation. Initial residual + identity mapping implemented manually."
+
+  - method_name: H2GCN
+    source_repo_url: "https://github.com/GemsLab/H2GCN"
+    paper_name: "Beyond Homophily in Graph Neural Networks: Current Limitations and Effective Designs"
+    official_or_unofficial: true
+    license_if_known: MIT
+    expected_entrypoint: "benchmark/runners/run_h2gcn.py"
+    expected_env_notes: "PyTorch >= 1.9, PyTorch Geometric >= 2.0"
+    dataset_support:
+      - cora
+      - citeseer
+      - pubmed
+      - chameleon
+      - squirrel
+      - texas
+      - cornell
+      - wisconsin
+      - actor
+    status: wrapped
+    blocker_notes: "Inline reimplementation. Ego/neighbor separation with 2-hop aggregation."
+
+  - method_name: LINKX
+    source_repo_url: "https://github.com/CUAI/Non-Homophily-Large-Scale"
+    paper_name: "Large Scale Learning on Non-Homophilous Graphs: New Benchmarks and Strong Simple Methods"
+    official_or_unofficial: true
+    license_if_known: MIT
+    expected_entrypoint: "benchmark/runners/run_linkx.py"
+    expected_env_notes: "PyTorch >= 1.9, PyTorch Geometric >= 2.0"
+    dataset_support:
+      - cora
+      - citeseer
+      - pubmed
+      - chameleon
+      - squirrel
+      - texas
+      - cornell
+      - wisconsin
+      - actor
+    status: wrapped
+    blocker_notes: "Inline reimplementation. Feature and adjacency branches combined."
+
+  - method_name: FSGNN
+    source_repo_url: "https://github.com/sunilkmaurya/FSGNN"
+    paper_name: "Understanding over-squashing and bottlenecks on graphs via curvature"
+    official_or_unofficial: true
+    license_if_known: MIT
+    expected_entrypoint: "benchmark/runners/run_fsgnn.py"
+    expected_env_notes: "PyTorch >= 1.9, PyTorch Geometric >= 2.0"
+    dataset_support:
+      - cora
+      - citeseer
+      - pubmed
+      - chameleon
+      - squirrel
+      - texas
+      - cornell
+      - wisconsin
+      - actor
+    status: wrapped
+    blocker_notes: "Inline reimplementation. Multi-scale feature smoothing with MLP classifier."
+
+  - method_name: ACM-GNN
+    source_repo_url: "https://github.com/SitaoLuan/ACM-GNN"
+    paper_name: "Revisiting Heterophily For Graph Neural Networks"
+    official_or_unofficial: true
+    license_if_known: MIT
+    expected_entrypoint: "benchmark/runners/run_acmgnn.py"
+    expected_env_notes: "PyTorch >= 1.9, PyTorch Geometric >= 2.0"
+    dataset_support:
+      - cora
+      - citeseer
+      - pubmed
+      - chameleon
+      - squirrel
+      - texas
+      - cornell
+      - wisconsin
+      - actor
+    status: wrapped
+    blocker_notes: "Inline reimplementation. Adaptive channel mixing over LP, HP, and identity."
+
+  - method_name: OrderedGNN
+    source_repo_url: "https://github.com/LUMIA-Group/OrderedGNN"
+    paper_name: "Ordered GNN: Ordering Message Passing to Deal with Heterophily and Over-smoothing"
+    official_or_unofficial: true
+    license_if_known: MIT
+    expected_entrypoint: "benchmark/runners/run_orderedgnn.py"
+    expected_env_notes: "PyTorch >= 1.9, PyTorch Geometric >= 2.0"
+    dataset_support:
+      - cora
+      - citeseer
+      - pubmed
+      - chameleon
+      - squirrel
+      - texas
+      - cornell
+      - wisconsin
+      - actor
+    status: planned
+    blocker_notes: "Requires chunk-based ordered propagation mechanism. Planned for Phase C integration."
+
+  - method_name: DJ-GNN
+    source_repo_url: "https://github.com/BUPT-GAMMA/DJ-GNN"
+    paper_name: "Decoupled Graph Neural Networks for Large Dynamic Graphs"
+    official_or_unofficial: true
+    license_if_known: MIT
+    expected_entrypoint: "benchmark/runners/run_djgnn.py"
+    expected_env_notes: "PyTorch >= 1.9, PyTorch Geometric >= 2.0"
+    dataset_support:
+      - cora
+      - citeseer
+      - pubmed
+      - chameleon
+      - squirrel
+      - texas
+      - cornell
+      - wisconsin
+      - actor
+    status: planned
+    blocker_notes: "Requires decoupled feature and topology learning. Planned for Phase C integration."
