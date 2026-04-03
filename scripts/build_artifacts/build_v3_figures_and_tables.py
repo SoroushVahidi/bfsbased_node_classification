@@ -441,7 +441,7 @@ def write_md(path: Path, header: list[str], rows: list[list[str]]) -> None:
         "Source: `reports/final_method_v3_results.csv` — **10 GEO-GCN splits** (indices 0–9) per dataset, same protocol as the FINAL_V3 evaluation logs.",
         "",
         "Regenerate this table and the figure set:",
-        "`python3 scripts/build_artifacts/build_prl_v3_figures_and_tables.py`",
+        "`python3 scripts/build_artifacts/build_v3_figures_and_tables.py`",
         "(reads existing CSVs only; no experiments).",
         "",
         "| " + " | ".join(header) + " |",

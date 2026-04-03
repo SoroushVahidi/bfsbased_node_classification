@@ -75,18 +75,18 @@ bash scripts/run_all_selective_correction_results.sh
 
 - Source data: `reports/final_method_v3_results.csv`
 - Rendered table: `tables/main_results_selective_correction.md`
-- Build script: `scripts/build_artifacts/build_prl_v3_figures_and_tables.py`
+- Build script: `scripts/build_artifacts/build_v3_figures_and_tables.py`
 
 ### Graphical abstract / correction-rate figure
 
 - `figures/graphical_abstract_selective_correction_v3.png`
 - `figures/correction_rate_vs_homophily.png`
-- Build script: `scripts/build_artifacts/build_prl_v3_figures_and_tables.py`
+- Build script: `scripts/build_artifacts/build_v3_figures_and_tables.py`
 
 ### Safety analysis
 
 - `reports/safety_analysis.md` (harmful-split counts, table)
-- Build script: `scripts/build_artifacts/build_prl_v3_figures_and_tables.py`
+- Build script: `scripts/build_artifacts/build_v3_figures_and_tables.py`
 
 ### GCN baseline (Table 1 comparison row)
 

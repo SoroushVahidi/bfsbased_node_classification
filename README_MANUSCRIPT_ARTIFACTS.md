@@ -58,7 +58,7 @@ table. See [`REPO_STATUS.md`](REPO_STATUS.md) for the full boundary description.
 
 | Purpose | Location |
 |--------|----------|
-| Extended tables/figures + inventory | `python3 scripts/build_artifacts/build_all_prl_artifacts.py` |
+| Extended tables/figures + inventory | `python3 scripts/build_artifacts/build_all_artifacts.py` |
 | Phase 1 audit + inventory | `archive/legacy_venue_specific/reports_prl_final_additions/PRL_PHASE1_AUDIT.md`, `artifact_inventory.json` |
 | Phase 2 gap analysis | `archive/legacy_venue_specific/reports_prl_final_additions/PRL_PHASE2_GAP_ANALYSIS.md` |
 | Results §3 (gate / threshold) notes | `archive/legacy_venue_specific/reports_prl_final_additions/PRL_RESULTS_SUBSECTION_3.md` |

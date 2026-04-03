@@ -83,7 +83,7 @@ python3 code/bfsbased_node_classification/run_final_evaluation.py \
 Additional tables/figures derived from `logs/` and `scripts/build_artifacts/`:
 
 ```bash
-python3 scripts/build_artifacts/build_all_prl_artifacts.py
+python3 scripts/build_artifacts/build_all_artifacts.py
 ```
 
 This runs several plotting/table scripts. Expect **tens of seconds** if Matplotlib is warm.
