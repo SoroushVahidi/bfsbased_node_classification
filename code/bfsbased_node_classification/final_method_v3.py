@@ -115,7 +115,7 @@ def final_method_v3(
     weights: Optional[Dict[str, float]] = None,
     split_id: Optional[int] = None,
     gate: Optional[str] = None,
-    include_node_arrays: bool = True,
+    include_node_arrays: bool = False,
     enable_lowconf_structural_term: bool = False,
     lowconf_structural_b6_candidates: Optional[List[float]] = None,
     local_configs: Optional[List[Dict[str, float]]] = None,
