@@ -72,9 +72,12 @@ bfsbased_node_classification/
 │       ├── final_method_v3.py          ← FINAL_V3 implementation
 │       ├── run_final_evaluation.py     ← 10-split benchmark driver
 │       ├── manuscript_runner.py        ← MLP vs SGC runner (UG-SGC line)
-│       ├── resubmission_runner.py      ← GCN/APPNP baselines + ablations
+│       ├── resubmission_runner.py      ← GCN/APPNP/PairNorm/FSGNN/GPRGNN baselines + ablations
 │       ├── gcn_baseline_runner.py      ← standalone GCN Table 1 baseline
-│       ├── standard_node_baselines.py  ← shared GCN/APPNP training helpers
+│       ├── pairnorm_baseline_runner.py ← standalone external DeepGCN+PairNorm baseline
+│       ├── fsgnn_baseline_runner.py    ← standalone external FSGNN baseline
+│       ├── gprgnn_baseline_runner.py   ← standalone external GPRGNN baseline
+│       ├── standard_node_baselines.py  ← shared GCN/APPNP/PairNorm/FSGNN/GPRGNN helpers
 │       ├── bfsbased-full-investigate-homophil.py  ← core module (all variants)
 │       └── experimental_archived/     ← legacy diagnostic scripts
 │
@@ -124,6 +127,9 @@ mix them:
 | Reliability-gated selective correction | **FINAL_V3** | ✅ Canonical / frozen | `code/final_method_v3.py` |
 | Uncertainty-gated selective correction | **UG-SGC** | 📁 Legacy / supplementary | `code/bfsbased_node_classification/manuscript_runner.py` |
 | Structural extension | **UG-SGC-S** | 🔬 Exploratory / partial | `code/bfsbased_node_classification/resubmission_runner.py` |
+
+External baselines (e.g., PairNorm, FSGNN, GPRGNN) are included for comparison only and are not
+part of canonical `FINAL_V3`.
 
 See [`REPO_STATUS.md`](REPO_STATUS.md) for a complete inventory.
 

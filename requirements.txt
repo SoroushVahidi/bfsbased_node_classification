@@ -16,6 +16,11 @@ matplotlib>=3.6.0
 # ── Optional (only for HPC / Slurm job submission) ──────────────────────────
 # No additional Python packages required.
 
+# ── Optional developer tooling ────────────────────────────────────────────────
+# Basic linting command used in AGENTS.md:
+#   python3 -m flake8 code/bfsbased_node_classification/ --max-line-length 120
+flake8>=7.0.0
+
 # ── Table/figure regeneration only (no PyTorch needed) ───────────────────────
 # numpy and matplotlib (already listed above) are sufficient for:
 #   bash scripts/run_all_selective_correction_results.sh
