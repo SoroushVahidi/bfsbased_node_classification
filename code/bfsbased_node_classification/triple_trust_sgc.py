@@ -115,11 +115,18 @@ def _compute_prototypes(
 
 def _feature_similarity_from_prototypes(x_np: np.ndarray, prototypes: np.ndarray, eps: float) -> np.ndarray:
     x_norm = np.linalg.norm(x_np, axis=1, keepdims=True) + eps
-    p_norm = np.linalg.norm(prototypes, axis=1, keepdims=True).T + eps
-    sim = (x_np @ prototypes.T) / (x_norm * p_norm)
-    return np.clip((sim + 1.0) / 2.0, 0.0, 1.0)
+    proto_norm = np.linalg.norm(prototypes, axis=1)
+    valid_proto = proto_norm > eps
 
+    transformed = np.zeros((x_np.shape[0], prototypes.shape[0]), dtype=np.float64)
+    if not np.any(valid_proto):
+        return transformed
 
+    valid_prototypes = prototypes[valid_proto]
+    valid_p_norm = proto_norm[valid_proto][np.newaxis, :]
+    sim = (x_np @ valid_prototypes.T) / (x_norm * valid_p_norm)
+    transformed[:, valid_proto] = np.clip((sim + 1.0) / 2.0, 0.0, 1.0)
+    return transformed
 def _compute_trust_neighbor_and_labelability(
     neighbors: list[list[int]],
     yhat: np.ndarray,
@@ -228,12 +235,13 @@ def triple_trust_sgc_predictclass(
 
     Returns (val_acc, test_acc, info).
     """
+    _ = seed  # deterministic behavior comes from caller-set seeds in current runners.
+
     if mod is None:
         raise ValueError(
-            "triple_trust_sgc_predictclass requires `mod` (the loaded bfsbased module) "
-            "for MLP training and margin computation."
+            "mod must be provided; it is required for compute_mlp_margin and related utilities. "
+            "Pass the manuscript module as mod=, and optionally supply pre-computed mlp_probs."
         )
-    _ = seed  # deterministic behavior comes from caller-set seeds in current runners.
 
     y_true = data.y.detach().cpu().numpy().astype(np.int64)
     n_nodes = int(data.num_nodes)
@@ -270,12 +278,15 @@ def triple_trust_sgc_predictclass(
 
     # init state
     yhat = mlp_pred.copy()
+    # Keep labeled training nodes fixed to their ground-truth labels.
     yhat[train_mask] = y_true[train_mask]
     q = norm_margin.copy()
     tau_class = np.full(n_classes, 1.0 / float(n_classes), dtype=np.float64)
     s = _compute_source_trust(train_mask, pseudo_mask, yhat, q, tau_class, deg, gamma_source, lambda_deg)
 
+    # Training nodes must never be treated as pseudo-updated/corrected nodes.
     pseudo_update_mask = np.zeros(n_nodes, dtype=bool)
+    pseudo_update_mask[train_mask] = False
     trusted_mass, tau_class = _trusted_mass_and_tau(yhat, s, train_mask, pseudo_update_mask, n_classes, alpha_class)
     compat = _init_compat_from_train(y_true, train_mask, src, dst, n_classes)
 
@@ -324,23 +335,25 @@ def triple_trust_sgc_predictclass(
         top2 = np.max(tmp, axis=1)
         score_gap = _norm01(top1 - top2)
 
-        agreement_signal = np.zeros(n_nodes, dtype=np.float64)
-        valid_neighbor_vote = neigh_mass > float(eps)
-        if np.any(valid_neighbor_vote):
-            neighbor_vote = np.argmax(ns[valid_neighbor_vote], axis=1)
-            agreement_signal[valid_neighbor_vote] = (
-                mlp_pred[valid_neighbor_vote] == neighbor_vote
-            ).astype(np.float64)
+        neighbor_vote = np.argmax(ns, axis=1)
+        has_trusted_neighbor_mass = neigh_mass > float(eps)
+        agreement_signal = np.where(
+            has_trusted_neighbor_mass,
+            (mlp_pred == neighbor_vote).astype(np.float64),
+            0.0,
+        )
         q = np.clip(w[0] * norm_margin + w[1] * score_gap + w[2] * ell + w[3] * agreement_signal, 0.0, 1.0)
 
-        eligible_corr = mlp_margin < float(tau_uncertain)
+        # Training nodes must never be corrected; only non-train nodes are eligible.
+        eligible_corr = (mlp_margin < float(tau_uncertain)) & ~train_mask
         if enable_target_labelability_gate:
             eligible_corr = eligible_corr & (ell >= float(rho_target))
 
         final_pred = mlp_pred.copy()
         final_pred[eligible_corr] = pred_scores[eligible_corr]
-        yhat = final_pred.copy()
-        yhat[train_mask] = y_true[train_mask]
+        # Always restore ground-truth labels for training nodes.
+        final_pred[train_mask] = y_true[train_mask]
+        yhat = final_pred
 
         s = _compute_source_trust(train_mask, pseudo_mask, yhat, q, tau_class, deg, gamma_source, lambda_deg)
 
@@ -383,11 +396,13 @@ def triple_trust_sgc_predictclass(
 
     # final pass for reporting predictions using last state
     pred_final = np.argmax(last_scores, axis=1).astype(np.int64)
-    corr_mask = (mlp_margin < float(tau_uncertain))
+    # Training nodes must never be corrected in the final pass either.
+    corr_mask = (mlp_margin < float(tau_uncertain)) & ~train_mask
     if enable_target_labelability_gate:
         corr_mask = corr_mask & (last_ell >= float(rho_target))
     final_pred = mlp_pred.copy()
     final_pred[corr_mask] = pred_final[corr_mask]
+    final_pred[train_mask] = y_true[train_mask]
 
     val_acc = _simple_accuracy(y_true[val_np], final_pred[val_np])
     test_acc = _simple_accuracy(y_true[test_np], final_pred[test_np])

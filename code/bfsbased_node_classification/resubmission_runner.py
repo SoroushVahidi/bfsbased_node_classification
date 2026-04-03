@@ -426,6 +426,12 @@ def run_resubmission(
                                 "refresh_fraction": 0.25,
                                 "compatibility_update_eta": 0.2,
                                 "enable_target_labelability_gate": True,
+                                "q_weights": [0.35, 0.30, 0.25, 0.10],
+                                "b1": 1.0,
+                                "b2": 0.6,
+                                "b4": 0.5,
+                                "b5": 0.3,
+                                "max_refresh_rounds": 3,
                             }
                             _, acc_sgc, info = triple_trust_sgc_predictclass(
                                 data,
