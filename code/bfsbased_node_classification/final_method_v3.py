@@ -318,7 +318,6 @@ def final_method_v3(
         "selected_rho": float(best_rho),
         "weights": {k: float(v) for k, v in w.items()},
         "enable_lowconf_structural_term": bool(enable_lowconf_structural_term),
-        "lowconf_structural_mode_metadata": "not_implemented",
         "selected_b6": float(best_b6),
         "selected_local_config": best_local_cfg,
         "branch_fractions": {
