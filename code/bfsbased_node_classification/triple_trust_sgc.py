@@ -344,12 +344,15 @@ def triple_trust_sgc_predictclass(
         )
         q = np.clip(w[0] * norm_margin + w[1] * score_gap + w[2] * ell + w[3] * agreement_signal, 0.0, 1.0)
 
-        eligible_corr = mlp_margin < float(tau_uncertain)
+        # Training nodes must never be corrected; only non-train nodes are eligible.
+        eligible_corr = (mlp_margin < float(tau_uncertain)) & ~train_mask
         if enable_target_labelability_gate:
             eligible_corr = eligible_corr & (ell >= float(rho_target))
 
         final_pred = mlp_pred.copy()
         final_pred[eligible_corr] = pred_scores[eligible_corr]
+        # Always restore ground-truth labels for training nodes.
+        final_pred[train_mask] = y_true[train_mask]
         yhat = final_pred
 
         s = _compute_source_trust(train_mask, pseudo_mask, yhat, q, tau_class, deg, gamma_source, lambda_deg)
@@ -393,11 +396,13 @@ def triple_trust_sgc_predictclass(
 
     # final pass for reporting predictions using last state
     pred_final = np.argmax(last_scores, axis=1).astype(np.int64)
-    corr_mask = (mlp_margin < float(tau_uncertain))
+    # Training nodes must never be corrected in the final pass either.
+    corr_mask = (mlp_margin < float(tau_uncertain)) & ~train_mask
     if enable_target_labelability_gate:
         corr_mask = corr_mask & (last_ell >= float(rho_target))
     final_pred = mlp_pred.copy()
     final_pred[corr_mask] = pred_final[corr_mask]
+    final_pred[train_mask] = y_true[train_mask]
 
     val_acc = _simple_accuracy(y_true[val_np], final_pred[val_np])
     test_acc = _simple_accuracy(y_true[test_np], final_pred[test_np])

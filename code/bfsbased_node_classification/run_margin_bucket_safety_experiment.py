@@ -289,6 +289,8 @@ def run_bucket_safety(
                     "selected_rho": float(v3_info["selected_rho"]),
                     "selected_b6": float(v3_info.get("selected_b6", 0.0)),
                     "enable_lowconf_structural_term": bool(enable_lowconf_structural_term),
+                    "baseline_max_epochs": baseline_max_epochs,
+                    "baseline_patience": baseline_patience,
                 }
             )
 
@@ -322,24 +324,32 @@ def run_bucket_safety(
                 "final_v3_delta_vs_mlp": _weighted_mean(
                     group, "final_v3_delta_vs_mlp", "n_test_nodes"
                 ),
-                "final_v3_changed_fraction": _weighted_mean(
-                    group, "final_v3_changed_fraction", "n_test_nodes"
-                ),
                 "final_v3_beneficial_change_count": int(
                     group["final_v3_beneficial_change_count"].sum()
                 ),
                 "final_v3_harmful_change_count": int(
                     group["final_v3_harmful_change_count"].sum()
                 ),
-                "final_v3_harmful_overwrite_rate": _weighted_mean(
-                    group, "final_v3_harmful_overwrite_rate", "n_test_nodes"
-                ),
-                "final_v3_correction_precision": _weighted_mean(
-                    group, "final_v3_correction_precision", "n_test_nodes"
-                ),
             }
         )
     bucket_main = pd.DataFrame(bucket_main_rows)
+    # Derive rate columns from the summed counts to avoid averaging-of-rates bias.
+    _bucket_changed = bucket_main["final_v3_beneficial_change_count"] + bucket_main["final_v3_harmful_change_count"]
+    bucket_main["final_v3_changed_fraction"] = np.where(
+        bucket_main["n_test_nodes"] > 0,
+        _bucket_changed / bucket_main["n_test_nodes"],
+        np.nan,
+    )
+    bucket_main["final_v3_harmful_overwrite_rate"] = np.where(
+        _bucket_changed > 0,
+        bucket_main["final_v3_harmful_change_count"] / _bucket_changed,
+        np.nan,
+    )
+    bucket_main["final_v3_correction_precision"] = np.where(
+        _bucket_changed > 0,
+        bucket_main["final_v3_beneficial_change_count"] / _bucket_changed,
+        np.nan,
+    )
     bucket_main.to_csv(out_table_csv, index=False)
     with open(out_table_md, "w", encoding="utf-8") as f:
         f.write("# FINAL_V3 bucket safety main table\n\n")
@@ -363,6 +373,7 @@ def run_bucket_safety(
         f.write("# FINAL_V3 canonical bucket safety summary\n\n")
         f.write("Datasets: " + ", ".join(datasets) + "\n\n")
         f.write("Splits: " + ", ".join(map(str, splits)) + "\n\n")
+        f.write(f"Baseline GCN/APPNP hyperparameters: max_epochs={baseline_max_epochs}, patience={baseline_patience}\n\n")
         f.write("## Bucket-level means\n\n")
         f.write(bucket_main.to_markdown(index=False))
         f.write("\n\n## Split-level dataset means\n\n")
