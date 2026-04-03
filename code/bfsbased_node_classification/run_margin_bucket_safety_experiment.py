@@ -89,6 +89,10 @@ DEFAULT_SPLITS = [0, 1, 2]
 # Bucket helpers
 # ---------------------------------------------------------------------------
 
+# Percentile positions for equal-thirds bucketing
+LOWER_THIRD_PERCENTILE = 100.0 / 3   # 33.333...
+UPPER_THIRD_PERCENTILE = 200.0 / 3   # 66.666...
+
 BUCKET_NAMES = ["low", "medium", "high"]
 
 
@@ -106,7 +110,7 @@ def compute_buckets(margins: np.ndarray) -> Tuple[np.ndarray, float, float]:
     q33, q67   : the 33rd and 67th percentile cut-points.
     """
     # Use exact thirds: 33.333...% and 66.666...%
-    q33, q67 = np.percentile(margins, [100.0 * 1 / 3, 100.0 * 2 / 3])
+    q33, q67 = np.percentile(margins, [LOWER_THIRD_PERCENTILE, UPPER_THIRD_PERCENTILE])
     q33, q67 = float(q33), float(q67)
     bucket_ids = np.where(margins < q33, 0, np.where(margins < q67, 1, 2))
     return bucket_ids.astype(np.int64), q33, q67
@@ -417,36 +421,26 @@ def write_markdown_report(
 ) -> None:
     """Write a concise markdown summary report."""
 
+    def _to_float(v) -> float:
+        """Convert a value (str, float, int, or None) to float; return nan if invalid."""
+        if v is None:
+            return float("nan")
+        try:
+            return float(v)
+        except (ValueError, TypeError):
+            return float("nan")
+
     # Compute per-dataset, per-bucket averages across splits
     def avg_field(rows, dataset, method, bucket, field):
-        vals = []
-        for r in rows:
-            if r["dataset"] != dataset or r["method"] != method or r["bucket_name"] != bucket:
-                continue
-            v = r.get(field, "")
-            if isinstance(v, str):
-                try:
-                    v = float(v) if v else float("nan")
-                except ValueError:
-                    v = float("nan")
-            if not np.isnan(float(v if v is not None else float("nan"))):
-                vals.append(float(v))
-        return float(np.mean(vals)) if vals else float("nan")
+        vals = [_to_float(r.get(field)) for r in rows
+                if r["dataset"] == dataset and r["method"] == method and r["bucket_name"] == bucket]
+        valid = [v for v in vals if not np.isnan(v)]
+        return float(np.mean(valid)) if valid else float("nan")
 
     def avg_split_field(rows, dataset, field):
-        vals = []
-        for r in rows:
-            if r["dataset"] != dataset:
-                continue
-            v = r.get(field, "")
-            if isinstance(v, str):
-                try:
-                    v = float(v) if v else float("nan")
-                except ValueError:
-                    v = float("nan")
-            if not np.isnan(float(v if v is not None else float("nan"))):
-                vals.append(float(v))
-        return float(np.mean(vals)) if vals else float("nan")
+        vals = [_to_float(r.get(field)) for r in rows if r["dataset"] == dataset]
+        valid = [v for v in vals if not np.isnan(v)]
+        return float(np.mean(valid)) if valid else float("nan")
 
     lines = [
         "# Margin-Bucket Safety Experiment — Summary Report",
@@ -560,16 +554,16 @@ def write_markdown_report(
             h3_evidence.append(v3_hurt_all <= gcn_hurt_all)
 
     # Verdict thresholds: "supported" if ≥2/3 datasets agree, "mixed" if ≥1/3.
-    _SUPPORTED_THRESHOLD = 2.0 / 3.0   # ≥ 67% of datasets agree
-    _MIXED_THRESHOLD = 1.0 / 3.0       # ≥ 33% of datasets agree
+    SUPPORTED_THRESHOLD = 2.0 / 3.0   # ≥ 67% of datasets agree
+    MIXED_THRESHOLD = 1.0 / 3.0       # ≥ 33% of datasets agree
 
     def _verdict(evidence):
         if not evidence:
             return "insufficient data"
         frac = sum(evidence) / len(evidence)
-        if frac >= _SUPPORTED_THRESHOLD:
+        if frac >= SUPPORTED_THRESHOLD:
             return "supported"
-        if frac >= _MIXED_THRESHOLD:
+        if frac >= MIXED_THRESHOLD:
             return "mixed"
         return "not supported"
 
