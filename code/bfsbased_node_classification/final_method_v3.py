@@ -258,11 +258,13 @@ def final_method_v3(
 
     # --- Step 6: Apply correction ---
     uncertain_all = mlp_margin_all < best_tau
+    adaptive_rho = np.full_like(reliability, float(best_rho), dtype=np.float64)
     if adaptive_gate:
-        adaptive_rho = np.clip(best_rho + float(adaptive_gate_scale) * (0.5 - reliability), 0.0, 1.0)
-        reliable_all = reliability >= adaptive_rho
+        adjusted_reliability = np.clip(
+            0.5 + float(adaptive_gate_scale) * (reliability - 0.5), 0.0, 1.0
+        )
+        reliable_all = adjusted_reliability >= best_rho
     else:
-        adaptive_rho = np.full_like(reliability, float(best_rho), dtype=np.float64)
         reliable_all = reliability >= best_rho
     correct_mask = uncertain_all & reliable_all
 
