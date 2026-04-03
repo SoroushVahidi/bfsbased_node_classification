@@ -1,4 +1,4 @@
-FINAL METHOD STORY — for PRL manuscript writing
+FINAL METHOD STORY — for manuscript writing
 
 PROBLEM
 Standard graph-based node classifiers propagate neighbor information broadly.
@@ -46,16 +46,16 @@ LIMITATIONS
   - Texas split 5 is bad for SGC v1, V2, and FINAL_V3 alike in the frozen log — the gate does not magically fix every split
   - Post-hoc correction layer, not an end-to-end trained GNN; we do not claim to beat all GNNs on every benchmark
 
-KEY NUMBERS (canonical **10-split** evaluation; see `tables/main_results_prl.md`)
+KEY NUMBERS (canonical **10-split** evaluation; see `tables/main_results_selective_correction.md`)
   Mean Δ vs MLP across six datasets: **+1.26 pp** (FINAL_V3 vs MLP column means)
   Harmful splits (Δ test < 0 vs MLP): FINAL_V3 — **2 of 60**; SGC v1 — **4 of 60**
   Correction precision (aggregate on citations): high on Cora / Citeseer; see `reports/final_method_v3_analysis.md`
   Search space: ~72 configurations (2 weight profiles × ~9 τ × 4 ρ)
 
-AUXILIARY TABLES (regenerate: `python3 scripts/prl_final_additions/build_prl_auxiliary_tables.py`)
-  Experimental setup (6 datasets, homophily, 10-split protocol): `tables/experimental_setup_prl.md`
-  Ablation snapshot (FINAL_V3 row live; other rows historical): `tables/ablation_prl.md`
-  ρ sensitivity snapshot (historical 3-split grid): `tables/sensitivity_prl.md`
+AUXILIARY TABLES (regenerate: `python3 scripts/build_artifacts/build_prl_auxiliary_tables.py`)
+  Experimental setup (6 datasets, homophily, 10-split protocol): `tables/experimental_setup_selective_correction.md`
+  Ablation snapshot (FINAL_V3 row live; other rows historical): `tables/ablation_selective_correction.md`
+  ρ sensitivity snapshot (historical 3-split grid): `tables/sensitivity_selective_correction.md`
 
 REPO AUDIT
   Section-by-section manuscript ↔ evidence map (what to cite, what is legacy UG-SGC): `reports/manuscript_repo_consistency_audit.md`

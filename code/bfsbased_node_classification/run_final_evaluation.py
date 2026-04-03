@@ -17,12 +17,11 @@ from __future__ import annotations
 import argparse
 import csv
 import importlib.util
-import json
 import os
 import sys
 import time
 from collections import defaultdict
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 import numpy as np
 import torch
@@ -31,8 +30,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
-from final_method_v3 import final_method_v3, _simple_accuracy
-from improved_sgc_variants import v2_multibranch_correction
+from final_method_v3 import final_method_v3, _simple_accuracy  # noqa: E402
+from improved_sgc_variants import v2_multibranch_correction  # noqa: E402
 
 
 def _load_module():
@@ -72,11 +71,21 @@ def _load_split(ds, sid, device, split_dir):
     if not os.path.isfile(path):
         raise FileNotFoundError(f"Split not found: {path}")
     sp = np.load(path)
-    to_t = lambda m: torch.as_tensor(np.where(m)[0], dtype=torch.long, device=device)
+
+    def to_t(mask):
+        return torch.as_tensor(np.where(mask)[0], dtype=torch.long, device=device)
+
     return to_t(sp["train_mask"]), to_t(sp["val_mask"]), to_t(sp["test_mask"])
 
 
-def run_evaluation(datasets, splits, split_dir, output_tag):
+def run_evaluation(
+    datasets,
+    splits,
+    split_dir,
+    output_tag,
+    *,
+    gate_mode: str,
+):
     mod = _load_module()
     records = []
 
@@ -172,31 +181,37 @@ def run_evaluation(datasets, splits, split_dir, output_tag):
             })
             print(f"    V2_MULTI:    {v2_acc:.4f}  (delta={v2_delta:+.4f})")
 
-            # --- FINAL_V3 ---
-            t0 = time.perf_counter()
-            v3_val, v3_acc, v3_info = final_method_v3(
-                data, train_np, val_np, test_np,
-                mlp_probs=mlp_probs, seed=seed, mod=mod,
-            )
-            v3_time = time.perf_counter() - t0
-            v3_delta = v3_acc - mlp_test_acc
-            ca = v3_info["correction_analysis"]
-            bf = v3_info["branch_fractions"]
-            records.append({
-                "dataset": ds, "split_id": sid, "seed": seed,
-                "method": "FINAL_V3",
-                "test_acc": v3_acc, "delta_vs_mlp": v3_delta,
-                "n_helped": ca["n_helped"], "n_hurt": ca["n_hurt"],
-                "correction_precision": ca["correction_precision"],
-                "frac_confident": bf["confident_keep_mlp"],
-                "frac_unreliable": bf["uncertain_unreliable_keep_mlp"],
-                "frac_corrected": bf["uncertain_reliable_corrected"],
-                "tau": v3_info["selected_tau"],
-                "rho": v3_info["selected_rho"],
-                "runtime_sec": v3_time,
-            })
-            print(f"    FINAL_V3:    {v3_acc:.4f}  (delta={v3_delta:+.4f})  "
-                  f"[helped={ca['n_helped']} hurt={ca['n_hurt']} prec={ca['correction_precision']:.2f}]")
+            gates_to_run = [gate_mode] if gate_mode != "both" else ["heuristic", "adaptive"]
+            for gate_name in gates_to_run:
+                t0 = time.perf_counter()
+                _, v3_acc, v3_info = final_method_v3(
+                    data, train_np, val_np, test_np,
+                    mlp_probs=mlp_probs, seed=seed, mod=mod,
+                    gate=gate_name, split_id=sid,
+                )
+                v3_time = time.perf_counter() - t0
+                v3_delta = v3_acc - mlp_test_acc
+                ca = v3_info["correction_analysis"]
+                bf = v3_info["branch_fractions"]
+                method_name = "FINAL_V3" if gate_mode != "both" else f"FINAL_V3_{gate_name.upper()}"
+                records.append({
+                    "dataset": ds, "split_id": sid, "seed": seed,
+                    "method": method_name,
+                    "test_acc": v3_acc, "delta_vs_mlp": v3_delta,
+                    "n_helped": ca["n_helped"], "n_hurt": ca["n_hurt"],
+                    "correction_precision": ca["correction_precision"],
+                    "frac_confident": bf["confident_keep_mlp"],
+                    "frac_unreliable": bf["uncertain_unreliable_keep_mlp"],
+                    "frac_corrected": bf["uncertain_reliable_corrected"],
+                    "tau": v3_info.get("selected_tau"),
+                    "rho": v3_info["selected_rho"],
+                    "gate_mode": v3_info.get("gate_mode"),
+                    "gate_uncertain_frac": v3_info.get("gate_stats", {}).get("uncertain_fraction_test"),
+                    "gate_bce_loss": v3_info.get("gate_stats", {}).get("gate_bce_loss"),
+                    "runtime_sec": v3_time,
+                })
+                print(f"    {method_name:<18s} {v3_acc:.4f}  (delta={v3_delta:+.4f})  "
+                      f"[helped={ca['n_helped']} hurt={ca['n_hurt']} prec={ca['correction_precision']:.2f}]")
 
     return records
 
@@ -207,7 +222,7 @@ def write_csv(records, path):
         "dataset", "split_id", "seed", "method", "test_acc", "delta_vs_mlp",
         "n_helped", "n_hurt", "correction_precision",
         "frac_confident", "frac_unreliable", "frac_corrected",
-        "tau", "rho", "runtime_sec",
+        "tau", "rho", "gate_mode", "gate_uncertain_frac", "gate_bce_loss", "runtime_sec",
     ]
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
@@ -218,7 +233,10 @@ def write_csv(records, path):
 
 
 def print_summary(records):
-    methods = ["MLP_ONLY", "BASELINE_SGC_V1", "V2_MULTIBRANCH", "FINAL_V3"]
+    methods = sorted(set(r["method"] for r in records), key=lambda x: (
+        ["MLP_ONLY", "BASELINE_SGC_V1", "V2_MULTIBRANCH"].index(x)
+        if x in ["MLP_ONLY", "BASELINE_SGC_V1", "V2_MULTIBRANCH"] else 99, x
+    ))
     datasets = sorted(set(r["dataset"] for r in records))
 
     by_md = defaultdict(lambda: defaultdict(list))
@@ -235,6 +253,34 @@ def print_summary(records):
     print(f"\n{'='*90}")
     print("MEAN TEST ACCURACY")
     print(f"{'='*90}")
+
+    # Win/Tie/Loss vs MLP by split + routed fraction
+    print("\n" + "=" * 90)
+    print("WIN/TIE/LOSS vs MLP")
+    print("=" * 90)
+    gate_methods = [m for m in methods if m.startswith("FINAL_V3")]
+    for m in gate_methods:
+        print(f"  {m}:")
+        for ds in datasets:
+            mlp = [r for r in records if r["dataset"] == ds and r["method"] == "MLP_ONLY"]
+            cur = [r for r in records if r["dataset"] == ds and r["method"] == m]
+            by_split_mlp = {r["split_id"]: r["test_acc"] for r in mlp}
+            by_split_cur = {r["split_id"]: r["test_acc"] for r in cur}
+            wins = ties = losses = 0
+            for sid, cur_acc in by_split_cur.items():
+                mlp_acc = by_split_mlp.get(sid)
+                if mlp_acc is None:
+                    continue
+                if cur_acc > mlp_acc:
+                    wins += 1
+                elif cur_acc < mlp_acc:
+                    losses += 1
+                else:
+                    ties += 1
+            print(f"    {ds:<10s} W/T/L = {wins}/{ties}/{losses}")
+        routed = [r.get("gate_uncertain_frac") for r in records if r["method"] == m and r.get("gate_uncertain_frac") is not None]
+        if routed:
+            print(f"    mean routed fraction: {100.0 * float(np.mean(routed)):.2f}%")
     hdr = f"{'Method':<20s}" + "".join(f"{ds:>14s}" for ds in datasets) + f"{'Mean':>10s}"
     print(hdr)
     print("-" * len(hdr))
@@ -275,7 +321,7 @@ def print_summary(records):
     print(f"\n{'='*90}")
     print("TOTAL HARMFUL CORRECTIONS (n_hurt sum across splits)")
     print(f"{'='*90}")
-    for m in ["FINAL_V3"]:
+    for m in gate_methods:
         for ds in datasets:
             hurts = by_md_hurt[m][ds]
             if hurts:
@@ -311,9 +357,16 @@ def main():
         default=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
     )
     parser.add_argument("--output-tag", default="final_v3")
+    parser.add_argument("--gate", choices=["heuristic", "adaptive", "both"], default="heuristic")
     args = parser.parse_args()
 
-    records = run_evaluation(args.datasets, args.splits, args.split_dir, args.output_tag)
+    records = run_evaluation(
+        args.datasets,
+        args.splits,
+        args.split_dir,
+        args.output_tag,
+        gate_mode=args.gate,
+    )
 
     csv_path = "reports/final_method_v3_results.csv"
     if args.output_tag != "final_v3":

@@ -17,7 +17,7 @@ Full benchmark reproduction (MLP, SGC v1, V2 ablation, FINAL_V3)::
 
 Regenerate tables and figures from the frozen per-split CSV (no training)::
 
-    bash scripts/run_all_prl_results.sh
+    bash scripts/run_all_selective_correction_results.sh
 """
 from __future__ import annotations
 
@@ -32,6 +32,13 @@ _mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mod)
 
 compute_graph_reliability = _mod.compute_graph_reliability
+compute_soft_local_agreement = _mod.compute_soft_local_agreement
+local_agreement_multiplier = _mod.local_agreement_multiplier
 final_method_v3 = _mod.final_method_v3
 
-__all__ = ["compute_graph_reliability", "final_method_v3"]
+__all__ = [
+    "compute_graph_reliability",
+    "compute_soft_local_agreement",
+    "local_agreement_multiplier",
+    "final_method_v3",
+]
