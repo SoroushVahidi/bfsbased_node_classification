@@ -14,7 +14,7 @@ from __future__ import annotations
 import copy
 import math
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import torch
@@ -46,13 +46,35 @@ def _coalesce_adj(
     return adj.coalesce()
 
 
-def _normalize_adj(edge_index: torch.Tensor, num_nodes: int) -> torch.Tensor:
-    adj = _coalesce_adj(edge_index, num_nodes, add_self_loops=True)
+def _normalize_adj(
+    edge_index: torch.Tensor,
+    num_nodes: int,
+    *,
+    add_self_loops: bool = True,
+) -> torch.Tensor:
+    adj = _coalesce_adj(edge_index, num_nodes, add_self_loops=add_self_loops)
     row, col = adj.indices()
     deg = torch.zeros(num_nodes, device=edge_index.device, dtype=torch.float32)
     deg.scatter_add_(0, row, adj.values())
     deg_inv_sqrt = deg.clamp(min=1.0).pow(-0.5)
     norm = deg_inv_sqrt[row] * adj.values() * deg_inv_sqrt[col]
+    return torch.sparse_coo_tensor(
+        adj.indices(), norm, adj.shape, device=edge_index.device
+    ).coalesce()
+
+
+def _row_normalize_adj(
+    edge_index: torch.Tensor,
+    num_nodes: int,
+    *,
+    add_self_loops: bool = True,
+) -> torch.Tensor:
+    adj = _coalesce_adj(edge_index, num_nodes, add_self_loops=add_self_loops)
+    row = adj.indices()[0]
+    deg = torch.zeros(num_nodes, device=edge_index.device, dtype=torch.float32)
+    deg.scatter_add_(0, row, adj.values())
+    deg_inv = deg.clamp(min=1.0).pow(-1.0)
+    norm = deg_inv[row] * adj.values()
     return torch.sparse_coo_tensor(
         adj.indices(), norm, adj.shape, device=edge_index.device
     ).coalesce()
@@ -104,12 +126,183 @@ class APPNPNet(nn.Module):
         return z
 
 
+class PairNorm(nn.Module):
+    """PairNorm from Zhao & Akoglu (ICLR 2020)."""
+
+    def __init__(self, mode: str = "PN", scale: float = 1.0):
+        super().__init__()
+        mode_u = str(mode).upper()
+        allowed = {"NONE", "PN", "PN-SI", "PN-SCS"}
+        if mode_u not in allowed:
+            raise ValueError(f"Unsupported PairNorm mode: {mode}")
+        self.mode = mode_u
+        self.scale = float(scale)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if self.mode == "NONE":
+            return x
+        col_mean = x.mean(dim=0)
+        if self.mode == "PN":
+            x = x - col_mean
+            rownorm_mean = (1e-6 + x.pow(2).sum(dim=1).mean()).sqrt()
+            return self.scale * x / rownorm_mean
+        if self.mode == "PN-SI":
+            x = x - col_mean
+            rownorm_individual = (1e-6 + x.pow(2).sum(dim=1, keepdim=True)).sqrt()
+            return self.scale * x / rownorm_individual
+        # PN-SCS
+        rownorm_individual = (1e-6 + x.pow(2).sum(dim=1, keepdim=True)).sqrt()
+        return self.scale * x / rownorm_individual - col_mean
+
+
+class DeepGCNPairNorm(nn.Module):
+    """Deep GCN baseline with PairNorm after each hidden layer."""
+
+    def __init__(
+        self,
+        in_dim: int,
+        hidden: int,
+        out_dim: int,
+        dropout: float,
+        nlayer: int,
+        norm_mode: str,
+        norm_scale: float,
+    ):
+        super().__init__()
+        self.dropout = float(dropout)
+        self.norm = PairNorm(norm_mode, norm_scale)
+        self.relu = nn.ReLU()
+        self.hidden_layers = nn.ModuleList(
+            [
+                nn.Linear(in_dim if i == 0 else hidden, hidden)
+                for i in range(max(int(nlayer) - 1, 0))
+            ]
+        )
+        self.out_layer = nn.Linear(in_dim if int(nlayer) == 1 else hidden, out_dim)
+
+    def forward(self, x: torch.Tensor, adj_rw: torch.Tensor) -> torch.Tensor:
+        for layer in self.hidden_layers:
+            x = F.dropout(x, p=self.dropout, training=self.training)
+            x = torch.sparse.mm(adj_rw, x)
+            x = layer(x)
+            x = self.norm(x)
+            x = self.relu(x)
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = torch.sparse.mm(adj_rw, x)
+        x = self.out_layer(x)
+        return x
+
+
+class GPRProp(nn.Module):
+    """Generalized PageRank propagation with learnable coefficients.
+
+    This lightweight implementation follows the core GPR-GNN idea from
+    Chien et al. (ICLR 2021): learn coefficients over 0..K propagation powers.
+    """
+
+    def __init__(self, k_steps: int, alpha: float, init_mode: str = "PPR"):
+        super().__init__()
+        self.k_steps = int(k_steps)
+        self.alpha = float(alpha)
+        self.init_mode = str(init_mode).upper()
+        self.temp = nn.Parameter(torch.empty(self.k_steps + 1))
+        self.reset_parameters()
+
+    def reset_parameters(self) -> None:
+        with torch.no_grad():
+            if self.init_mode == "PPR":
+                coeff = self.alpha * (1.0 - self.alpha) ** torch.arange(self.k_steps + 1, dtype=torch.float32)
+                coeff[-1] = (1.0 - self.alpha) ** self.k_steps
+                self.temp.copy_(coeff)
+            elif self.init_mode == "NPPR":
+                coeff = self.alpha ** torch.arange(self.k_steps + 1, dtype=torch.float32)
+                coeff = coeff / coeff.abs().sum().clamp(min=1e-12)
+                self.temp.copy_(coeff)
+            else:  # Random
+                bound = math.sqrt(3.0 / float(self.k_steps + 1))
+                nn.init.uniform_(self.temp, -bound, bound)
+
+    def forward(self, logits: torch.Tensor, adj_norm: torch.Tensor, dprate: float) -> torch.Tensor:
+        h = logits
+        if dprate > 0.0:
+            h = F.dropout(h, p=dprate, training=self.training)
+        out = self.temp[0] * h
+        for step in range(1, self.k_steps + 1):
+            h = torch.sparse.mm(adj_norm, h)
+            out = out + self.temp[step] * h
+        return out
+
+
+class GPRGNNNet(nn.Module):
+    def __init__(
+        self,
+        in_dim: int,
+        hidden: int,
+        out_dim: int,
+        dropout: float,
+        k_steps: int,
+        alpha: float,
+        dprate: float,
+        init_mode: str = "PPR",
+    ):
+        super().__init__()
+        self.lin1 = nn.Linear(in_dim, hidden)
+        self.lin2 = nn.Linear(hidden, out_dim)
+        self.dropout = float(dropout)
+        self.dprate = float(dprate)
+        self.prop1 = GPRProp(k_steps=k_steps, alpha=alpha, init_mode=init_mode)
+
+    def forward(self, x: torch.Tensor, adj_norm: torch.Tensor) -> torch.Tensor:
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = F.relu(self.lin1(x))
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = self.lin2(x)
+        x = self.prop1(x, adj_norm, self.dprate)
+        return x
+
+
+class FSGNNNet(nn.Module):
+    """Compact FSGNN implementation (Maurya et al., 2021)."""
+
+    def __init__(
+        self,
+        in_dim: int,
+        num_layers: int,
+        hidden: int,
+        out_dim: int,
+        dropout: float,
+        layer_norm: bool,
+    ):
+        super().__init__()
+        self.fc1 = nn.ModuleList([nn.Linear(in_dim, int(hidden)) for _ in range(num_layers)])
+        self.fc2 = nn.Linear(int(hidden) * int(num_layers), out_dim)
+        self.att = nn.Parameter(torch.ones(num_layers))
+        self.dropout = float(dropout)
+        self.layer_norm = bool(layer_norm)
+        self.relu = nn.ReLU()
+        self.softmax = nn.Softmax(dim=0)
+
+    def forward(self, list_mat: List[torch.Tensor]) -> torch.Tensor:
+        weights = self.softmax(self.att)
+        outs: List[torch.Tensor] = []
+        for idx, mat in enumerate(list_mat):
+            h = self.fc1[idx](mat)
+            if self.layer_norm:
+                h = F.normalize(h, p=2, dim=1)
+            h = weights[idx] * h
+            outs.append(h)
+        final = torch.cat(outs, dim=1)
+        final = self.relu(final)
+        final = F.dropout(final, p=self.dropout, training=self.training)
+        return self.fc2(final)
+
+
 @dataclass
 class BaselineResult:
     probs: torch.Tensor
     val_acc: float
     test_acc: float
-    best_config: Dict[str, float]
+    best_config: Dict[str, Any]
     train_runtime_sec: float
 
 
@@ -229,6 +422,270 @@ def _appnp_grid() -> List[Dict[str, float]]:
     ]
 
 
+def _gprgnn_grid() -> List[Dict[str, object]]:
+    return [
+        {
+            "hidden": 64,
+            "dropout": 0.5,
+            "lr": 0.01,
+            "weight_decay": 5e-4,
+            "k_steps": 10,
+            "alpha": 0.1,
+            "dprate": 0.0,
+            "init_mode": "PPR",
+        },
+        {
+            "hidden": 64,
+            "dropout": 0.5,
+            "lr": 0.01,
+            "weight_decay": 5e-4,
+            "k_steps": 10,
+            "alpha": 0.1,
+            "dprate": 0.5,
+            "init_mode": "PPR",
+        },
+        {
+            "hidden": 64,
+            "dropout": 0.5,
+            "lr": 0.05,
+            "weight_decay": 5e-4,
+            "k_steps": 10,
+            "alpha": 0.2,
+            "dprate": 0.0,
+            "init_mode": "PPR",
+        },
+        {
+            "hidden": 64,
+            "dropout": 0.5,
+            "lr": 0.01,
+            "weight_decay": 0.0,
+            "k_steps": 10,
+            "alpha": 0.1,
+            "dprate": 0.5,
+            "init_mode": "RANDOM",
+        },
+    ]
+
+
+def _fsgnn_grid() -> List[Dict[str, object]]:
+    return [
+        {
+            "num_hops": 3,
+            "hidden": 64,
+            "dropout": 0.5,
+            "layer_norm": True,
+            "feat_type": "all",
+            "lr_fc": 0.02,
+            "lr_att": 0.02,
+            "w_fc1": 5e-4,
+            "w_fc2": 5e-4,
+            "w_att": 5e-4,
+        },
+        {
+            "num_hops": 3,
+            "hidden": 64,
+            "dropout": 0.5,
+            "layer_norm": True,
+            "feat_type": "homophily",
+            "lr_fc": 0.02,
+            "lr_att": 0.02,
+            "w_fc1": 5e-4,
+            "w_fc2": 5e-4,
+            "w_att": 5e-4,
+        },
+        {
+            "num_hops": 3,
+            "hidden": 64,
+            "dropout": 0.5,
+            "layer_norm": True,
+            "feat_type": "heterophily",
+            "lr_fc": 0.02,
+            "lr_att": 0.02,
+            "w_fc1": 5e-4,
+            "w_fc2": 5e-4,
+            "w_att": 5e-4,
+        },
+    ]
+
+
+def _gcn_pairnorm_grid() -> List[Dict[str, object]]:
+    return [
+        {
+            "hidden": 64,
+            "dropout": 0.5,
+            "nlayer": 4,
+            "norm_mode": "PN",
+            "norm_scale": 1.0,
+            "lr": 0.01,
+            "weight_decay": 5e-4,
+        },
+        {
+            "hidden": 64,
+            "dropout": 0.5,
+            "nlayer": 8,
+            "norm_mode": "PN",
+            "norm_scale": 1.0,
+            "lr": 0.01,
+            "weight_decay": 5e-4,
+        },
+        {
+            "hidden": 64,
+            "dropout": 0.5,
+            "nlayer": 8,
+            "norm_mode": "PN-SI",
+            "norm_scale": 1.0,
+            "lr": 0.01,
+            "weight_decay": 5e-4,
+        },
+    ]
+
+
+def _build_fsgnn_features(
+    x: torch.Tensor,
+    edge_index: torch.Tensor,
+    num_nodes: int,
+    num_hops: int,
+    feat_type: str,
+) -> List[torch.Tensor]:
+    feat_type = str(feat_type).lower()
+    adj_no_loop = _normalize_adj(edge_index, num_nodes, add_self_loops=False)
+    adj_loop = _normalize_adj(edge_index, num_nodes, add_self_loops=True)
+    list_mat: List[torch.Tensor] = [x]
+    no_loop = x
+    loop = x
+    for _ in range(int(num_hops)):
+        no_loop = torch.sparse.mm(adj_no_loop, no_loop)
+        loop = torch.sparse.mm(adj_loop, loop)
+        list_mat.append(no_loop)
+        list_mat.append(loop)
+    if feat_type == "homophily":
+        select_idx = [0] + [2 * hop for hop in range(1, int(num_hops) + 1)]
+        return [list_mat[idx] for idx in select_idx]
+    if feat_type == "heterophily":
+        select_idx = [0] + [2 * hop - 1 for hop in range(1, int(num_hops) + 1)]
+        return [list_mat[idx] for idx in select_idx]
+    return list_mat
+
+
+def run_fsgnn(
+    data,
+    train_idx: torch.Tensor,
+    val_idx: torch.Tensor,
+    test_idx: torch.Tensor,
+    *,
+    seed: int,
+    max_epochs: int = 1500,
+    patience: int = 100,
+) -> BaselineResult:
+    _set_seed(seed)
+    device = data.x.device
+    in_dim = int(data.x.size(1))
+    out_dim = int(data.y.max().item()) + 1
+    edge_index = data.edge_index.to(device)
+
+    best = None
+    for cfg in _fsgnn_grid():
+        _set_seed(seed)
+        list_mat = _build_fsgnn_features(
+            data.x,
+            edge_index,
+            data.num_nodes,
+            int(cfg["num_hops"]),
+            str(cfg["feat_type"]),
+        )
+        model = FSGNNNet(
+            in_dim,
+            len(list_mat),
+            int(cfg["hidden"]),
+            out_dim,
+            float(cfg["dropout"]),
+            bool(cfg["layer_norm"]),
+        ).to(device)
+        optimizer = torch.optim.Adam(
+            [
+                {
+                    "params": model.fc2.parameters(),
+                    "weight_decay": float(cfg["w_fc2"]),
+                    "lr": float(cfg["lr_fc"]),
+                },
+                {
+                    "params": model.fc1.parameters(),
+                    "weight_decay": float(cfg["w_fc1"]),
+                    "lr": float(cfg["lr_fc"]),
+                },
+                {
+                    "params": [model.att],
+                    "weight_decay": float(cfg["w_att"]),
+                    "lr": float(cfg["lr_att"]),
+                },
+            ]
+        )
+
+        best_state = None
+        best_key = None
+        bad_epochs = 0
+
+        for _epoch in range(max_epochs):
+            model.train()
+            optimizer.zero_grad()
+            logits = model(list_mat)
+            loss = F.cross_entropy(logits[train_idx], data.y[train_idx])
+            loss.backward()
+            optimizer.step()
+
+            model.eval()
+            with torch.no_grad():
+                logits = model(list_mat)
+                val_acc = _accuracy(logits, data.y, val_idx)
+                val_loss = F.cross_entropy(logits[val_idx], data.y[val_idx]).item()
+            key = (val_acc, -val_loss)
+            if best_key is None or key > best_key:
+                best_key = key
+                best_state = copy.deepcopy(model.state_dict())
+                bad_epochs = 0
+            else:
+                bad_epochs += 1
+                if bad_epochs >= patience:
+                    break
+
+        assert best_state is not None and best_key is not None
+        model.load_state_dict(best_state)
+        model.eval()
+        with torch.no_grad():
+            logits = model(list_mat)
+            probs = F.softmax(logits, dim=1)
+            test_acc = _accuracy(logits, data.y, test_idx)
+        key = (float(best_key[0]), float(test_acc))
+        if best is None or key > best["key"]:
+            best = {
+                "key": key,
+                "probs": probs.detach().cpu(),
+                "val_acc": float(best_key[0]),
+                "test_acc": float(test_acc),
+                "best_config": {
+                    k: (
+                        float(v)
+                        if isinstance(v, float)
+                        else bool(v)
+                        if isinstance(v, bool)
+                        else int(v)
+                        if isinstance(v, int)
+                        else str(v)
+                    )
+                    for k, v in cfg.items()
+                },
+            }
+
+    assert best is not None
+    return BaselineResult(
+        probs=best["probs"],
+        val_acc=best["val_acc"],
+        test_acc=best["test_acc"],
+        best_config=best["best_config"],
+        train_runtime_sec=float("nan"),
+    )
+
+
 def run_sgc_wu2019(
     data,
     train_idx: torch.Tensor,
@@ -337,20 +794,63 @@ def run_baseline(
     if model_name == "gcn":
         configs = _gcn_grid()
         adj = _normalize_adj(data.edge_index.to(device), data.num_nodes)
-        build = lambda cfg: SparseGCN(in_dim, int(cfg["hidden"]), out_dim, float(cfg["dropout"])).to(device)
+
+        def build(cfg):
+            return SparseGCN(in_dim, int(cfg["hidden"]), out_dim, float(cfg["dropout"])).to(device)
     elif model_name == "appnp":
         configs = _appnp_grid()
         adj = _normalize_adj(data.edge_index.to(device), data.num_nodes)
-        build = lambda cfg: APPNPNet(
-            in_dim,
-            int(cfg["hidden"]),
-            out_dim,
-            float(cfg["dropout"]),
-            int(cfg["k_steps"]),
-            float(cfg["alpha"]),
-        ).to(device)
+
+        def build(cfg):
+            return APPNPNet(
+                in_dim,
+                int(cfg["hidden"]),
+                out_dim,
+                float(cfg["dropout"]),
+                int(cfg["k_steps"]),
+                float(cfg["alpha"]),
+            ).to(device)
+    elif model_name == "gprgnn":
+        configs = _gprgnn_grid()
+        adj = _normalize_adj(data.edge_index.to(device), data.num_nodes)
+
+        def build(cfg):
+            return GPRGNNNet(
+                in_dim,
+                int(cfg["hidden"]),
+                out_dim,
+                float(cfg["dropout"]),
+                int(cfg["k_steps"]),
+                float(cfg["alpha"]),
+                float(cfg["dprate"]),
+                str(cfg["init_mode"]),
+            ).to(device)
     elif model_name == "sgc_wu2019":
         return run_sgc_wu2019(data, train_idx, val_idx, test_idx, seed=seed)
+    elif model_name == "fsgnn":
+        return run_fsgnn(
+            data,
+            train_idx,
+            val_idx,
+            test_idx,
+            seed=seed,
+            max_epochs=max_epochs,
+            patience=patience,
+        )
+    elif model_name == "gcn_pairnorm":
+        configs = _gcn_pairnorm_grid()
+        adj = _row_normalize_adj(data.edge_index.to(device), data.num_nodes)
+
+        def build(cfg):
+            return DeepGCNPairNorm(
+                in_dim,
+                int(cfg["hidden"]),
+                out_dim,
+                float(cfg["dropout"]),
+                int(cfg["nlayer"]),
+                str(cfg["norm_mode"]),
+                float(cfg["norm_scale"]),
+            ).to(device)
     else:
         raise ValueError(f"Unsupported baseline model: {model_name}")
 
@@ -376,7 +876,16 @@ def run_baseline(
                 "probs": probs.detach().cpu(),
                 "val_acc": float(best_val_acc),
                 "test_acc": test_acc,
-                "best_config": {k: float(v) if isinstance(v, float) else int(v) for k, v in cfg.items()},
+                "best_config": {
+                    k: (
+                        float(v)
+                        if isinstance(v, float)
+                        else int(v)
+                        if isinstance(v, int)
+                        else v
+                    )
+                    for k, v in cfg.items()
+                },
             }
 
     assert best is not None

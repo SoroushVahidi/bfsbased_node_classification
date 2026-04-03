@@ -30,6 +30,9 @@ on `main`.
 |----------|------|
 | Focused resubmission runner | `resubmission_runner.py` |
 | Compact GCN/APPNP baselines | `standard_node_baselines.py` |
+| External DeepGCN+PairNorm baseline (inline) | `standard_node_baselines.py` + `pairnorm_baseline_runner.py` |
+| External GPRGNN baseline (inline) | `standard_node_baselines.py` + `gprgnn_baseline_runner.py` |
+| External FSGNN baseline (inline) | `standard_node_baselines.py` + `fsgnn_baseline_runner.py` |
 | Triple-trust experimental variant | `triple_trust_sgc.py` |
 | Triple-trust dedicated runner | `run_triple_trust_experiments.py` |
 | Canonical bucket-safety runner | `run_margin_bucket_safety_experiment.py` |
@@ -49,6 +52,12 @@ on `main`.
 - `FINAL_V3` remains the canonical frozen PRL method; experimental variants
   (`TRIPLE_TRUST_SGC`, optional low-confidence structural term) are
   supplementary and opt-in.
+- `GPRGNN` is included as an **external baseline** for comparison only. It is
+  not part of the canonical `FINAL_V3` package.
+- `FSGNN` is included as an **external baseline** for comparison only. It is
+  not part of the canonical `FINAL_V3` package.
+- `PairNorm` is included here as **DeepGCN+PairNorm** external baseline for
+  comparison only. It is not part of the canonical `FINAL_V3` package.
 
 For the manuscript-facing map, prefer:
 
