@@ -1,5 +1,7 @@
 # Archive — Inventory and Justification
 
+For the active codebase map, see [`../AGENTS.md`](../AGENTS.md) and [`../docs/INDEX.md`](../docs/INDEX.md).
+
 This directory contains all non-canonical material that has been moved out of
 the main repository surface to keep the top-level layout clean and
 reviewer-focused.

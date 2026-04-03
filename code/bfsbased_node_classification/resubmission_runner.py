@@ -10,6 +10,8 @@ Adds:
   - external baseline (DeepGCN + PairNorm; lightweight in-repo implementation)
   - external baseline (FSGNN; lightweight in-repo implementation)
   - external baseline (GPRGNN; lightweight in-repo implementation)
+  - paper baselines: SGC (alias ``sgc``), Correct and Smooth (``correct_and_smooth`` / ``cs``),
+    CLP (``clp``), GraphSAGE (``graphsage``); see docs/BASELINES_SUITE.md
   - true ablations for selective graph correction (SGC)
   - method/protocol records that are easier to cite in a rewritten manuscript
 
@@ -46,6 +48,11 @@ DEFAULT_METHODS = [
     "fsgnn",
     "gprgnn",
     "sgc_wu2019",
+    "sgc",
+    "clp",
+    "correct_and_smooth",
+    "cs",
+    "graphsage",
     "selective_graph_correction",
     "selective_graph_correction_structural",
     "gated_mlp_prop",
@@ -383,6 +390,11 @@ def run_resubmission(
                         "fsgnn",
                         "gprgnn",
                         "sgc_wu2019",
+                        "sgc",
+                        "clp",
+                        "correct_and_smooth",
+                        "cs",
+                        "graphsage",
                         "gcnii",
                         "geom_gcn",
                         "linkx",
@@ -398,6 +410,10 @@ def run_resubmission(
                             "geom_gcn",
                             "linkx",
                             "acmii_gcn_plus_plus",
+                            "clp",
+                            "correct_and_smooth",
+                            "cs",
+                            "graphsage",
                         }:
                             baseline_kwargs = {"max_epochs": 500, "patience": 100}
                         result = run_baseline(

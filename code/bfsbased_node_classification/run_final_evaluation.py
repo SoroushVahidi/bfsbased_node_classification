@@ -2,6 +2,9 @@
 """
 Final evaluation runner: compares MLP, baseline SGC (v1), V2_MULTIBRANCH, and FINAL_V3.
 
+See ``AGENTS.md`` (repo root) for how this driver relates to ``manuscript_runner.py``
+and ``resubmission_runner.py``.
+
 Usage:
   python3 code/bfsbased_node_classification/run_final_evaluation.py \
     --split-dir data/splits
@@ -65,7 +68,14 @@ def _load_data(mod, ds, root="data/"):
 
 
 def _load_split(ds, sid, device, split_dir):
-    prefix = "film" if ds == "actor" else ds.lower()
+    from split_paths import is_official_single_split_dataset, split_npz_prefix
+
+    if is_official_single_split_dataset(ds) and int(sid) != 0:
+        raise FileNotFoundError(
+            f"Dataset {ds!r} uses the benchmark's official split only (split_id must be 0, got {sid}). "
+            f"See docs/DATASETS_EXTENDED.md."
+        )
+    prefix = split_npz_prefix(ds)
     fname = f"{prefix}_split_0.6_0.2_{sid}.npz"
     path = os.path.join(split_dir, fname)
     if not os.path.isfile(path):

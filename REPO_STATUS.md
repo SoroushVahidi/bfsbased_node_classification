@@ -4,6 +4,9 @@ This repository uses a strict three-label status system.
 
 ## Canonical
 
+**Navigation for tooling / AI agents:** start with [`AGENTS.md`](AGENTS.md) and [`docs/INDEX.md`](docs/INDEX.md).
+
+---
 - Method: `FINAL_V3`
 - Entry point: `code/final_method_v3.py`
 - Canonical results source: `reports/final_method_v3_results.csv`

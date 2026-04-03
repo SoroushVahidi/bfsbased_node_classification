@@ -1,5 +1,10 @@
 # Uncertainty-Gated Selective Graph Correction for Node Classification
 
+**Canonical method:** `FINAL_V3` — reliability-gated selective graph correction on top of a strong MLP  
+**Canonical claims and result files:** [`CANONICAL_CLAIMS.md`](CANONICAL_CLAIMS.md)  
+**Full reproduction guide:** [`scripts/README_REPRODUCE.md`](scripts/README_REPRODUCE.md)  
+**Repository status and classification:** [`REPO_STATUS.md`](REPO_STATUS.md)  
+**AI / agent onboarding:** [`AGENTS.md`](AGENTS.md) · [Documentation index](docs/INDEX.md)
 This repository contains code and reproducible artifacts for a node-classification method that combines a strong feature-first MLP with **selective graph correction**.
 
 ## Start here
@@ -55,6 +60,11 @@ python3 code/bfsbased_node_classification/run_final_evaluation.py \
 
 Always use `--output-tag` for non-canonical reruns.
 
+**Extended datasets (feature-rich nodes + official benchmark splits):** `ogbn-arxiv`, `ogbn-products`, and TabGraphs `hm-categories` are supported via `load_dataset` and the usual runners when split `.npz` files are prepared. See [`docs/DATASETS_EXTENDED.md`](docs/DATASETS_EXTENDED.md).
+
+**Standard baselines (GCN, APPNP, SGC, GraphSAGE, Correct & Smooth, CLP, …):** method names, paper links, and implementation fidelity notes are in [`docs/BASELINES_SUITE.md`](docs/BASELINES_SUITE.md).
+
+---
 For details, see [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
 
 ---

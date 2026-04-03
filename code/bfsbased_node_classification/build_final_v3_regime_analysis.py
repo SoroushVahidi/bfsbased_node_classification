@@ -50,7 +50,13 @@ def _load_data(mod, ds):
 
 
 def _load_split(ds, sid, device, split_dir):
-    prefix = "film" if ds == "actor" else ds.lower()
+    from split_paths import is_official_single_split_dataset, split_npz_prefix
+
+    if is_official_single_split_dataset(ds) and int(sid) != 0:
+        raise FileNotFoundError(
+            f"Dataset {ds!r} only supports official split_id=0 (got {sid})."
+        )
+    prefix = split_npz_prefix(ds)
     path = os.path.join(split_dir, f"{prefix}_split_0.6_0.2_{sid}.npz")
     sp = np.load(path)
     return (

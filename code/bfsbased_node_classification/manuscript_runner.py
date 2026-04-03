@@ -84,10 +84,11 @@ def _load_dataset_and_data(mod, dataset_key: str):
 
 
 def _resolve_split_file(dataset_key: str, split_id: int, split_dir: Optional[str]) -> Optional[str]:
-    # GEO-GCN uses `film_split_*` for the Actor dataset.
-    split_prefix = dataset_key.lower()
-    if split_prefix == "actor":
-        split_prefix = "film"
+    from split_paths import is_official_single_split_dataset, split_npz_prefix
+
+    if is_official_single_split_dataset(dataset_key) and int(split_id) != 0:
+        return None
+    split_prefix = split_npz_prefix(dataset_key)
     fname = f"{split_prefix}_split_0.6_0.2_{split_id}.npz"
     candidates = []
     if split_dir:
@@ -144,6 +145,9 @@ ALL_CANDIDATE_DATASETS = [
     "chameleon", "texas", "actor", "cornell",
     "wisconsin",
     "squirrel", "pubmed",
+    "ogbn-arxiv",
+    "ogbn-products",
+    "hm-categories",
 ]
 
 PRIORITY_ORDER = [

@@ -29,6 +29,7 @@ from improved_sgc_variants import v2_multibranch_correction  # noqa: E402
 from run_final_evaluation import _load_data, _load_module, _load_split  # noqa: E402
 from standard_node_baselines import (  # noqa: E402
     BEGGA_HETEROPHILY_BASELINE_METHODS,
+    PAPER_GRAPH_BASELINE_METHODS,
     run_baseline,
 )
 
@@ -38,6 +39,12 @@ _EXTERNAL_DISPLAY = {
     "geom_gcn": "GeomGCN",
     "linkx": "LINKX",
     "acmii_gcn_plus_plus": "ACMII_GCN_PLUSPLUS",
+    "clp": "CLP",
+    "correct_and_smooth": "CORRECT_AND_SMOOTH",
+    "cs": "CORRECT_AND_SMOOTH",
+    "graphsage": "GRAPHSAGE",
+    "sgc": "SGC",
+    "sgc_wu2019": "SGC",
 }
 
 
@@ -432,7 +439,10 @@ def main() -> None:
         "--external-baselines",
         nargs="*",
         default=None,
-        help="Subset of h2gcn gcnii geom_gcn linkx acmii_gcn_plus_plus (default: all)",
+        help=(
+            "Keys passed to run_baseline. Default: Begga heterophily set. "
+            "Also supported: " + ", ".join(PAPER_GRAPH_BASELINE_METHODS)
+        ),
     )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument(
