@@ -113,6 +113,9 @@ def final_method_v3(
     seed: int = 1337,
     mod=None,
     weights: Optional[Dict[str, float]] = None,
+    split_id: Optional[int] = None,
+    gate: Optional[str] = None,
+    include_node_arrays: bool = True,
     enable_lowconf_structural_term: bool = False,
     lowconf_structural_mode: str = "diffusion",
     lowconf_structural_b6_candidates: Optional[List[float]] = None,
@@ -131,6 +134,9 @@ def final_method_v3(
     weights : optional single weight dict. If set, **only** this profile is evaluated
         (ablation: single-profile / fixed-weight runs). Default: both `WEIGHT_PROFILES`
         are searched on validation together with τ and ρ.
+    split_id : optional split identifier for downstream diagnostics.
+    gate : optional gate label for compatibility with runner metadata.
+    include_node_arrays : if True, include per-test-node arrays in returned info.
 
     Returns
     -------
@@ -273,6 +279,8 @@ def final_method_v3(
 
     info = {
         "variant": "FINAL_V3",
+        "split_id": int(split_id) if split_id is not None else None,
+        "gate": gate,
         "val_acc_mlp": float(mlp_val_acc),
         "val_acc_v3": float(val_acc),
         "test_acc_mlp": float(mlp_test_acc),
@@ -309,7 +317,9 @@ def final_method_v3(
             "total": float(total_time),
         },
         "search_space_size": len(tau_candidates) * len(rho_candidates) * len(profiles) * len(b6_candidates),
-        "test_node_outputs": {
+    }
+    if include_node_arrays:
+        info["test_node_outputs"] = {
             "node_id": test_np.astype(np.int64).tolist(),
             "true_label": y_true[test_np].astype(np.int64).tolist(),
             "mlp_pred": mlp_pred_all[test_np].astype(np.int64).tolist(),
@@ -330,6 +340,5 @@ def final_method_v3(
             "selected_tau": float(best_tau),
             "selected_rho": float(best_rho),
             "selected_weights": {k: float(v) for k, v in w.items()},
-        },
-    }
+        }
     return val_acc, test_acc, info
