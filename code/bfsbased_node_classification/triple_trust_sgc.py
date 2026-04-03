@@ -265,11 +265,15 @@ def triple_trust_sgc_predictclass(
 
     # init state
     yhat = mlp_pred.copy()
+    # Keep labeled training nodes fixed to their ground-truth labels.
+    yhat[train_mask] = y_true[train_mask]
     q = norm_margin.copy()
     tau_class = np.full(n_classes, 1.0 / float(n_classes), dtype=np.float64)
     s = _compute_source_trust(train_mask, pseudo_mask, yhat, q, tau_class, deg, gamma_source, lambda_deg)
 
+    # Training nodes must never be treated as pseudo-updated/corrected nodes.
     pseudo_update_mask = np.zeros(n_nodes, dtype=bool)
+    pseudo_update_mask[train_mask] = False
     trusted_mass, tau_class = _trusted_mass_and_tau(yhat, s, train_mask, pseudo_update_mask, n_classes, alpha_class)
     compat = _init_compat_from_train(y_true, train_mask, src, dst, n_classes)
 
