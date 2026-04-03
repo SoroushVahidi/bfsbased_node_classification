@@ -437,7 +437,9 @@ def run_prl_resubmission(
                                 "b4": 0.5,
                                 "b5": 0.3,
                                 "max_refresh_rounds": 3,
-                                "tau_uncertain": "0.40_quantile_of_norm_margin",
+                                # Record the actual effective tau value derived during the run
+                                # (0.40-quantile of val margin when tau_uncertain=None).
+                                "tau_uncertain": float(info.get("selected_threshold_high", 0.0)),
                             }
                         elif method.startswith("sgcs") or method == "selective_graph_correction_structural":
                             variant_kwargs = _structural_variant_kwargs(method)
