@@ -1,25 +1,26 @@
-# Legacy venue-specific artifacts
+# Legacy Venue-Specific Archive
 
-This directory contains materials that were created during an earlier submission
-to a specific venue. They are preserved here for provenance and traceability,
-but are no longer part of the active repository surface.
+This directory stores materials created for earlier venue-specific packaging cycles.
 
-## Contents
+- **Status:** Archived
+- **Canonical for current repository claims:** No
+- **Replaced by:** `FINAL_V3` canonical path (`code/final_method_v3.py`, `reports/final_method_v3_results.csv`)
 
-| Directory/File | Original path | Description |
-|----------------|---------------|-------------|
-| prl_final_additions/ | prl_final_additions/ | UG-SGC legacy bundle (figures, tables, scripts, audit docs) |
-| results_prl/ | results_prl/ | Threshold sensitivity results from earlier analysis |
-| logs_prl_resubmission/ | logs/prl_resubmission/ | Raw per-run JSONL logs from resubmission experiments |
-| logs_prl_final_additions/ | logs/prl_final_additions/ | Log README from earlier phase |
-| reports_resubmission_protocols/ | reports/prl_resubmission/ | Run protocols and claims/risks docs |
-| reports_prl_final_additions/ | reports/prl_final_additions/ | Legacy UG-SGC analysis reports |
-| tables_prl_final_additions/ | tables/prl_final_additions/ | Legacy UG-SGC tables |
-| tables_prl_resubmission/ | tables/prl_resubmission/ | Resubmission comparison tables |
-| figures_prl_final_additions/ | figures/prl_final_additions/ | Legacy UG-SGC figures |
-| slurm/ | slurm/run_prl_*.sbatch | HPC job scripts for venue-specific runs |
-| reports_misc/ | reports/prl_*.md | Venue-specific report documents |
+## What is here
 
-## Traceability
+| Path | Description |
+|---|---|
+| `prl_final_additions/` | Historical UG-SGC bundle (tables/figures/scripts/audits). |
+| `results_prl/` | Historical threshold-sensitivity outputs. |
+| `reports_prl_final_additions/` | Legacy manuscript-era reports. |
+| `reports_resubmission_protocols/` | Structural-extension protocol notes and run summaries. |
+| `tables_prl_final_additions/` | Legacy UG-SGC tables. |
+| `tables_prl_resubmission/` | Resubmission-era structural comparison tables. |
+| `logs_prl_final_additions/` | Historical log notes. |
+| `logs_prl_resubmission/` | Historical resubmission JSONL logs. |
+| `slurm/` | Historical HPC launch scripts. |
+| `reports_misc/` | Historical venue-oriented writeups. |
 
-For the full naming migration map see: `reports/naming_migration_map.md`
+## Usage guidance
+
+Use this directory for provenance and auditability only. For external review and scientific claims in the current repository organization, use canonical files in `reports/`, `tables/`, and `figures/` at the repository root.

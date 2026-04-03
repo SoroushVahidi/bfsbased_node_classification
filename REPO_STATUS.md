@@ -1,51 +1,43 @@
 # Repository Status
 
-This file describes the current state of the repository: which packages are
-canonical, which are legacy, and which are still exploratory.
+This repository uses a strict three-label status system.
 
-> **Last updated:** repository reorganization — all legacy and exploratory
-> material has been moved to `archive/`. See `archive/README.md` for the full
-> inventory of archived material.
+## Canonical
 
 **Navigation for tooling / AI agents:** start with [`AGENTS.md`](AGENTS.md) and [`docs/INDEX.md`](docs/INDEX.md).
 
 ---
+- Method: `FINAL_V3`
+- Entry point: `code/final_method_v3.py`
+- Canonical results source: `reports/final_method_v3_results.csv`
+- Canonical result products: `tables/`, `figures/`, and canonical analyses in `reports/`.
 
-## Canonical package (FINAL_V3)
+## Archived
 
-**Status: ✅ Frozen — do not modify result files**
+- Venue-specific historical bundles and manuscript-era assets in `archive/legacy_venue_specific/`.
+- Legacy UG-SGC logs and supporting files in `archive/legacy_logs/`.
+- Legacy code and docs in `archive/legacy_code/` and `archive/legacy_docs/`.
 
-The canonical package for the research paper submission is **FINAL_V3** (reliability-gated
-selective graph correction on top of a strong MLP).
+Archived material is preserved for provenance and should not be used as primary evidence for canonical claims.
 
-### Frozen evidence files
+## Exploratory
 
-| File | Description |
-|------|-------------|
-| `reports/final_method_v3_results.csv` | Per-split log, 10 splits × 6 datasets |
-| `tables/main_results_selective_correction.{md,csv}` | Main benchmark table |
-| `tables/experimental_setup_selective_correction.{md,csv}` | Experimental setup table |
-| `tables/ablation_selective_correction.{md,csv}` | Ablation table |
-| `tables/sensitivity_selective_correction.{md,csv}` | Sensitivity table |
-| `figures/graphical_abstract_selective_correction_v3.*` | Graphical abstract |
-| `figures/correction_rate_vs_homophily.png` | Correction-rate vs homophily |
-| `figures/safety_comparison.png` | Safety analysis figure |
-| `figures/reliability_vs_accuracy.png` | Reliability vs accuracy figure |
-| `reports/safety_analysis.md` | Harmful-split analysis |
-| `reports/final_method_v3_analysis.md` | Method analysis narrative |
-| `reports/final_v3_regime_analysis.md` | Regime analysis |
+- Structural-extension and non-canonical exploratory lines.
+- Locations: `archive/exploratory/`, `archive/exploratory_code/`, and exploratory runners retained in `code/bfsbased_node_classification/`.
 
-### Canonical scripts
+Exploratory material is informative but not claim-bearing for the canonical method.
 
-| Script | Role |
-|--------|------|
-| `code/final_method_v3.py` | Stable import path |
-| `code/bfsbased_node_classification/final_method_v3.py` | Core implementation |
-| `code/bfsbased_node_classification/run_final_evaluation.py` | 10-split benchmark driver |
-| `code/bfsbased_node_classification/gcn_baseline_runner.py` | GCN Table 1 baseline |
-| `code/bfsbased_node_classification/analyze_final_v3_regimes.py` | Regime analysis |
-| `code/bfsbased_node_classification/build_final_v3_regime_analysis.py` | Regime analysis builder |
-| `bash scripts/run_all_selective_correction_results.sh` | One-command table/figure refresh |
+## Reader path
+
+1. `README.md`
+2. `docs/OVERVIEW.md`
+3. `docs/METHOD_STATUS.md`
+4. `docs/REPRODUCIBILITY.md`
+5. `docs/RESULTS_GUIDE.md`
+
+For a link hub (baselines, Slurm, agents): [`docs/INDEX.md`](docs/INDEX.md).
+
+---
 
 ### Canonical log files
 
@@ -115,7 +107,7 @@ Large JSONL sweep results land under `outputs/baseline_comparison/`, `outputs/la
 
 ---
 
-## Archived / superseded
+## Archived / superseded (inventory)
 
 **Status: 🗄️ Kept for provenance — do not use for paper claims**
 
