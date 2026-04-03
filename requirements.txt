@@ -8,6 +8,10 @@
 
 torch>=2.0.0
 torch_geometric>=2.3.0
+# Optional PyG sparse extensions (needed by some external baselines/tools):
+# install matching wheels from https://data.pyg.org for your torch build.
+torch_sparse>=0.6.0
+torch_scatter>=2.1.0
 numpy>=1.23.0
 networkx>=2.8
 sortedcontainers>=2.4.0

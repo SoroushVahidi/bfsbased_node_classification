@@ -33,12 +33,14 @@ _spec.loader.exec_module(_mod)
 
 compute_graph_reliability = _mod.compute_graph_reliability
 compute_soft_local_agreement = _mod.compute_soft_local_agreement
+compute_local_homophily_from_labels = _mod.compute_local_homophily_from_labels
 local_agreement_multiplier = _mod.local_agreement_multiplier
 final_method_v3 = _mod.final_method_v3
 
 __all__ = [
     "compute_graph_reliability",
     "compute_soft_local_agreement",
+    "compute_local_homophily_from_labels",
     "local_agreement_multiplier",
     "final_method_v3",
 ]

@@ -30,6 +30,7 @@ on `main`.
 |----------|------|
 | Focused resubmission runner | `resubmission_runner.py` |
 | Compact GCN/APPNP baselines | `standard_node_baselines.py` |
+| External H2GCN baseline (compact in-repo adaptation) | `standard_node_baselines.py` |
 | External DeepGCN+PairNorm baseline (inline) | `standard_node_baselines.py` + `pairnorm_baseline_runner.py` |
 | External GPRGNN baseline (inline) | `standard_node_baselines.py` + `gprgnn_baseline_runner.py` |
 | External FSGNN baseline (inline) | `standard_node_baselines.py` + `fsgnn_baseline_runner.py` |
@@ -52,8 +53,20 @@ on `main`.
 - `FINAL_V3` remains the canonical frozen PRL method; experimental variants
   (`TRIPLE_TRUST_SGC`, optional low-confidence structural term) are
   supplementary and opt-in.
+- `FINAL_V3` includes an optional local graph-reliability gate in
+  `final_method_v3.py`. The legacy soft probability-based local agreement
+  modes (`linear`, `hard_threshold`, `shifted_linear`) are preserved, and an
+  explicit propagated-label local homophily family
+  (`exact_local_linear`, `exact_local_hard_threshold`,
+  `exact_local_shifted_linear`) is available as an opt-in upgrade path.
+  Canonical defaults are unchanged unless these options are enabled.
 - `GPRGNN` is included as an **external baseline** for comparison only. It is
   not part of the canonical `FINAL_V3` package.
+- `H2GCN` is included as an **external baseline** for comparison only. Its
+  in-repo implementation is a compact PyTorch adaptation aligned with
+  https://github.com/GitEventhandler/H2GCN-PyTorch (and conceptually with the
+  original H2GCN work), while reusing this repository's split/logging protocol.
+  It is not part of the canonical `FINAL_V3` package.
 - `FSGNN` is included as an **external baseline** for comparison only. It is
   not part of the canonical `FINAL_V3` package.
 - `PairNorm` is included here as **DeepGCN+PairNorm** external baseline for

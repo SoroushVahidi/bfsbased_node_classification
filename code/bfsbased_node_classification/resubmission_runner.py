@@ -4,6 +4,7 @@ Focused resubmission experiment runner.
 
 Adds:
   - compact standard graph baselines (GCN, APPNP)
+  - external baseline (H2GCN; compact in-repo adaptation)
   - external baseline (DeepGCN + PairNorm; lightweight in-repo implementation)
   - external baseline (FSGNN; lightweight in-repo implementation)
   - external baseline (GPRGNN; lightweight in-repo implementation)
@@ -39,6 +40,7 @@ DEFAULT_METHODS = [
     "gcn",
     "gcn_pairnorm",
     "appnp",
+    "h2gcn",
     "fsgnn",
     "gprgnn",
     "sgc_wu2019",
@@ -370,7 +372,7 @@ def run_resubmission(
                 for method in [
                     m
                     for m in methods
-                    if m in {"gcn", "gcn_pairnorm", "appnp", "fsgnn", "gprgnn", "sgc_wu2019"}
+                    if m in {"gcn", "gcn_pairnorm", "appnp", "h2gcn", "fsgnn", "gprgnn", "sgc_wu2019"}
                 ]:
                     rec = _build_record(**rec_base, method=method, method_family="baseline")
                     t0 = time.perf_counter()
