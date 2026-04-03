@@ -300,22 +300,46 @@ def run_bucket_safety(
     bucket_df = pd.DataFrame(per_bucket_rows)
     split_df = pd.DataFrame(per_split_rows)
 
-    bucket_main = (
-        bucket_df.groupby(["dataset", "bucket"], as_index=False)
-        .agg(
-            n_test_nodes=("n_test_nodes", "sum"),
-            mlp_acc=("mlp_acc", "mean"),
-            final_v3_acc=("final_v3_acc", "mean"),
-            gcn_acc=("gcn_acc", "mean"),
-            appnp_acc=("appnp_acc", "mean"),
-            final_v3_delta_vs_mlp=("final_v3_delta_vs_mlp", "mean"),
-            final_v3_changed_fraction=("final_v3_changed_fraction", "mean"),
-            final_v3_beneficial_change_count=("final_v3_beneficial_change_count", "sum"),
-            final_v3_harmful_change_count=("final_v3_harmful_change_count", "sum"),
-            final_v3_harmful_overwrite_rate=("final_v3_harmful_overwrite_rate", "mean"),
-            final_v3_correction_precision=("final_v3_correction_precision", "mean"),
+    def _weighted_mean(group: pd.DataFrame, value_col: str, weight_col: str) -> float:
+        weights = group[weight_col].to_numpy(dtype=float)
+        total_weight = weights.sum()
+        if total_weight <= 0:
+            return float("nan")
+        values = group[value_col].to_numpy(dtype=float)
+        return float(np.average(values, weights=weights))
+
+    bucket_main_rows = []
+    for (dataset, bucket), group in bucket_df.groupby(["dataset", "bucket"], sort=True):
+        bucket_main_rows.append(
+            {
+                "dataset": dataset,
+                "bucket": bucket,
+                "n_test_nodes": int(group["n_test_nodes"].sum()),
+                "mlp_acc": _weighted_mean(group, "mlp_acc", "n_test_nodes"),
+                "final_v3_acc": _weighted_mean(group, "final_v3_acc", "n_test_nodes"),
+                "gcn_acc": _weighted_mean(group, "gcn_acc", "n_test_nodes"),
+                "appnp_acc": _weighted_mean(group, "appnp_acc", "n_test_nodes"),
+                "final_v3_delta_vs_mlp": _weighted_mean(
+                    group, "final_v3_delta_vs_mlp", "n_test_nodes"
+                ),
+                "final_v3_changed_fraction": _weighted_mean(
+                    group, "final_v3_changed_fraction", "n_test_nodes"
+                ),
+                "final_v3_beneficial_change_count": int(
+                    group["final_v3_beneficial_change_count"].sum()
+                ),
+                "final_v3_harmful_change_count": int(
+                    group["final_v3_harmful_change_count"].sum()
+                ),
+                "final_v3_harmful_overwrite_rate": _weighted_mean(
+                    group, "final_v3_harmful_overwrite_rate", "n_test_nodes"
+                ),
+                "final_v3_correction_precision": _weighted_mean(
+                    group, "final_v3_correction_precision", "n_test_nodes"
+                ),
+            }
         )
-    )
+    bucket_main = pd.DataFrame(bucket_main_rows)
     bucket_main.to_csv(out_table_csv, index=False)
     with open(out_table_md, "w", encoding="utf-8") as f:
         f.write("# FINAL_V3 bucket safety main table\n\n")
