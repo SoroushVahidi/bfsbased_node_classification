@@ -29,6 +29,7 @@ BASELINE_METHODS = [
     "selective_graph_correction",
     "selective_graph_correction_structural",
     "gated_mlp_prop",
+    "triple_trust_sgc",
 ]
 
 ABLATION_METHODS = [
@@ -55,6 +56,7 @@ DISPLAY = {
     "selective_graph_correction": "Selective correction",
     "selective_graph_correction_structural": "UG-SGC-S structural",
     "gated_mlp_prop": "Learned MLP/prop gate",
+    "triple_trust_sgc": "TRIPLE_TRUST_SGC",
     "sgc_no_gate": "SGC without gate",
     "sgc_no_feature_similarity": "SGC w/o feature similarity",
     "sgc_no_graph_neighbor": "SGC w/o graph-neighbor support",

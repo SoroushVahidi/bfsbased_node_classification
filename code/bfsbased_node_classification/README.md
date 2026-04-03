@@ -30,6 +30,9 @@ on `main`.
 |----------|------|
 | Focused resubmission runner | `prl_resubmission_runner.py` |
 | Compact GCN/APPNP baselines | `standard_node_baselines.py` |
+| Triple-trust experimental variant | `triple_trust_sgc.py` |
+| Triple-trust dedicated runner | `run_triple_trust_experiments.py` |
+| Canonical bucket-safety runner | `run_margin_bucket_safety_experiment.py` |
 | Resubmission analysis | `analyze_prl_resubmission.py` |
 | Grouped-run merge helper | `merge_prl_resubmission_runs.py` |
 
@@ -41,6 +44,9 @@ on `main`.
   scripts.
 - Some older files reflect earlier heterophily-oriented wording and should not
   be treated as the current paper framing.
+- `FINAL_V3` remains the canonical frozen PRL method; experimental variants
+  (`TRIPLE_TRUST_SGC`, optional low-confidence structural term) are
+  supplementary and opt-in.
 
 For the manuscript-facing map, prefer:
 
