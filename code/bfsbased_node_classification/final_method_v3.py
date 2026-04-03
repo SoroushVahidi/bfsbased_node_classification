@@ -25,7 +25,7 @@ Key design vs V2:
     threshold ρ, searched over ~|α|×|ρ|×2 profiles (see implementation).
   - 3-signal reliability formula R(v) with equal weights (no ad-hoc coefficients).
   - No feature-only branch (dropped — the reliability gate provides safety).
-  - Cleaner search space than V2’s multibranch / multi-config grid.
+  - Cleaner search space than V2's multibranch / multi-config grid.
 """
 from __future__ import annotations
 
@@ -251,20 +251,8 @@ def compute_graph_reliability(
 
 
 # ---------------------------------------------------------------------------
-# Core: Final Method v3
+# Core: Final Method v3 — local agreement helpers
 # ---------------------------------------------------------------------------
-
-# Two evidence weight profiles: one feature-leaning, one graph-leaning.
-# The best profile is selected on validation alongside (τ, ρ).
-# b1: MLP log-probability (anchor)
-# b2: feature-prototype cosine similarity
-# b4: 1-hop graph neighbor class support
-# b5: train-train compatibility prior
-WEIGHT_PROFILES = [
-    {"b1": 1.0, "b2": 0.6, "b3": 0.0, "b4": 0.5, "b5": 0.3, "b6": 0.0},
-    {"b1": 1.0, "b2": 0.4, "b3": 0.0, "b4": 0.9, "b5": 0.5, "b6": 0.0},
-]
-
 
 def compute_soft_local_agreement(
     data,
@@ -336,6 +324,22 @@ def local_agreement_multiplier(
     raise ValueError(f"Unknown local agreement mode: {mode}")
 
 
+# ---------------------------------------------------------------------------
+# Core: Final Method v3
+# ---------------------------------------------------------------------------
+
+# Two evidence weight profiles: one feature-leaning, one graph-leaning.
+# The best profile is selected on validation alongside (τ, ρ).
+# b1: MLP log-probability (anchor)
+# b2: feature-prototype cosine similarity
+# b4: 1-hop graph neighbor class support
+# b5: train-train compatibility prior
+WEIGHT_PROFILES = [
+    {"b1": 1.0, "b2": 0.6, "b3": 0.0, "b4": 0.5, "b5": 0.3, "b6": 0.0},
+    {"b1": 1.0, "b2": 0.4, "b3": 0.0, "b4": 0.9, "b5": 0.5, "b6": 0.0},
+]
+
+
 def final_method_v3(
     data,
     train_indices,
@@ -349,6 +353,7 @@ def final_method_v3(
     gate: str = "heuristic",
     split_id: Optional[int] = None,
     include_node_arrays: bool = False,
+    enable_lowconf_structural_term: bool = False,
     use_local_agreement_gate: bool = False,
     local_agreement_mode: str = "none",
     local_agreement_eta: Optional[float] = None,
@@ -371,9 +376,10 @@ def final_method_v3(
         are searched on validation together with gate and ρ.
     gate : uncertainty gate type; one of {"heuristic", "adaptive"}.
     split_id : optional split index for diagnostics logging.
-        are searched on validation together with τ and ρ.
     include_node_arrays : if True, include per-node arrays for the test split in
-        info["node_arrays"]. Useful for downstream bucket analysis. Default: False.
+        info["node_arrays"] and info["test_node_outputs"]. Default: False.
+    enable_lowconf_structural_term : if True, search over b6 candidates
+        (low-confidence structural term weight). Default: False (canonical FINAL_V3).
     use_local_agreement_gate : if True, attenuate graph-dependent correction terms
         using soft local agreement g(h_v_soft). Default: False (canonical FINAL_V3).
     local_agreement_mode : one of {"none","linear","hard_threshold","shifted_linear"}.
@@ -419,10 +425,7 @@ def final_method_v3(
 
     # --- Step 3: Reliability score ---
     reliability = compute_graph_reliability(mlp_probs_np, evidence)
-    need_local_agreement = bool(
-        locals().get("use_local_agreement_gate", False)
-        or locals().get("include_node_arrays", False)
-    )
+    need_local_agreement = bool(use_local_agreement_gate or include_node_arrays)
     if need_local_agreement:
         local_agreement_scores = compute_soft_local_agreement(
             data, train_np, mlp_probs_np, mlp_pred_all, y_true
@@ -432,7 +435,18 @@ def final_method_v3(
 
     # --- Step 4–5: Select (weights, gate, ρ) jointly on validation ---
     t_sel = time.perf_counter()
+    val_margins = mlp_margin_all[val_np]
+    tau_candidates = sorted(set(np.round(np.concatenate([
+        np.quantile(val_margins, [0.25, 0.40, 0.50, 0.60, 0.75]),
+        np.array([0.05, 0.10, 0.20, 0.30]),
+    ]), 5).tolist()))
+    rho_candidates = [0.3, 0.4, 0.5, 0.6]
     profiles = [weights] if weights else WEIGHT_PROFILES
+
+    # b6 candidates (low-confidence structural term; canonical FINAL_V3 uses b6=0)
+    b6_candidates = [0.0, 0.2, 0.4] if enable_lowconf_structural_term else [0.0]
+
+    # local agreement configurations
     eta_candidates = local_agreement_eta_candidates or [0.3, 0.4, 0.5, 0.6, 0.7]
     if local_agreement_search_modes is not None:
         modes = [str(m).lower() for m in local_agreement_search_modes]
@@ -457,55 +471,60 @@ def final_method_v3(
     best_rho = None
     best_combined = None
     best_w = None
+    best_b6 = 0.0
     best_local_mode = None
     best_local_eta = None
     best_local_multiplier = None
 
     for w in profiles:
-        comps = mod.build_selective_correction_scores(
-            mlp_probs_np, evidence,
-            b1=w["b1"], b2=w["b2"], b3=w["b3"],
-            b4=w["b4"], b5=w["b5"], b6=w.get("b6", 0.0),
-        )
-        base_terms = (
-            comps["mlp_term"]
-            + comps["feature_similarity_term"]
-            + comps["feature_knn_term"]
-            + comps["structural_far_term"]
-        )
-        graph_terms = comps["graph_neighbor_term"] + comps["compatibility_term"]
-
-        for local_mode, local_eta in local_configs:
-            local_multiplier = local_agreement_multiplier(
-                local_agreement_scores, mode=local_mode, eta=local_eta
+        for b6_val in b6_candidates:
+            w_eff = dict(w)
+            w_eff["b6"] = float(b6_val)
+            comps = mod.build_selective_correction_scores(
+                mlp_probs_np, evidence,
+                b1=w_eff["b1"], b2=w_eff["b2"], b3=w_eff["b3"],
+                b4=w_eff["b4"], b5=w_eff["b5"], b6=w_eff["b6"],
             )
-            combined_scores = base_terms + local_multiplier[:, None] * graph_terms
+            base_terms = (
+                comps["mlp_term"]
+                + comps["feature_similarity_term"]
+                + comps["feature_knn_term"]
+                + comps["structural_far_term"]
+            )
+            graph_terms = comps["graph_neighbor_term"] + comps["compatibility_term"]
 
-            for tau in tau_candidates:
-                uncertain_val = val_margins < tau
-                for rho in rho_candidates:
-                    reliable_val = reliability[val_np] >= rho
-                    apply_val = uncertain_val & reliable_val
+            for local_mode, local_eta in local_configs:
+                local_multiplier = local_agreement_multiplier(
+                    local_agreement_scores, mode=local_mode, eta=local_eta
+                )
+                combined_scores = base_terms + local_multiplier[:, None] * graph_terms
 
-                    final_val = mlp_pred_all[val_np].copy()
-                    if apply_val.any():
-                        final_val[apply_val] = np.argmax(
-                            combined_scores[val_np][apply_val], axis=1
-                        ).astype(np.int64)
+                for tau in tau_candidates:
+                    uncertain_val = val_margins < tau
+                    for rho in rho_candidates:
+                        reliable_val = reliability[val_np] >= rho
+                        apply_val = uncertain_val & reliable_val
 
-                    val_acc = _simple_accuracy(y_true[val_np], final_val)
-                    changed_frac = float((final_val != mlp_pred_all[val_np]).mean())
-                    key = (val_acc, -changed_frac)
+                        final_val = mlp_pred_all[val_np].copy()
+                        if apply_val.any():
+                            final_val[apply_val] = np.argmax(
+                                combined_scores[val_np][apply_val], axis=1
+                            ).astype(np.int64)
 
-                    if best_key is None or key > best_key:
-                        best_key = key
-                        best_tau = tau
-                        best_rho = rho
-                        best_combined = combined_scores
-                        best_w = dict(w)
-                        best_local_mode = local_mode
-                        best_local_eta = local_eta
-                        best_local_multiplier = local_multiplier
+                        val_acc = _simple_accuracy(y_true[val_np], final_val)
+                        changed_frac = float((final_val != mlp_pred_all[val_np]).mean())
+                        key = (val_acc, -changed_frac)
+
+                        if best_key is None or key > best_key:
+                            best_key = key
+                            best_tau = tau
+                            best_rho = rho
+                            best_combined = combined_scores
+                            best_w = w_eff
+                            best_b6 = float(b6_val)
+                            best_local_mode = local_mode
+                            best_local_eta = local_eta
+                            best_local_multiplier = local_multiplier
 
     selection_time = time.perf_counter() - t_sel
     combined_scores = best_combined
@@ -513,7 +532,7 @@ def final_method_v3(
     local_multiplier_all = best_local_multiplier
 
     # --- Step 6: Apply correction ---
-    uncertain_all = best["uncertain_all"]
+    uncertain_all = mlp_margin_all < best_tau
     reliable_all = reliability >= best_rho
     correct_mask = uncertain_all & reliable_all
 
@@ -538,8 +557,12 @@ def final_method_v3(
     test_uncertain = uncertain_all[test_np]
 
     if test_uncertain.any():
-        acc_test_uncertain_mlp = _simple_accuracy(y_true[test_np][test_uncertain], mlp_pred_all[test_np][test_uncertain])
-        acc_test_uncertain_v3 = _simple_accuracy(y_true[test_np][test_uncertain], final_pred[test_np][test_uncertain])
+        acc_test_uncertain_mlp = _simple_accuracy(
+            y_true[test_np][test_uncertain], mlp_pred_all[test_np][test_uncertain]
+        )
+        acc_test_uncertain_v3 = _simple_accuracy(
+            y_true[test_np][test_uncertain], final_pred[test_np][test_uncertain]
+        )
     else:
         acc_test_uncertain_mlp = None
         acc_test_uncertain_v3 = None
@@ -559,17 +582,26 @@ def final_method_v3(
 
     total_time = time.perf_counter() - t_start
 
+    search_space_size = (
+        len(tau_candidates) * len(rho_candidates) * len(profiles)
+        * len(b6_candidates) * len(local_configs)
+    )
+
     info = {
         "variant": "FINAL_V3",
+        "split_id": int(split_id) if split_id is not None else None,
+        "gate": gate,
         "val_acc_mlp": float(mlp_val_acc),
         "val_acc_v3": float(val_acc),
         "test_acc_mlp": float(mlp_test_acc),
         "test_acc_v3": float(test_acc),
         "delta_vs_mlp": float(test_acc - mlp_test_acc),
         "gate_mode": gate,
-        "selected_tau": float(selected_tau) if selected_tau is not None else None,
+        "selected_tau": float(best_tau),
         "selected_rho": float(best_rho),
         "weights": {k: float(v) for k, v in w.items()},
+        "enable_lowconf_structural_term": bool(enable_lowconf_structural_term),
+        "selected_b6": float(best_b6),
         "local_agreement": {
             "enabled": bool(best_local_mode and best_local_mode != "none"),
             "selected_mode": str(best_local_mode),
@@ -585,9 +617,9 @@ def final_method_v3(
         },
         "gate_stats": {
             "uncertain_fraction_test": float(uncertain_all[test_np].mean()),
-            "gate_bce_loss": float(best_gate_loss) if best_gate_loss is not None else None,
-            "n_pos_val": int(n_pos) if n_pos is not None else None,
-            "n_neg_val": int(n_neg) if n_neg is not None else None,
+            "gate_bce_loss": None,
+            "n_pos_val": None,
+            "n_neg_val": None,
             "low_conf_gain_vs_mlp_test": (
                 float(acc_test_uncertain_v3 - acc_test_uncertain_mlp)
                 if (acc_test_uncertain_mlp is not None and acc_test_uncertain_v3 is not None)
@@ -615,18 +647,8 @@ def final_method_v3(
             "selection": float(selection_time),
             "total": float(total_time),
         },
-        "search_space_size": int(best.get("search_space_size", 0)),
+        "search_space_size": search_space_size,
     }
-    if local_configs:
-        info["search_space_size"] *= len(local_configs)
-    if info["gate_mode"] == "adaptive":
-        split_label = split_id if split_id is not None else "?"
-        print(
-            f"[AdaptiveGate] split={split_label} | n_pos={info['gate_stats']['n_pos_val']} "
-            f"n_neg={info['gate_stats']['n_neg_val']} | routed to correction: "
-            f"{100.0 * info['gate_stats']['uncertain_fraction_test']:.1f}% of test nodes | "
-            f"gate BCE loss: {info['gate_stats']['gate_bce_loss']:.3f}"
-        )
     if include_node_arrays:
         test_idx_local = test_np
         was_correct_before_test = (mlp_pred_all[test_idx_local] == y_true[test_idx_local])
@@ -634,6 +656,7 @@ def final_method_v3(
         changed_test = (final_pred[test_idx_local] != mlp_pred_all[test_idx_local])
         changed_helpful = changed_test & (~was_correct_before_test) & is_correct_after_test
         changed_harmful = changed_test & was_correct_before_test & (~is_correct_after_test)
+        # node_arrays: numpy arrays for downstream use
         info["node_arrays"] = {
             "test_indices": test_np.copy(),
             "mlp_predictions": mlp_pred_all[test_np].copy(),
@@ -648,5 +671,24 @@ def final_method_v3(
             "is_changed": changed_test.copy(),
             "is_changed_helpful": changed_helpful.copy(),
             "is_changed_harmful": changed_harmful.copy(),
+        }
+        # test_node_outputs: JSON-serializable version for CSV/JSONL export
+        info["test_node_outputs"] = {
+            "node_id": test_np.astype(np.int64).tolist(),
+            "true_label": y_true[test_np].astype(np.int64).tolist(),
+            "mlp_pred": mlp_pred_all[test_np].astype(np.int64).tolist(),
+            "final_pred": final_pred[test_np].astype(np.int64).tolist(),
+            "changed_from_mlp": (final_pred[test_np] != mlp_pred_all[test_np]).astype(np.int64).tolist(),
+            "beneficial_change": changed_helpful.astype(np.int64).tolist(),
+            "harmful_change": changed_harmful.astype(np.int64).tolist(),
+            "mlp_margin": mlp_margin_all[test_np].astype(np.float64).tolist(),
+            "passed_uncertainty_gate": uncertain_all[test_np].astype(np.int64).tolist(),
+            "passed_reliability_gate": reliable_all[test_np].astype(np.int64).tolist(),
+            "reliability": reliability[test_np].astype(np.float64).tolist(),
+            "combined_top_score": combined_scores[test_np].max(axis=1).astype(np.float64).tolist(),
+            "combined_top_label": np.argmax(combined_scores[test_np], axis=1).astype(np.int64).tolist(),
+            "selected_tau": float(best_tau),
+            "selected_rho": float(best_rho),
+            "selected_weights": {k: float(v) for k, v in w.items()},
         }
     return val_acc, test_acc, info

@@ -24,6 +24,7 @@ import torch
 
 import manuscript_runner as mr
 from standard_node_baselines import run_baseline
+from triple_trust_sgc import triple_trust_sgc_predictclass
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 LOGS_DIR = os.path.join(REPO_ROOT, "logs", "resubmission_runs")
@@ -49,6 +50,7 @@ DEFAULT_METHODS = [
     "sgcs_no_far",
     "sgcs_far_only",
     "sgcs_no_gate",
+    "triple_trust_sgc",
 ]
 
 
@@ -241,6 +243,7 @@ def run_resubmission(
                         "mlp_only",
                         "selective_graph_correction",
                         "selective_graph_correction_structural",
+                        "triple_trust_sgc",
                         "gated_mlp_prop",
                         "sgc_no_gate",
                         "sgc_no_feature_similarity",
@@ -400,6 +403,7 @@ def run_resubmission(
                         "sgcs_no_far",
                         "sgcs_far_only",
                         "sgcs_no_gate",
+                        "triple_trust_sgc",
                     }
                 ]
                 for method in sgc_methods:
@@ -411,7 +415,29 @@ def run_resubmission(
                     )
                     t0 = time.perf_counter()
                     try:
-                        if method.startswith("sgcs") or method == "selective_graph_correction_structural":
+                        if method == "triple_trust_sgc":
+                            variant_kwargs = {
+                                "alpha_class": 0.5,
+                                "gamma_source": 2.0,
+                                "lambda_deg": 0.2,
+                                "lambda_proto": 0.3,
+                                "rho_target": 0.15,
+                                "kappa_update": 0.65,
+                                "refresh_fraction": 0.25,
+                                "compatibility_update_eta": 0.2,
+                                "enable_target_labelability_gate": True,
+                            }
+                            _, acc_sgc, info = triple_trust_sgc_predictclass(
+                                data,
+                                train_np,
+                                val_np,
+                                test_np,
+                                mlp_probs=mlp_probs,
+                                seed=current_seed,
+                                mod=mod,
+                                **variant_kwargs,
+                            )
+                        elif method.startswith("sgcs") or method == "selective_graph_correction_structural":
                             variant_kwargs = _structural_variant_kwargs(method)
                             _, acc_sgc, info = mod.selective_graph_correction_structural_predictclass(
                                 data,
@@ -470,6 +496,23 @@ def run_resubmission(
                                 "config_json": json.dumps(variant_kwargs, sort_keys=True, default=str),
                             }
                         )
+                        if method == "triple_trust_sgc":
+                            rec.update(
+                                {
+                                    "tt_mean_q_corrected": float(info.get("mean_q_corrected", 0.0)),
+                                    "tt_mean_source_trust_pseudo": float(info.get("mean_source_trust_pseudo", 0.0)),
+                                    "tt_average_target_labelability": float(info.get("average_target_labelability", 0.0)),
+                                    "tt_pseudo_update_eligible_count": int(info.get("pseudo_update_eligible_count", 0)),
+                                    "tt_class_trust_vector": info.get("class_trust_vector"),
+                                    "tt_per_class_trusted_mass": info.get("per_class_trusted_mass"),
+                                    "tt_trust_neighbor_concentration_mean": float(
+                                        info.get("trust_neighbor_concentration_mean", 0.0)
+                                    ),
+                                    "tt_compatibility_update_stats": info.get("compatibility_update_stats"),
+                                    "tt_n_helped": int(info.get("correction_analysis", {}).get("n_helped", 0)),
+                                    "tt_n_hurt": int(info.get("correction_analysis", {}).get("n_hurt", 0)),
+                                }
+                            )
                     except Exception as e:
                         rec["success"] = False
                         rec["notes"] = str(e)

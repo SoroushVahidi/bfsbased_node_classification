@@ -23,6 +23,9 @@ Methods
   - FINAL_V3   (reliability-gated selective correction)
   - GCN        (graph-wide 2-layer GCN baseline)
 
+Optional: pass --compare-structural-lowconf-term to also run FINAL_V3 with
+the experimental low-confidence structural term (b6 search enabled).
+
 Datasets / splits
 -----------------
   Defaults: cora, chameleon, texas  ×  splits 0, 1, 2
@@ -208,6 +211,8 @@ def _run_one_split(
     val_idx: torch.Tensor,
     test_idx: torch.Tensor,
     seed: int,
+    *,
+    enable_lowconf_structural_term: bool = False,
 ) -> Dict[str, Any]:
     """
     Run MLP + FINAL_V3 + GCN on one dataset-split and return raw per-node results.
@@ -255,7 +260,9 @@ def _run_one_split(
         mlp_probs=mlp_probs,
         seed=seed,
         mod=mod,
+        split_id=split_id,
         include_node_arrays=True,
+        enable_lowconf_structural_term=enable_lowconf_structural_term,
     )
     v3_time = time.perf_counter() - t0
 
@@ -553,9 +560,8 @@ def write_markdown_report(
         if not np.isnan(v3_hurt_all) and not np.isnan(gcn_hurt_all):
             h3_evidence.append(v3_hurt_all <= gcn_hurt_all)
 
-    # Verdict thresholds: "supported" if ≥2/3 datasets agree, "mixed" if ≥1/3.
-    SUPPORTED_THRESHOLD = 2.0 / 3.0   # ≥ 67% of datasets agree
-    MIXED_THRESHOLD = 1.0 / 3.0       # ≥ 33% of datasets agree
+    SUPPORTED_THRESHOLD = 2.0 / 3.0
+    MIXED_THRESHOLD = 1.0 / 3.0
 
     def _verdict(evidence):
         if not evidence:
@@ -652,7 +658,6 @@ def _try_make_plots(
         ax.set_ylabel("Δ accuracy vs MLP")
         ax.legend(fontsize=9)
 
-        # Annotate bars with values
         for bar in bars1:
             h = bar.get_height()
             ax.annotate(f"{h:+.3f}", xy=(bar.get_x() + bar.get_width() / 2, h),
@@ -697,13 +702,15 @@ def _try_make_plots(
 
 
 # ---------------------------------------------------------------------------
-# Main
+# Main experiment runner
 # ---------------------------------------------------------------------------
 
 def run_margin_bucket_experiment(
     datasets: Optional[List[str]] = None,
     split_ids: Optional[List[int]] = None,
     split_dir: Optional[str] = None,
+    *,
+    enable_lowconf_structural_term: bool = False,
 ) -> Dict[str, Any]:
     """
     Run the margin-bucket safety experiment.
@@ -713,6 +720,8 @@ def run_margin_bucket_experiment(
     datasets  : list of dataset keys (default: cora, chameleon, texas)
     split_ids : list of split IDs to run (default: [0, 1, 2])
     split_dir : directory containing split .npz files
+    enable_lowconf_structural_term : if True, pass to final_method_v3 to also
+        search over b6 candidates (experimental low-conf structural term).
 
     Returns
     -------
@@ -777,6 +786,7 @@ def run_margin_bucket_experiment(
                 result = _run_one_split(
                     mod, data, dataset_key, split_id,
                     train_idx, val_idx, test_idx, seed,
+                    enable_lowconf_structural_term=enable_lowconf_structural_term,
                 )
             except Exception as e:
                 import traceback
@@ -833,7 +843,6 @@ def run_margin_bucket_experiment(
             # --------------------------------------------------------------
             # Per-split summary
             # --------------------------------------------------------------
-            # Harmful count: nodes where method is wrong but MLP was correct
             v3_harmful = int(((v3_preds != true_labels) & (mlp_preds == true_labels)).sum())
             gcn_harmful = int(((gcn_preds != true_labels) & (mlp_preds == true_labels)).sum())
 
@@ -909,12 +918,19 @@ def main() -> None:
         default=None,
         help=f"Split IDs to run (default: {DEFAULT_SPLITS}).",
     )
+    parser.add_argument(
+        "--compare-structural-lowconf-term",
+        action="store_true",
+        default=False,
+        help="Also run FINAL_V3 with enable_lowconf_structural_term=True for comparison.",
+    )
     args = parser.parse_args()
 
     out = run_margin_bucket_experiment(
         datasets=args.datasets,
         split_ids=args.splits,
         split_dir=args.split_dir,
+        enable_lowconf_structural_term=args.compare_structural_lowconf_term,
     )
     print("\nOutput files:")
     for k, v in out.items():
