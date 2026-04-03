@@ -351,6 +351,9 @@ def run_prl_resubmission(
                     rec = _build_record(**rec_base, method=method, method_family="baseline")
                     t0 = time.perf_counter()
                     try:
+                        baseline_kwargs: Dict[str, Any] = (
+                            {"max_epochs": 500, "patience": 100} if method == "gcn" else {}
+                        )
                         result = run_baseline(
                             method,
                             data,
@@ -358,6 +361,7 @@ def run_prl_resubmission(
                             val_idx,
                             test_idx,
                             seed=current_seed,
+                            **baseline_kwargs,
                         )
                         method_time = time.perf_counter() - t0
                         rec.update(
