@@ -351,7 +351,13 @@ def final_method_v3(
             "selection": float(selection_time),
             "total": float(total_time),
         },
-        "search_space_size": len(tau_candidates) * len(rho_candidates) * len(profiles) * len(b6_candidates),
+        "search_space_size": (
+            len(tau_candidates)
+            * len(rho_candidates)
+            * len(profiles)
+            * len(b6_candidates)
+            * (len(local_configs) if local_configs is not None else 1)
+        ),
     }
     if include_node_arrays:
         info["test_node_outputs"] = {
