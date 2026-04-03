@@ -328,7 +328,8 @@ def triple_trust_sgc_predictclass(
 
         final_pred = mlp_pred.copy()
         final_pred[eligible_corr] = pred_scores[eligible_corr]
-        yhat = final_pred
+        yhat = final_pred.copy()
+        yhat[train_mask] = y_true[train_mask]
 
         s = _compute_source_trust(train_mask, pseudo_mask, yhat, q, tau_class, deg, gamma_source, lambda_deg)
 
