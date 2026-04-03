@@ -1,0 +1,36 @@
+dataset,method,display_name,mean_test_acc,std_test_acc,delta_vs_default_sgc,wins_vs_default_sgc,losses_vs_default_sgc,ties_vs_default_sgc,n_runs
+chameleon,selective_graph_correction,Selective correction,0.4671,0.0231,+0.0000,0,0,10,10
+chameleon,sgc_no_gate,SGC without gate,0.4667,0.0227,-0.0004,2,3,5,10
+chameleon,sgc_no_feature_similarity,SGC w/o feature similarity,0.4673,0.0227,+0.0002,2,1,7,10
+chameleon,sgc_no_graph_neighbor,SGC w/o graph-neighbor support,0.4669,0.0213,-0.0002,3,6,1,10
+chameleon,sgc_no_compatibility,SGC w/o compatibility,0.4673,0.0230,+0.0002,2,1,7,10
+chameleon,sgc_mlp_plus_graph,SGC MLP+graph only,0.4673,0.0226,+0.0002,2,3,5,10
+chameleon,sgc_knn_enabled,SGC with feature-kNN enabled,0.4697,0.0246,+0.0026,6,1,3,10
+citeseer,selective_graph_correction,Selective correction,0.7063,0.0195,+0.0000,0,0,10,10
+citeseer,sgc_no_gate,SGC without gate,0.7063,0.0195,+0.0000,0,0,10,10
+citeseer,sgc_no_feature_similarity,SGC w/o feature similarity,0.7060,0.0189,-0.0003,0,1,9,10
+citeseer,sgc_no_graph_neighbor,SGC w/o graph-neighbor support,0.6873,0.0184,-0.0190,0,10,0,10
+citeseer,sgc_no_compatibility,SGC w/o compatibility,0.7011,0.0197,-0.0052,0,9,1,10
+citeseer,sgc_mlp_plus_graph,SGC MLP+graph only,0.7008,0.0200,-0.0055,0,9,1,10
+citeseer,sgc_knn_enabled,SGC with feature-kNN enabled,0.7105,0.0193,+0.0041,9,0,1,10
+cora,selective_graph_correction,Selective correction,0.7421,0.0252,+0.0000,0,0,10,10
+cora,sgc_no_gate,SGC without gate,0.7421,0.0252,+0.0000,0,0,10,10
+cora,sgc_no_feature_similarity,SGC w/o feature similarity,0.7419,0.0253,-0.0002,0,1,9,10
+cora,sgc_no_graph_neighbor,SGC w/o graph-neighbor support,0.7153,0.0253,-0.0268,0,10,0,10
+cora,sgc_no_compatibility,SGC w/o compatibility,0.7314,0.0248,-0.0107,0,10,0,10
+cora,sgc_mlp_plus_graph,SGC MLP+graph only,0.7316,0.0249,-0.0105,0,10,0,10
+cora,sgc_knn_enabled,SGC with feature-kNN enabled,0.7431,0.0243,+0.0010,6,3,1,10
+pubmed,selective_graph_correction,Selective correction,0.8845,0.0039,+0.0000,0,0,10,10
+pubmed,sgc_no_gate,SGC without gate,0.8845,0.0039,+0.0000,0,0,10,10
+pubmed,sgc_no_feature_similarity,SGC w/o feature similarity,0.8845,0.0039,+0.0001,4,3,3,10
+pubmed,sgc_no_graph_neighbor,SGC w/o graph-neighbor support,0.8777,0.0042,-0.0068,0,10,0,10
+pubmed,sgc_no_compatibility,SGC w/o compatibility,0.8821,0.0038,-0.0024,0,10,0,10
+pubmed,sgc_mlp_plus_graph,SGC MLP+graph only,0.8821,0.0040,-0.0023,0,10,0,10
+pubmed,sgc_knn_enabled,SGC with feature-kNN enabled,0.8848,0.0033,+0.0004,7,3,0,10
+wisconsin,selective_graph_correction,Selective correction,0.8431,0.0402,+0.0000,0,0,10,10
+wisconsin,sgc_no_gate,SGC without gate,0.8412,0.0434,-0.0020,1,2,7,10
+wisconsin,sgc_no_feature_similarity,SGC w/o feature similarity,0.8431,0.0402,+0.0000,0,0,10,10
+wisconsin,sgc_no_graph_neighbor,SGC w/o graph-neighbor support,0.8431,0.0421,+0.0000,1,1,8,10
+wisconsin,sgc_no_compatibility,SGC w/o compatibility,0.8431,0.0402,+0.0000,0,0,10,10
+wisconsin,sgc_mlp_plus_graph,SGC MLP+graph only,0.8431,0.0402,+0.0000,0,0,10,10
+wisconsin,sgc_knn_enabled,SGC with feature-kNN enabled,0.8431,0.0402,+0.0000,0,0,10,10

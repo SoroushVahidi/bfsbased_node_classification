@@ -41,7 +41,7 @@ Publication-oriented outputs:
 
 ## 5. Older / exploratory outputs
 
-- `code/bfsbased_node_classification/diagnosis/preserve_*` — point-in-time snapshots; **prefer `logs/`** for citations.
+- `code/bfsbased_node_classification/diagnosis/*` — **not tracked** on the default branch anymore; **prefer `logs/`** for citations (historical bundles may exist on other git branches).
 - `logs/broken_job1_*` — superseded failed job.
 - `logs/*_final_validation_main.csv` — earlier pipeline stage where superseded by `*_final_validation.csv`.
 

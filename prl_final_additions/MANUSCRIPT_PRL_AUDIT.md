@@ -1,5 +1,10 @@
 # PRL manuscript — repository & artifact audit
 
+> **Historical scope note:** this audit describes the older
+> `manuscript_runner` / `UG-SGC` evidence package. For the current frozen PRL
+> paper package, prefer `FINAL_V3` artifacts under `tables/main_results_prl.*`,
+> `reports/final_method_v3_analysis.md`, and `README_PRL_MANUSCRIPT.md`.
+
 **Root:** `/home/sv96/node_classification_manuscript`  
 **Date:** 2026-03-21 (audit); user date context 2026-03-18  
 **Venue target:** Pattern Recognition Letters (~7 pages incl. references)
@@ -10,7 +15,7 @@
 
 | Area | Status |
 |------|--------|
-| **Canonical benchmark + split evidence** | **Sufficient** — `logs/manuscript_gain_over_mlp_final_validation.csv` + `comparison_runs_manuscript_final_validation.jsonl` |
+| **Canonical benchmark + split evidence for the older UG-SGC package** | **Sufficient** — `logs/manuscript_gain_over_mlp_final_validation.csv` + `comparison_runs_manuscript_final_validation.jsonl` |
 | **Correction-behavior table (descriptive)** | **Sufficient** — `logs/manuscript_correction_behavior_final_validation.csv` |
 | **Regime / propagation baseline context** | **Sufficient** — `logs/manuscript_regime_analysis_final_validation.csv` |
 | **Threshold “sensitivity” (honest scope)** | **Exists** — cross-run co-variation in `results_prl/` (not a fixed-split τ sweep) |
@@ -20,7 +25,7 @@
 
 **Canonical “final validation” prefix:** `*_manuscript_final_validation*` under `logs/` (merged job outputs).
 
-**Obsolete / duplicate content:** Multiple **frozen snapshots** under `code/bfsbased_node_classification/diagnosis/preserve_*` duplicate `logs/` artifacts for archival; prefer **`logs/`** for citations. `logs/broken_job1_883410_backup_2026-03-19/` is explicitly superseded.
+**Obsolete / duplicate content:** Frozen snapshots that used to live under `code/bfsbased_node_classification/diagnosis/preserve_*` duplicated `logs/` artifacts; that tree is **no longer tracked** on the default branch—prefer **`logs/`** for citations (check other git branches for archives). `logs/broken_job1_883410_backup_2026-03-19/` is explicitly superseded.
 
 ---
 
@@ -97,7 +102,7 @@
 | Type | Paths |
 |------|--------|
 | Active Slurm templates | `/home/sv96/node_classification_manuscript/slurm/run_selective_validation_main_r3.sbatch`, `run_selective_validation_large_controls.sbatch`, `run_selective_validation_analysis.sbatch` |
-| Historical copies | Under `code/bfsbased_node_classification/diagnosis/preserve_*/slurm/` (archival) |
+| Historical copies | May exist on non-default git branches; not under `code/.../diagnosis/` on main |
 
 ---
 
@@ -115,7 +120,7 @@
 |----------|--------|
 | `logs/*_final_validation_main.csv` / `job1` / `job2` split artifacts | Earlier pipeline stages; **superseded** by `*_final_validation.csv` without `_main` where merged |
 | `logs/broken_job1_883410_backup_2026-03-19/` | Broken job backup |
-| `code/bfsbased_node_classification/diagnosis/preserve_*` | Point-in-time copies; use `logs/` for paper |
+| `code/bfsbased_node_classification/diagnosis/*` (removed from main) | Was point-in-time copies; use `logs/` for paper |
 
 ---
 

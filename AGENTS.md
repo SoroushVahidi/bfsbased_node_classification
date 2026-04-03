@@ -2,7 +2,7 @@
 
 ### Overview
 
-This is a Python research codebase for the paper "Uncertainty-Gated Selective Graph Correction for Node Classification." It implements a graph neural network method (SGC) that uses an MLP baseline and selectively applies graph-based correction for uncertain nodes. There are no web servers, databases, or Docker services — all work is Python script execution.
+This is a Python research codebase for the paper "Uncertainty-Gated Selective Graph Correction for Node Classification." The **PRL submission method** is **FINAL_V3** (reliability-gated selective graph correction on top of an MLP). The repo also retains the original **selective graph correction (SGC v1)** path via `manuscript_runner.py` for baselines and historical logs. There are no web servers, databases, or Docker services — all work is Python script execution.
 
 ### Key dependencies
 
@@ -15,6 +15,12 @@ Install with:
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 pip install torch_geometric numpy networkx sortedcontainers matplotlib
 ```
+
+### FINAL_V3 entry point
+
+- Implementation: `code/bfsbased_node_classification/final_method_v3.py`
+- Stable import path: `code/final_method_v3.py` (requires PyTorch when imported)
+- Regenerate main PRL tables/figures from CSVs: `bash scripts/run_all_prl_results.sh` (FINAL_V3, **10-split** canonical log `reports/final_method_v3_results.csv`)
 
 ### Running experiments
 

@@ -2,6 +2,11 @@
 """
 Improved SGC (Selective Graph Correction) variants.
 
+**Publication method:** FINAL_V3 is implemented in ``final_method_v3.py`` (not in this module).
+This file retains **baselines and ablations** used for comparison: original selective correction
+(SGC v1) and **V2_MULTIBRANCH** (archived multibranch design). Other tagged variants are
+experimental and not part of the main PRL narrative.
+
 Each variant builds on the existing evidence infrastructure in
 bfsbased-full-investigate-homophil.py but upgrades the gating, mixing,
 or scoring strategy.

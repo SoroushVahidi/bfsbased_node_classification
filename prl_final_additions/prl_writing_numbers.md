@@ -1,5 +1,9 @@
 # Numbers for manuscript text (from canonical CSVs)
 
+> **Scope warning (read before citing):** These tables summarize the **legacy manuscript_runner / selective_graph_correction (“UG-SGC”)** pipeline over **nine datasets** and **30 split-level comparisons per dataset** from `logs/manuscript_gain_over_mlp_final_validation.csv`. They are **not** the **FINAL_V3** submission package.
+>
+> **For the PRL paper’s main benchmark (FINAL_V3, 10 splits, six datasets), use:** `tables/main_results_prl.md` / `tables/main_results_prl.csv` and `reports/final_method_v3_results.csv`. Narrative: `reports/final_method_story.txt`, `reports/final_method_v3_analysis.md`, `reports/safety_analysis.md`.
+
 Source gain: `logs/manuscript_gain_over_mlp_final_validation.csv`  
 Source correction: `logs/manuscript_correction_behavior_final_validation.csv`
 

@@ -1,5 +1,10 @@
 # PRL resubmission readiness audit
 
+> **Relation to the frozen paper package:** this document tracks the separate
+> resubmission / extension workflow. The canonical short-paper package on the
+> default branch is still `FINAL_V3`; use this audit only for supplementary
+> baseline/ablation planning and provenance.
+
 ## What already existed
 
 - Canonical final-validation manuscript package under `logs/*manuscript_final_validation*`

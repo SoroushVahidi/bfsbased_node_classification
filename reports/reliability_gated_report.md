@@ -140,7 +140,7 @@ Percentile-based thresholds adapt to each dataset's margin distribution, ensurin
 
 ```bash
 cd code/bfsbased_node_classification
-python reliability_gated_runner.py \
+python3 code/bfsbased_node_classification/experimental_archived/reliability_gated_runner.py \
     --split-dir ../../data/splits \
     --data-dir ../../data \
     --splits 0 1

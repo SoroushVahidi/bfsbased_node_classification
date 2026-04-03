@@ -28,13 +28,14 @@ from standard_node_baselines import run_baseline
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 LOGS_DIR = os.path.join(REPO_ROOT, "logs", "prl_resubmission")
 
-CORE_DATASETS = ["cora", "citeseer", "pubmed", "chameleon", "wisconsin"]
+CORE_DATASETS = ["cora", "citeseer", "pubmed", "chameleon", "texas", "wisconsin"]
 
 DEFAULT_METHODS = [
     "mlp_only",
     "prop_only",
     "gcn",
     "appnp",
+    "sgc_wu2019",
     "selective_graph_correction",
     "selective_graph_correction_structural",
     "gated_mlp_prop",
@@ -346,7 +347,7 @@ def run_prl_resubmission(
                         total_runs += 1
 
                 # standard baselines
-                for method in [m for m in methods if m in {"gcn", "appnp"}]:
+                for method in [m for m in methods if m in {"gcn", "appnp", "sgc_wu2019"}]:
                     rec = _build_record(**rec_base, method=method, method_family="baseline")
                     t0 = time.perf_counter()
                     try:

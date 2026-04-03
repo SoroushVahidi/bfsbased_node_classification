@@ -16,12 +16,14 @@ Method summary:
          combined evidence scores
        - If MLP is uncertain AND graph is unreliable: keep MLP prediction
 
-Key simplifications over V2:
-  - Single fixed weight configuration (no weight search)
-  - 3-signal reliability formula with equal weights (no ad-hoc coefficients)
-  - Only 2 tuned parameters (τ, ρ) from a small grid
-  - No feature-only branch (unnecessary — reliability gate handles safety)
-  - Cleaner, more explainable, fewer overfitting risks
+Key design vs V2:
+  - **Two evidence weight profiles** (`WEIGHT_PROFILES`: balanced vs graph-heavy). The
+    best profile is chosen **on the validation split**, jointly with τ and ρ (not fixed a priori).
+  - **Three tuned choices on validation:** weight profile, uncertainty threshold τ, and
+    reliability threshold ρ, searched over ~|τ|×|ρ|×2 profiles (see implementation).
+  - 3-signal reliability formula R(v) with equal weights (no ad-hoc coefficients).
+  - No feature-only branch (dropped — the reliability gate provides safety).
+  - Cleaner search space than V2’s multibranch / multi-config grid.
 """
 from __future__ import annotations
 
@@ -120,9 +122,12 @@ def final_method_v3(
     data : PyG Data object
     train_indices, val_indices, test_indices : array-like
     mlp_probs : optional pre-computed MLP probabilities
-    seed : random seed
+    seed : random seed, retained for API compatibility with older runners.
+        When `mlp_probs` is supplied, RNG control is handled by the caller.
     mod : the loaded bfsbased-full-investigate module
-    weights : override fixed weights (for ablation studies only)
+    weights : optional single weight dict. If set, **only** this profile is evaluated
+        (ablation: single-profile / fixed-weight runs). Default: both `WEIGHT_PROFILES`
+        are searched on validation together with τ and ρ.
 
     Returns
     -------
@@ -287,6 +292,6 @@ def final_method_v3(
             "selection": float(selection_time),
             "total": float(total_time),
         },
-        "search_space_size": len(tau_candidates) * len(rho_candidates),
+        "search_space_size": len(tau_candidates) * len(rho_candidates) * len(profiles),
     }
     return val_acc, test_acc, info

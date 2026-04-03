@@ -4,7 +4,13 @@ Final evaluation runner: compares MLP, baseline SGC (v1), V2_MULTIBRANCH, and FI
 
 Usage:
   python3 code/bfsbased_node_classification/run_final_evaluation.py \
-    --split-dir data/splits --output-tag final_v3
+    --split-dir data/splits
+
+Default: **10 splits** (indices 0–9), matching `reports/final_method_v3_results.csv`.
+
+If `--output-tag` is left at the default `final_v3`, the runner overwrites the
+canonical path `reports/final_method_v3_results.csv`. Supplying a different tag
+creates `reports/final_method_v3_results_<tag>.csv` instead.
 """
 from __future__ import annotations
 
@@ -127,11 +133,7 @@ def run_evaluation(datasets, splits, split_dir, output_tag):
             )
             v1_time = time.perf_counter() - t0
 
-            v1_final = mlp_pred.copy()
             v1_thr = v1_info.get("selected_threshold_high", 0.2)
-            v1_uncertain = mlp_info["mlp_margin_all"] < v1_thr
-            v1_changed = v1_final.copy()  # need to reconstruct
-            # Approximate harm analysis for v1
             v1_delta = v1_acc - mlp_test_acc
             records.append({
                 "dataset": ds, "split_id": sid, "seed": seed,
@@ -140,6 +142,8 @@ def run_evaluation(datasets, splits, split_dir, output_tag):
                 "n_helped": None, "n_hurt": None, "correction_precision": None,
                 "frac_confident": None,
                 "frac_unreliable": None,
+                # For the legacy v1 baseline we only log uncertain-node coverage;
+                # the column name is kept for CSV compatibility with older tables.
                 "frac_corrected": float(v1_info.get("fraction_test_nodes_uncertain", 0)),
                 "tau": v1_thr, "rho": None,
                 "runtime_sec": v1_time,
@@ -302,13 +306,18 @@ def main():
     parser.add_argument("--split-dir", default="data/splits")
     parser.add_argument("--datasets", nargs="+",
                         default=["cora", "citeseer", "pubmed", "chameleon", "texas", "wisconsin"])
-    parser.add_argument("--splits", nargs="+", type=int, default=[0, 1, 2, 3, 4])
+    parser.add_argument(
+        "--splits", nargs="+", type=int,
+        default=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    )
     parser.add_argument("--output-tag", default="final_v3")
     args = parser.parse_args()
 
     records = run_evaluation(args.datasets, args.splits, args.split_dir, args.output_tag)
 
-    csv_path = f"reports/final_method_v3_results.csv"
+    csv_path = "reports/final_method_v3_results.csv"
+    if args.output_tag != "final_v3":
+        csv_path = f"reports/final_method_v3_results_{args.output_tag}.csv"
     write_csv(records, csv_path)
     print_summary(records)
 

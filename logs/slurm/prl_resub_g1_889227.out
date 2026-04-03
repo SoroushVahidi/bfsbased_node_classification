@@ -1,0 +1,73 @@
+
+=== Split Coverage Check ===
+  cora        : FULL
+  citeseer    : FULL
+  pubmed      : FULL
+
+
+=== Dataset: cora ===
+  split=0 repeat=1/1 seed=133700
+  split=1 repeat=1/1 seed=133800
+  split=2 repeat=1/1 seed=133900
+  split=3 repeat=1/1 seed=134000
+  split=4 repeat=1/1 seed=134100
+  split=5 repeat=1/1 seed=134200
+  split=6 repeat=1/1 seed=134300
+  split=7 repeat=1/1 seed=134400
+  split=8 repeat=1/1 seed=134500
+  split=9 repeat=1/1 seed=134600
+
+=== Dataset: citeseer ===
+  split=0 repeat=1/1 seed=133700
+  split=1 repeat=1/1 seed=133800
+  split=2 repeat=1/1 seed=133900
+  split=3 repeat=1/1 seed=134000
+  split=4 repeat=1/1 seed=134100
+  split=5 repeat=1/1 seed=134200
+  split=6 repeat=1/1 seed=134300
+  split=7 repeat=1/1 seed=134400
+  split=8 repeat=1/1 seed=134500
+  split=9 repeat=1/1 seed=134600
+
+=== Dataset: pubmed ===
+  split=0 repeat=1/1 seed=133700
+  split=1 repeat=1/1 seed=133800
+  split=2 repeat=1/1 seed=133900
+  split=3 repeat=1/1 seed=134000
+  split=4 repeat=1/1 seed=134100
+  split=5 repeat=1/1 seed=134200
+  split=6 repeat=1/1 seed=134300
+  split=7 repeat=1/1 seed=134400
+  split=8 repeat=1/1 seed=134500
+  split=9 repeat=1/1 seed=134600
+
+Completed 360 runs in 29409.0s
+{
+  "runs_path": "/mmfs1/home/sv96/node_classification_manuscript/logs/prl_resubmission/comparison_runs_prl_resubmission_core_group1_r1.jsonl",
+  "dataset_meta": {
+    "cora": {
+      "num_nodes": 2708,
+      "num_edges": 10556,
+      "num_classes": 7,
+      "avg_degree": 3.8980797636632203,
+      "homophily": 0.8099658961727927
+    },
+    "citeseer": {
+      "num_nodes": 3327,
+      "num_edges": 9104,
+      "num_classes": 6,
+      "avg_degree": 2.7363991584009617,
+      "homophily": 0.7355008787346221
+    },
+    "pubmed": {
+      "num_nodes": 19717,
+      "num_edges": 88648,
+      "num_classes": 3,
+      "avg_degree": 4.496018664096972,
+      "homophily": 0.8023869686851367
+    }
+  },
+  "total_runs": 360,
+  "wall_time_sec": 29408.951674429,
+  "output_tag": "prl_resubmission_core_group1_r1"
+}

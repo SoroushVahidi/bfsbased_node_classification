@@ -1,0 +1,31 @@
+dataset,method,display_name,mean_test_acc,std_test_acc,delta_vs_mlp,wins_vs_mlp,losses_vs_mlp,ties_vs_mlp,n_runs
+chameleon,mlp_only,MLP,0.4664,0.0213,+0.0000,0,0,10,10
+chameleon,prop_only,Propagation,0.3792,0.0421,-0.0873,0,10,0,10
+chameleon,gcn,GCN,0.6469,0.0223,+0.1805,10,0,0,10
+chameleon,appnp,APPNP,0.5417,0.0191,+0.0752,10,0,0,10
+chameleon,selective_graph_correction,Selective correction,0.4671,0.0231,+0.0007,6,3,1,10
+chameleon,gated_mlp_prop,Learned MLP/prop gate,0.4864,0.0218,+0.0200,8,2,0,10
+citeseer,mlp_only,MLP,0.6805,0.0185,+0.0000,0,0,10,10
+citeseer,prop_only,Propagation,0.6782,0.0477,-0.0024,7,3,0,10
+citeseer,gcn,GCN,0.7636,0.0146,+0.0831,10,0,0,10
+citeseer,appnp,APPNP,0.7627,0.0142,+0.0821,10,0,0,10
+citeseer,selective_graph_correction,Selective correction,0.7063,0.0195,+0.0258,10,0,0,10
+citeseer,gated_mlp_prop,Learned MLP/prop gate,0.7255,0.0232,+0.0449,10,0,0,10
+cora,mlp_only,MLP,0.7056,0.0278,+0.0000,0,0,10,10
+cora,prop_only,Propagation,0.8113,0.0315,+0.1056,10,0,0,10
+cora,gcn,GCN,0.8746,0.0076,+0.1690,10,0,0,10
+cora,appnp,APPNP,0.8787,0.0125,+0.1730,10,0,0,10
+cora,selective_graph_correction,Selective correction,0.7421,0.0252,+0.0364,10,0,0,10
+cora,gated_mlp_prop,Learned MLP/prop gate,0.8258,0.0193,+0.1201,10,0,0,10
+pubmed,mlp_only,MLP,0.8736,0.0037,+0.0000,0,0,10,10
+pubmed,prop_only,Propagation,0.8085,0.0052,-0.0650,0,10,0,10
+pubmed,gcn,GCN,0.8735,0.0061,-0.0001,6,4,0,10
+pubmed,appnp,APPNP,0.8722,0.0063,-0.0013,4,6,0,10
+pubmed,selective_graph_correction,Selective correction,0.8845,0.0039,+0.0109,10,0,0,10
+pubmed,gated_mlp_prop,Learned MLP/prop gate,0.8829,0.0042,+0.0093,10,0,0,10
+wisconsin,mlp_only,MLP,0.8431,0.0421,+0.0000,0,0,10,10
+wisconsin,prop_only,Propagation,0.5294,0.0886,-0.3137,0,10,0,10
+wisconsin,gcn,GCN,0.5392,0.0640,-0.3039,0,10,0,10
+wisconsin,appnp,APPNP,0.5706,0.0442,-0.2725,0,10,0,10
+wisconsin,selective_graph_correction,Selective correction,0.8431,0.0402,-0.0000,1,1,8,10
+wisconsin,gated_mlp_prop,Learned MLP/prop gate,0.8216,0.0551,-0.0216,3,6,1,10

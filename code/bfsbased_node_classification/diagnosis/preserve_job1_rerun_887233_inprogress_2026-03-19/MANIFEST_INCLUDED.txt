@@ -1,8 +1,0 @@
-./INPROGRESS_STATUS_README.md
-./job1_rerun_887233_patch_note.txt
-./logs/comparison_runs_manuscript_final_validation_main.jsonl
-./MANIFEST_INCLUDED.txt
-./manuscript_runner.py
-./run_selective_validation_main_r3.sbatch
-./slurm/sv_main_r3_887233.err
-./slurm/sv_main_r3_887233.out
