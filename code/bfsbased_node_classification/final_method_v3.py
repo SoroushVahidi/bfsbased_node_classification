@@ -113,6 +113,9 @@ def final_method_v3(
     seed: int = 1337,
     mod=None,
     weights: Optional[Dict[str, float]] = None,
+    enable_lowconf_structural_term: bool = False,
+    lowconf_structural_mode: str = "diffusion",
+    lowconf_structural_b6_candidates: Optional[List[float]] = None,
 ) -> Tuple[float, float, Dict[str, Any]]:
     """
     Reliability-Gated Selective Graph Correction (v3).
@@ -178,47 +181,57 @@ def final_method_v3(
     rho_candidates = [0.3, 0.4, 0.5, 0.6]
 
     profiles = [weights] if weights else WEIGHT_PROFILES
+    if lowconf_structural_b6_candidates is None:
+        lowconf_structural_b6_candidates = [0.0, 0.2, 0.4] if enable_lowconf_structural_term else [0.0]
+    b6_candidates = [float(x) for x in lowconf_structural_b6_candidates]
+    if not enable_lowconf_structural_term:
+        b6_candidates = [0.0]
 
     best_key = None
     best_tau = None
     best_rho = None
     best_combined = None
     best_w = None
+    best_b6 = 0.0
 
     for w in profiles:
-        comps = mod.build_selective_correction_scores(
-            mlp_probs_np, evidence,
-            b1=w["b1"], b2=w["b2"], b3=w["b3"],
-            b4=w["b4"], b5=w["b5"], b6=w.get("b6", 0.0),
-        )
-        combined_scores = comps["combined_scores"]
+        for b6_val in b6_candidates:
+            comps = mod.build_selective_correction_scores(
+                mlp_probs_np, evidence,
+                b1=w["b1"], b2=w["b2"], b3=w["b3"],
+                b4=w["b4"], b5=w["b5"], b6=float(b6_val) if enable_lowconf_structural_term else 0.0,
+            )
+            combined_scores = comps["combined_scores"]
 
-        for tau in tau_candidates:
-            uncertain_val = val_margins < tau
-            for rho in rho_candidates:
-                reliable_val = reliability[val_np] >= rho
-                apply_val = uncertain_val & reliable_val
+            for tau in tau_candidates:
+                uncertain_val = val_margins < tau
+                for rho in rho_candidates:
+                    reliable_val = reliability[val_np] >= rho
+                    apply_val = uncertain_val & reliable_val
 
-                final_val = mlp_pred_all[val_np].copy()
-                if apply_val.any():
-                    final_val[apply_val] = np.argmax(
-                        combined_scores[val_np][apply_val], axis=1
-                    ).astype(np.int64)
+                    final_val = mlp_pred_all[val_np].copy()
+                    if apply_val.any():
+                        final_val[apply_val] = np.argmax(
+                            combined_scores[val_np][apply_val], axis=1
+                        ).astype(np.int64)
 
-                val_acc = _simple_accuracy(y_true[val_np], final_val)
-                changed_frac = float((final_val != mlp_pred_all[val_np]).mean())
-                key = (val_acc, -changed_frac)
+                    val_acc = _simple_accuracy(y_true[val_np], final_val)
+                    changed_frac = float((final_val != mlp_pred_all[val_np]).mean())
+                    key = (val_acc, -changed_frac)
 
-                if best_key is None or key > best_key:
-                    best_key = key
-                    best_tau = tau
-                    best_rho = rho
-                    best_combined = combined_scores
-                    best_w = dict(w)
+                    if best_key is None or key > best_key:
+                        best_key = key
+                        best_tau = tau
+                        best_rho = rho
+                        best_combined = combined_scores
+                        best_w = dict(w)
+                        best_b6 = float(b6_val) if enable_lowconf_structural_term else 0.0
 
     selection_time = time.perf_counter() - t_sel
     combined_scores = best_combined
     w = best_w
+    w = dict(w)
+    w["b6"] = float(best_b6)
 
     # --- Step 6: Apply correction ---
     uncertain_all = mlp_margin_all < best_tau
@@ -268,6 +281,9 @@ def final_method_v3(
         "selected_tau": float(best_tau),
         "selected_rho": float(best_rho),
         "weights": {k: float(v) for k, v in w.items()},
+        "enable_lowconf_structural_term": bool(enable_lowconf_structural_term),
+        "lowconf_structural_mode": str(lowconf_structural_mode),
+        "selected_b6": float(best_b6),
         "branch_fractions": {
             "confident_keep_mlp": float(test_confident.mean()),
             "uncertain_unreliable_keep_mlp": float(test_uncertain_unreliable.mean()),
@@ -292,6 +308,28 @@ def final_method_v3(
             "selection": float(selection_time),
             "total": float(total_time),
         },
-        "search_space_size": len(tau_candidates) * len(rho_candidates) * len(profiles),
+        "search_space_size": len(tau_candidates) * len(rho_candidates) * len(profiles) * len(b6_candidates),
+        "test_node_outputs": {
+            "node_id": test_np.astype(np.int64).tolist(),
+            "true_label": y_true[test_np].astype(np.int64).tolist(),
+            "mlp_pred": mlp_pred_all[test_np].astype(np.int64).tolist(),
+            "final_pred": final_pred[test_np].astype(np.int64).tolist(),
+            "changed_from_mlp": (final_pred[test_np] != mlp_pred_all[test_np]).astype(np.int64).tolist(),
+            "beneficial_change": (
+                (mlp_pred_all[test_np] != y_true[test_np]) & (final_pred[test_np] == y_true[test_np])
+            ).astype(np.int64).tolist(),
+            "harmful_change": (
+                (mlp_pred_all[test_np] == y_true[test_np]) & (final_pred[test_np] != y_true[test_np])
+            ).astype(np.int64).tolist(),
+            "mlp_margin": mlp_margin_all[test_np].astype(np.float64).tolist(),
+            "passed_uncertainty_gate": uncertain_all[test_np].astype(np.int64).tolist(),
+            "passed_reliability_gate": reliable_all[test_np].astype(np.int64).tolist(),
+            "reliability": reliability[test_np].astype(np.float64).tolist(),
+            "combined_top_score": combined_scores[test_np].max(axis=1).astype(np.float64).tolist(),
+            "combined_top_label": np.argmax(combined_scores[test_np], axis=1).astype(np.int64).tolist(),
+            "selected_tau": float(best_tau),
+            "selected_rho": float(best_rho),
+            "selected_weights": {k: float(v) for k, v in w.items()},
+        },
     }
     return val_acc, test_acc, info

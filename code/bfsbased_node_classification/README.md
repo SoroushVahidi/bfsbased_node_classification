@@ -30,6 +30,8 @@ on `main`.
 |----------|------|
 | Focused resubmission runner | `prl_resubmission_runner.py` |
 | Compact GCN/APPNP baselines | `standard_node_baselines.py` |
+| Triple-trust experimental variant | `triple_trust_sgc.py` |
+| Triple-trust dedicated runner | `run_triple_trust_experiments.py` |
 | Resubmission analysis | `analyze_prl_resubmission.py` |
 | Grouped-run merge helper | `merge_prl_resubmission_runs.py` |
 
