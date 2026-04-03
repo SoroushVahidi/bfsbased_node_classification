@@ -175,6 +175,7 @@ def run_bucket_safety(
                 mod=mod,
                 enable_lowconf_structural_term=enable_lowconf_structural_term,
                 lowconf_structural_b6_candidates=b6_candidates,
+                include_node_arrays=True,
             )
             node_out = v3_info["test_node_outputs"]
             v3_pred_test = np.asarray(node_out["final_pred"], dtype=np.int64)
