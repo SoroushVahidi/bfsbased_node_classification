@@ -228,6 +228,11 @@ def triple_trust_sgc_predictclass(
 
     Returns (val_acc, test_acc, info).
     """
+    if mod is None:
+        raise ValueError(
+            "triple_trust_sgc_predictclass requires `mod` (the loaded bfsbased module) "
+            "for MLP training and margin computation."
+        )
     _ = seed  # deterministic behavior comes from caller-set seeds in current runners.
 
     y_true = data.y.detach().cpu().numpy().astype(np.int64)

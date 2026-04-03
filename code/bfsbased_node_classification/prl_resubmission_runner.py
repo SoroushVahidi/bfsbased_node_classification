@@ -412,15 +412,6 @@ def run_prl_resubmission(
                     t0 = time.perf_counter()
                     try:
                         if method == "triple_trust_sgc":
-                            _, acc_sgc, info = triple_trust_sgc_predictclass(
-                                data,
-                                train_np,
-                                val_np,
-                                test_np,
-                                mlp_probs=mlp_probs,
-                                seed=current_seed,
-                                mod=mod,
-                            )
                             variant_kwargs = {
                                 "alpha_class": 0.5,
                                 "gamma_source": 2.0,
@@ -432,6 +423,16 @@ def run_prl_resubmission(
                                 "compatibility_update_eta": 0.2,
                                 "enable_target_labelability_gate": True,
                             }
+                            _, acc_sgc, info = triple_trust_sgc_predictclass(
+                                data,
+                                train_np,
+                                val_np,
+                                test_np,
+                                mlp_probs=mlp_probs,
+                                seed=current_seed,
+                                mod=mod,
+                                **variant_kwargs,
+                            )
                         elif method.startswith("sgcs") or method == "selective_graph_correction_structural":
                             variant_kwargs = _structural_variant_kwargs(method)
                             _, acc_sgc, info = mod.selective_graph_correction_structural_predictclass(

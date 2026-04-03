@@ -185,11 +185,7 @@ def final_method_v3(
     rho_candidates = [0.3, 0.4, 0.5, 0.6]
 
     profiles = [weights] if weights else WEIGHT_PROFILES
-    if lowconf_structural_b6_candidates is None:
-        lowconf_structural_b6_candidates = [0.0, 0.2, 0.4] if enable_lowconf_structural_term else [0.0]
-    b6_candidates = [float(x) for x in lowconf_structural_b6_candidates]
-    if not enable_lowconf_structural_term:
-        b6_candidates = [0.0]
+    b6_candidates = [0.0, 0.2, 0.4] if enable_lowconf_structural_term else [0.0]
 
     best_key = None
     best_tau = None
@@ -288,7 +284,6 @@ def final_method_v3(
         "selected_rho": float(best_rho),
         "weights": {k: float(v) for k, v in w.items()},
         "enable_lowconf_structural_term": bool(enable_lowconf_structural_term),
-        "lowconf_structural_mode": str(lowconf_structural_mode),
         "selected_b6": float(best_b6),
         "branch_fractions": {
             "confident_keep_mlp": float(test_confident.mean()),
