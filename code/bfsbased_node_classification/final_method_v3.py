@@ -266,6 +266,76 @@ WEIGHT_PROFILES = [
 ]
 
 
+def compute_soft_local_agreement(
+    data,
+    train_indices: np.ndarray,
+    mlp_probs_np: np.ndarray,
+    mlp_pred_all: np.ndarray,
+    y_true: np.ndarray,
+    *,
+    degree0_default: float = 0.0,
+) -> np.ndarray:
+    """
+    Soft local agreement score h_v_soft in [0,1].
+
+    For node v with predicted class c_v:
+      h_v_soft(v) = mean_{u in N(v)} contribution(u -> v)
+
+    contribution(u -> v):
+      - if u is train-labeled: 1[y_u == c_v]
+      - else: p_MLP(u, c_v)
+    """
+    num_nodes = int(data.num_nodes)
+    edge_index = data.edge_index.detach().cpu().numpy()
+    src = edge_index[0].astype(np.int64)
+    dst = edge_index[1].astype(np.int64)
+
+    train_mask = np.zeros(num_nodes, dtype=bool)
+    train_mask[np.asarray(train_indices, dtype=np.int64)] = True
+
+    dst_pred = mlp_pred_all[dst]
+    contrib = mlp_probs_np[src, dst_pred].astype(np.float64)
+    train_src = train_mask[src]
+    if train_src.any():
+        contrib[train_src] = (y_true[src[train_src]] == dst_pred[train_src]).astype(np.float64)
+
+    accum = np.zeros(num_nodes, dtype=np.float64)
+    deg = np.zeros(num_nodes, dtype=np.float64)
+    np.add.at(accum, dst, contrib)
+    np.add.at(deg, dst, 1.0)
+
+    out = np.full(num_nodes, float(degree0_default), dtype=np.float64)
+    nz = deg > 0
+    out[nz] = accum[nz] / deg[nz]
+    return np.clip(out, 0.0, 1.0)
+
+
+def local_agreement_multiplier(
+    local_agreement_scores: np.ndarray,
+    *,
+    mode: str,
+    eta: Optional[float] = None,
+) -> np.ndarray:
+    """Return g(h_v_soft) used to attenuate graph-dependent correction terms."""
+    h = np.clip(local_agreement_scores.astype(np.float64), 0.0, 1.0)
+    mode = str(mode).lower()
+    if mode == "none":
+        return np.ones_like(h, dtype=np.float64)
+    if mode == "linear":
+        return h
+    if mode == "hard_threshold":
+        thr = 0.5 if eta is None else float(eta)
+        return (h >= thr).astype(np.float64)
+    if mode == "shifted_linear":
+        thr = 0.5 if eta is None else float(eta)
+        if thr >= 1.0:
+            return np.zeros_like(h, dtype=np.float64)
+        if thr <= 0.0:
+            return h
+        return np.clip((h - thr) / (1.0 - thr), 0.0, 1.0)
+    raise ValueError(f"Unknown local agreement mode: {mode}")
+
+
 def final_method_v3(
     data,
     train_indices,
@@ -279,6 +349,11 @@ def final_method_v3(
     gate: str = "heuristic",
     split_id: Optional[int] = None,
     include_node_arrays: bool = False,
+    use_local_agreement_gate: bool = False,
+    local_agreement_mode: str = "none",
+    local_agreement_eta: Optional[float] = None,
+    local_agreement_search_modes: Optional[List[str]] = None,
+    local_agreement_eta_candidates: Optional[List[float]] = None,
 ) -> Tuple[float, float, Dict[str, Any]]:
     """
     Reliability-Gated Selective Graph Correction (v3).
@@ -299,6 +374,14 @@ def final_method_v3(
         are searched on validation together with τ and ρ.
     include_node_arrays : if True, include per-node arrays for the test split in
         info["node_arrays"]. Useful for downstream bucket analysis. Default: False.
+    use_local_agreement_gate : if True, attenuate graph-dependent correction terms
+        using soft local agreement g(h_v_soft). Default: False (canonical FINAL_V3).
+    local_agreement_mode : one of {"none","linear","hard_threshold","shifted_linear"}.
+        Used when `use_local_agreement_gate=True` and no search list is provided.
+    local_agreement_eta : threshold parameter for thresholded modes.
+    local_agreement_search_modes : optional list of modes to search on validation.
+        If set, modes are searched jointly with (weights, τ, ρ).
+    local_agreement_eta_candidates : eta grid for thresholded modes.
 
     Returns
     -------
@@ -336,106 +419,98 @@ def final_method_v3(
 
     # --- Step 3: Reliability score ---
     reliability = compute_graph_reliability(mlp_probs_np, evidence)
+    need_local_agreement = bool(
+        locals().get("use_local_agreement_gate", False)
+        or locals().get("include_node_arrays", False)
+    )
+    if need_local_agreement:
+        local_agreement_scores = compute_soft_local_agreement(
+            data, train_np, mlp_probs_np, mlp_pred_all, y_true
+        )
+    else:
+        local_agreement_scores = np.ones_like(reliability, dtype=np.float32)
 
     # --- Step 4–5: Select (weights, gate, ρ) jointly on validation ---
     t_sel = time.perf_counter()
     profiles = [weights] if weights else WEIGHT_PROFILES
-    if gate not in {"heuristic", "adaptive"}:
-        raise ValueError("gate must be one of {'heuristic', 'adaptive'}")
-
-    if gate == "heuristic":
-        best = _search_heuristic_uncertainty(
-            y_true=y_true,
-            mlp_pred_all=mlp_pred_all,
-            mlp_margin_all=mlp_margin_all,
-            reliability=reliability,
-            val_np=val_np,
-            profiles=profiles,
-            mod=mod,
-            mlp_probs_np=mlp_probs_np,
-            evidence=evidence,
-        )
-        best_gate_loss = None
-        n_pos = None
-        n_neg = None
+    eta_candidates = local_agreement_eta_candidates or [0.3, 0.4, 0.5, 0.6, 0.7]
+    if local_agreement_search_modes is not None:
+        modes = [str(m).lower() for m in local_agreement_search_modes]
+    elif use_local_agreement_gate:
+        modes = [str(local_agreement_mode).lower()]
     else:
-        rho_candidates = [0.3, 0.4, 0.5, 0.6]
-        features_all = _compute_node_context_features(
-            data=data,
-            mlp_probs_np=mlp_probs_np,
-            mlp_margin_all=mlp_margin_all,
-            evidence=evidence,
-        )
-        best_key = None
-        best = {}
-        best_gate_loss = None
-        n_pos = 0
-        n_neg = 0
-        for w in profiles:
-            comps = mod.build_selective_correction_scores(
-                mlp_probs_np, evidence,
-                b1=w["b1"], b2=w["b2"], b3=w["b3"],
-                b4=w["b4"], b5=w["b5"], b6=w.get("b6", 0.0),
-            )
-            combined_scores = comps["combined_scores"]
-            corrected_all = np.argmax(combined_scores, axis=1).astype(np.int64)
-            y_gate_val = (
-                (corrected_all[val_np] == y_true[val_np]) &
-                (mlp_pred_all[val_np] != y_true[val_np])
-            ).astype(np.int64)
-            cur_pos = int(y_gate_val.sum())
-            cur_neg = int(y_gate_val.size - cur_pos)
-            if cur_pos < 10:
-                print(f"[AdaptiveGate] Fallback to heuristic τ: too few positive training examples (n_pos={cur_pos}).")
-                best = _search_heuristic_uncertainty(
-                    y_true=y_true,
-                    mlp_pred_all=mlp_pred_all,
-                    mlp_margin_all=mlp_margin_all,
-                    reliability=reliability,
-                    val_np=val_np,
-                    profiles=profiles,
-                    mod=mod,
-                    mlp_probs_np=mlp_probs_np,
-                    evidence=evidence,
-                )
-                best["fallback_reason"] = "too_few_positive_examples"
-                best_gate_loss = None
-                n_pos = cur_pos
-                n_neg = cur_neg
-                gate = "heuristic"
-                break
+        modes = ["none"]
 
-            gate_probs_all, gate_loss = _train_adaptive_gate(features_all, val_np, y_gate_val, seed=seed)
-            uncertain_all = gate_probs_all > 0.5
-            for rho in rho_candidates:
-                reliable_val = reliability[val_np] >= rho
-                apply_val = uncertain_all[val_np] & reliable_val
-                final_val = mlp_pred_all[val_np].copy()
-                if apply_val.any():
-                    final_val[apply_val] = corrected_all[val_np][apply_val]
-                val_acc = _simple_accuracy(y_true[val_np], final_val)
-                changed_frac = float((final_val != mlp_pred_all[val_np]).mean())
-                key = (val_acc, -changed_frac)
-                if best_key is None or key > best_key:
-                    best_key = key
-                    n_pos = cur_pos
-                    n_neg = cur_neg
-                    best_gate_loss = gate_loss
-                    best = {
-                        "combined_scores": combined_scores,
-                        "weights": dict(w),
-                        "selected_tau": None,
-                        "selected_rho": float(rho),
-                        "uncertain_all": uncertain_all,
-                        "gate_probs_all": gate_probs_all,
-                        "search_space_size": len(rho_candidates) * len(profiles),
-                    }
+    local_configs: List[Tuple[str, Optional[float]]] = []
+    for mode in modes:
+        if mode in {"hard_threshold", "shifted_linear"}:
+            if use_local_agreement_gate and local_agreement_search_modes is None and local_agreement_eta is not None:
+                local_configs.append((mode, float(local_agreement_eta)))
+            else:
+                for eta in eta_candidates:
+                    local_configs.append((mode, float(eta)))
+        else:
+            local_configs.append((mode, None))
+
+    best_key = None
+    best_tau = None
+    best_rho = None
+    best_combined = None
+    best_w = None
+    best_local_mode = None
+    best_local_eta = None
+    best_local_multiplier = None
+
+    for w in profiles:
+        comps = mod.build_selective_correction_scores(
+            mlp_probs_np, evidence,
+            b1=w["b1"], b2=w["b2"], b3=w["b3"],
+            b4=w["b4"], b5=w["b5"], b6=w.get("b6", 0.0),
+        )
+        base_terms = (
+            comps["mlp_term"]
+            + comps["feature_similarity_term"]
+            + comps["feature_knn_term"]
+            + comps["structural_far_term"]
+        )
+        graph_terms = comps["graph_neighbor_term"] + comps["compatibility_term"]
+
+        for local_mode, local_eta in local_configs:
+            local_multiplier = local_agreement_multiplier(
+                local_agreement_scores, mode=local_mode, eta=local_eta
+            )
+            combined_scores = base_terms + local_multiplier[:, None] * graph_terms
+
+            for tau in tau_candidates:
+                uncertain_val = val_margins < tau
+                for rho in rho_candidates:
+                    reliable_val = reliability[val_np] >= rho
+                    apply_val = uncertain_val & reliable_val
+
+                    final_val = mlp_pred_all[val_np].copy()
+                    if apply_val.any():
+                        final_val[apply_val] = np.argmax(
+                            combined_scores[val_np][apply_val], axis=1
+                        ).astype(np.int64)
+
+                    val_acc = _simple_accuracy(y_true[val_np], final_val)
+                    changed_frac = float((final_val != mlp_pred_all[val_np]).mean())
+                    key = (val_acc, -changed_frac)
+
+                    if best_key is None or key > best_key:
+                        best_key = key
+                        best_tau = tau
+                        best_rho = rho
+                        best_combined = combined_scores
+                        best_w = dict(w)
+                        best_local_mode = local_mode
+                        best_local_eta = local_eta
+                        best_local_multiplier = local_multiplier
 
     selection_time = time.perf_counter() - t_sel
-    combined_scores = best["combined_scores"]
-    w = best["weights"]
-    selected_tau = best.get("selected_tau")
-    best_rho = best["selected_rho"]
+    combined_scores = best_combined
+    w = best_w
+    local_multiplier_all = best_local_multiplier
 
     # --- Step 6: Apply correction ---
     uncertain_all = best["uncertain_all"]
@@ -459,6 +534,7 @@ def final_method_v3(
     test_uncertain_unreliable = (uncertain_all & ~reliable_all)[test_np]
     test_corrected = correct_mask[test_np]
     test_changed = (final_pred[test_np] != mlp_pred_all[test_np])
+    test_local_multiplier = local_multiplier_all[test_np]
     test_uncertain = uncertain_all[test_np]
 
     if test_uncertain.any():
@@ -494,6 +570,14 @@ def final_method_v3(
         "selected_tau": float(selected_tau) if selected_tau is not None else None,
         "selected_rho": float(best_rho),
         "weights": {k: float(v) for k, v in w.items()},
+        "local_agreement": {
+            "enabled": bool(best_local_mode and best_local_mode != "none"),
+            "selected_mode": str(best_local_mode),
+            "selected_eta": None if best_local_eta is None else float(best_local_eta),
+            "mean_score_all": float(local_agreement_scores.mean()),
+            "mean_score_test": float(local_agreement_scores[test_np].mean()),
+            "mean_multiplier_test": float(test_local_multiplier.mean()),
+        },
         "branch_fractions": {
             "confident_keep_mlp": float(test_confident.mean()),
             "uncertain_unreliable_keep_mlp": float(test_uncertain_unreliable.mean()),
@@ -533,6 +617,8 @@ def final_method_v3(
         },
         "search_space_size": int(best.get("search_space_size", 0)),
     }
+    if local_configs:
+        info["search_space_size"] *= len(local_configs)
     if info["gate_mode"] == "adaptive":
         split_label = split_id if split_id is not None else "?"
         print(
@@ -542,11 +628,25 @@ def final_method_v3(
             f"gate BCE loss: {info['gate_stats']['gate_bce_loss']:.3f}"
         )
     if include_node_arrays:
+        test_idx_local = test_np
+        was_correct_before_test = (mlp_pred_all[test_idx_local] == y_true[test_idx_local])
+        is_correct_after_test = (final_pred[test_idx_local] == y_true[test_idx_local])
+        changed_test = (final_pred[test_idx_local] != mlp_pred_all[test_idx_local])
+        changed_helpful = changed_test & (~was_correct_before_test) & is_correct_after_test
+        changed_harmful = changed_test & was_correct_before_test & (~is_correct_after_test)
         info["node_arrays"] = {
             "test_indices": test_np.copy(),
             "mlp_predictions": mlp_pred_all[test_np].copy(),
             "final_predictions": final_pred[test_np].copy(),
             "mlp_margins": mlp_margin_all[test_np].copy(),
             "true_labels": y_true[test_np].copy(),
+            "local_agreement_scores": local_agreement_scores[test_np].copy(),
+            "local_graph_multiplier": local_multiplier_all[test_np].copy(),
+            "is_uncertain": uncertain_all[test_np].copy(),
+            "passes_reliability_gate": reliable_all[test_np].copy(),
+            "is_corrected_branch": correct_mask[test_np].copy(),
+            "is_changed": changed_test.copy(),
+            "is_changed_helpful": changed_helpful.copy(),
+            "is_changed_harmful": changed_harmful.copy(),
         }
     return val_acc, test_acc, info
