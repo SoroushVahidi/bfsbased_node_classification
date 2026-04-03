@@ -147,7 +147,15 @@ def run_experiment(datasets: List[str], splits: List[int], split_dir: str, tag: 
                 mod=mod,
                 include_node_arrays=True,
                 use_local_agreement_gate=True,
-                local_agreement_search_modes=["none", "linear", "hard_threshold", "shifted_linear"],
+                local_agreement_search_modes=[
+                    "none",
+                    "linear",
+                    "hard_threshold",
+                    "shifted_linear",
+                    "exact_local_linear",
+                    "exact_local_hard_threshold",
+                    "exact_local_shifted_linear",
+                ],
                 local_agreement_eta_candidates=[0.3, 0.4, 0.5, 0.6, 0.7],
             )
 
@@ -220,6 +228,7 @@ def run_experiment(datasets: List[str], splits: List[int], split_dir: str, tag: 
                 "changed_precision_canonical": canonical_quality["changed_precision"],
                 "high_conf_untouched_rate_local": 1.0 - high_changed_local,
                 "selected_local_mode": local_info["local_agreement"]["selected_mode"],
+                "selected_local_score_family": local_info["local_agreement"].get("selected_score_family"),
                 "selected_local_eta": local_info["local_agreement"].get("selected_eta"),
                 "mean_local_agreement_test": local_info["local_agreement"]["mean_score_test"],
                 "mean_local_multiplier_test": local_info["local_agreement"]["mean_multiplier_test"],
@@ -238,6 +247,7 @@ def run_experiment(datasets: List[str], splits: List[int], split_dir: str, tag: 
                     "local_pred": int(na_local["final_predictions"][i]),
                     "mlp_margin": float(na_local["mlp_margins"][i]),
                     "h_v_soft": float(na_local["local_agreement_scores"][i]),
+                    "h_v_selected": float(na_local["selected_local_scores"][i]),
                     "local_multiplier": float(na_local["local_graph_multiplier"][i]),
                     "local_gate_active": bool(na_local["local_graph_multiplier"][i] > 0),
                     "is_uncertain": bool(na_local["is_uncertain"][i]),

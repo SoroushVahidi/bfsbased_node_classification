@@ -82,6 +82,9 @@ table. See [`REPO_STATUS.md`](REPO_STATUS.md) for the full boundary description.
 | `code/bfsbased_node_classification/manuscript_runner.py` | UG-SGC runner (legacy) |
 | `code/bfsbased_node_classification/resubmission_runner.py` | UG-SGC-S + GCN/APPNP baselines |
 | `code/bfsbased_node_classification/gcn_baseline_runner.py` | Standalone GCN baseline |
+| `code/bfsbased_node_classification/pairnorm_baseline_runner.py` | Standalone external PairNorm baseline |
+| `code/bfsbased_node_classification/fsgnn_baseline_runner.py` | Standalone external FSGNN baseline |
+| `code/bfsbased_node_classification/gprgnn_baseline_runner.py` | Standalone external GPRGNN baseline |
 | `code/bfsbased_node_classification/analyze_resubmission_results.py` | Analysis helper |
 | `code/bfsbased_node_classification/merge_resubmission_runs.py` | Grouped-job merge helper |
 | `slurm/*.sbatch` | Wulver HPC templates |

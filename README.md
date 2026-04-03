@@ -65,10 +65,15 @@ bfsbased_node_classification/
 │       ├── gcn_baseline_runner.py          ← GCN Table 1 baseline      [CANONICAL]
 │       ├── analyze_final_v3_regimes.py     ← regime analysis           [CANONICAL]
 │       ├── build_final_v3_regime_analysis.py                           [CANONICAL]
-│       ├── bfsbased-full-investigate-homophil.py  ← core module (all variants)
 │       ├── manuscript_runner.py            ← UG-SGC runner             [LEGACY]
 │       ├── resubmission_runner.py          ← UG-SGC-S + baselines      [EXPLORATORY]
-│       ├── standard_node_baselines.py      ← GCN/APPNP training helpers
+│       ├── pairnorm_baseline_runner.py     ← standalone DeepGCN+PairNorm baseline
+│       ├── fsgnn_baseline_runner.py        ← standalone FSGNN baseline
+│       ├── gprgnn_baseline_runner.py       ← standalone GPRGNN baseline
+│       ├── standard_node_baselines.py      ← GCN/APPNP + external baseline helpers
+│       ├── triple_trust_sgc.py             ← experimental triple-trust (opt-in)
+│       ├── run_triple_trust_experiments.py ← triple-trust runner
+│       ├── bfsbased-full-investigate-homophil.py  ← core module (all variants)
 │       ├── make_splits.py                  ← split generation utility
 │       └── experimental_archived/          ← legacy diagnostic scripts
 │
@@ -115,10 +120,25 @@ bfsbased_node_classification/
 | Uncertainty-gated selective correction | **UG-SGC** | 📁 Legacy | `code/bfsbased_node_classification/manuscript_runner.py` |
 | Structural extension | **UG-SGC-S** | 🔬 Exploratory | `code/bfsbased_node_classification/resubmission_runner.py` |
 
-**FINAL_V3 ≠ UG-SGC.** FINAL_V3 uses a reliability gate; UG-SGC uses
-uncertainty/confidence thresholding. Only FINAL_V3 is the canonical
-submission-facing package. See [`REPO_STATUS.md`](REPO_STATUS.md) for the
-full boundary description.
+External baselines (e.g., PairNorm, FSGNN, GPRGNN) are included for comparison only and are not
+part of canonical `FINAL_V3`.
+
+See [`REPO_STATUS.md`](REPO_STATUS.md) for a complete inventory.
+
+---
+
+## What not to confuse
+
+- **`FINAL_V3` ≠ `UG-SGC`** — FINAL_V3 uses a reliability gate; UG-SGC uses
+  uncertainty/confidence thresholding. Only FINAL_V3 is the canonical
+  submission-facing package.
+- **`tables/main_results_selective_correction.*`** is the canonical main table.
+  Older UG-SGC tables live in `archive/legacy_venue_specific/`.
+- **`archive/legacy_venue_specific/results_prl/`** is a threshold-sensitivity
+  cross-run package from the UG-SGC line, not FINAL_V3.
+- **`archive/legacy_venue_specific/reports_resubmission_protocols/`** and
+  **`archive/legacy_venue_specific/tables_prl_resubmission/`** are the structural
+  extension (UG-SGC-S) exploratory package.
 
 ---
 

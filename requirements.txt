@@ -8,6 +8,10 @@
 
 torch>=2.0.0
 torch_geometric>=2.3.0
+# Optional PyG sparse extensions (needed by some external baselines/tools):
+# install matching wheels from https://data.pyg.org for your torch build.
+torch_sparse>=0.6.0
+torch_scatter>=2.1.0
 numpy>=1.23.0
 networkx>=2.8
 sortedcontainers>=2.4.0
@@ -15,6 +19,11 @@ matplotlib>=3.6.0
 
 # ── Optional (only for HPC / Slurm job submission) ──────────────────────────
 # No additional Python packages required.
+
+# ── Optional developer tooling ────────────────────────────────────────────────
+# Basic linting command used in AGENTS.md:
+#   python3 -m flake8 code/bfsbased_node_classification/ --max-line-length 120
+flake8>=7.0.0
 
 # ── Table/figure regeneration only (no PyTorch needed) ───────────────────────
 # numpy and matplotlib (already listed above) are sufficient for:
