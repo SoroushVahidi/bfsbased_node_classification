@@ -49,11 +49,11 @@ import torch
 LIGHT_GRID: Dict[str, List] = {
     "alpha1":     [1.0],
     "alpha2":     [0.25, 0.5, 1.0],
-    "lambda_corr":[0.25, 0.5, 1.0],
-    "tau_H":      [0.0, 0.01, 0.02],
-    "tau_R":      [0.05, 0.1, 0.2],
+    "lambda_corr":[0.5, 1.0, 2.0, 4.0],
+    "tau_H":      [0.0, 0.01, 0.05],
+    "tau_R":      [0.0, 0.05, 0.15],
 }
-# Total: 1 × 3 × 3 × 3 × 3 = 81 configs (vectorised, fast)
+# Total: 1 × 3 × 4 × 3 × 3 = 108 configs (vectorised, fast)
 
 _EPS = 1e-12
 
@@ -472,7 +472,13 @@ def ca_mrc(
 
     for alpha1 in _grid.get("alpha1", [1.0]):
         for alpha2 in _grid.get("alpha2", [0.5]):
-            r_hat = _diffuse_residual(P, r, C, alpha1, alpha2, use_compat=use_compat)
+            r_hat_raw = _diffuse_residual(P, r, C, alpha1, alpha2, use_compat=use_compat)
+            # Per-node L-inf normalisation so lambda_corr is scale-invariant.
+            # After normalisation the max absolute correction per node is 1.0;
+            # lambda_corr directly controls the logit-space correction magnitude.
+            scale = np.abs(r_hat_raw).max(axis=1, keepdims=True)
+            scale = np.where(scale < _EPS, 1.0, scale)
+            r_hat = (r_hat_raw / scale).astype(np.float32)
             cfg = _grid_search(
                 mlp_logits, r_hat, y_all, val_np, mlp_preds,
                 grid=_grid, mode=ablation,

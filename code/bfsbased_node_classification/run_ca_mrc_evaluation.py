@@ -448,10 +448,12 @@ def main():
     )
 
     tag = args.output_tag
-    if tag == "ca_mrc":
-        suffix = "_light" if args.light else ""
-    else:
+    if args.light:
+        suffix = "_light"
+    elif tag != "ca_mrc":
         suffix = f"_{tag}"
+    else:
+        suffix = ""
     results_path = f"reports/ca_mrc_results{suffix}.csv"
     delta_path = f"reports/ca_mrc_vs_final_v3{suffix}.csv"
 
