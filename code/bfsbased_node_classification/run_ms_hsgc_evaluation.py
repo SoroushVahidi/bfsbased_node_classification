@@ -101,9 +101,12 @@ def _load_split(ds: str, sid: int, device, split_dir: str):
 
 MS_HSGC_RESULT_FIELDS = [
     "dataset", "split_id", "method", "test_acc", "val_acc", "delta_vs_mlp",
+    "delta_vs_final_v3",
     "frac_confident", "frac_corrected_1hop", "frac_corrected_2hop",
     "frac_mlp_only_uncertain",
     "mean_H1", "mean_H2", "mean_DeltaH",
+    "n_helped", "n_hurt", "net_help", "correction_precision",
+    "blocked_by_h1_only", "blocked_by_r1", "blocked_by_r2", "blocked_by_delta",
     "n_helped", "n_hurt", "correction_precision",
     # per-hop quality
     "helped_1hop", "hurt_1hop", "net_gain_1hop", "avg_margin_before_1hop",
@@ -117,12 +120,23 @@ MS_HSGC_RESULT_FIELDS = [
     "selected_tau", "selected_rho1", "selected_rho2",
     "selected_h1_max", "selected_delta_min",
     "selected_profile_1hop", "selected_profile_2hop",
+    "h1_max_override",
     "runtime_sec",
 ]
 
 DELTA_FIELDS = [
     "dataset", "split_id", "mlp_test_acc", "final_v3_test_acc", "ms_hsgc_test_acc",
     "delta_ms_hsgc_vs_final_v3",
+]
+
+SENSITIVITY_RESULT_FIELDS = [
+    "dataset", "split_id", "h1_max_value",
+    "ms_hsgc_test_acc", "delta_vs_mlp", "delta_vs_final_v3",
+    "n_helped", "n_hurt", "net_help",
+    "frac_corrected_1hop", "frac_corrected_2hop", "frac_mlp_only_uncertain",
+    "blocked_by_h1_only", "blocked_by_r1", "blocked_by_r2", "blocked_by_delta",
+    "selected_tau", "selected_rho1", "selected_rho2", "selected_delta_min",
+    "selected_profile_1hop", "selected_profile_2hop",
 ]
 
 
@@ -170,6 +184,8 @@ def run_evaluation(
     split_dir: str,
     output_tag: str,
     light: bool = False,
+    h1_max_override: float = None,
+    sensitivity_h1max_values: List[float] = None,
     medium: bool = False,
 ) -> tuple:
     if light:
@@ -177,6 +193,9 @@ def run_evaluation(
         print(f"    MLP epochs: {LIGHT_MLP_KWARGS['epochs']}  "
               f"(canonical: {300})  "
               f"MS_HSGC grid size: {len(LIGHT_GRID['tau'])} configs\n")
+    if sensitivity_h1max_values:
+        print(f"\n*** H1_MAX SENSITIVITY SWEEP ACTIVE — h1_max values: {sensitivity_h1max_values} ***\n")
+    mlp_kwargs = LIGHT_MLP_KWARGS if light else None  # None → use DEFAULT inside loop
     elif medium:
         n_medium = (len(MEDIUM_GRID["tau"]) * len(MEDIUM_GRID["rho1"])
                     * len(MEDIUM_GRID["rho2"]) * len(MEDIUM_GRID["h1_max"])
@@ -200,6 +219,7 @@ def run_evaluation(
     mod = _load_module()
     records: List[Dict] = []
     delta_records: List[Dict] = []
+    sensitivity_records: List[Dict] = []
 
     for ds in datasets:
         print(f"\n{'='*60}\nDataset: {ds}\n{'='*60}")
@@ -270,14 +290,18 @@ def run_evaluation(
             ms_val, ms_test_acc, ms_info = ms_hsgc(
                 data, train_np, val_np, test_np,
                 mlp_probs=mlp_probs, seed=seed, mod=mod,
+                light_grid_override=LIGHT_GRID if light else None,
+                h1_max_override=h1_max_override,
                 light_grid_override=grid_override,
             )
             ms_time = time.perf_counter() - t0
             ms_delta = ms_test_acc - mlp_test_acc
+            ms_delta_v3 = ms_test_acc - v3_test_acc
 
             bd = ms_info.get("block_diag_test", {})
             ms_row = _base_row(ds, sid, "MS_HSGC", ms_test_acc, ms_val, ms_delta)
             ms_row.update({
+                "delta_vs_final_v3": ms_delta_v3,
                 "frac_confident": ms_info["frac_confident"],
                 "frac_corrected_1hop": ms_info["frac_corrected_1hop"],
                 "frac_corrected_2hop": ms_info["frac_corrected_2hop"],
@@ -287,7 +311,12 @@ def run_evaluation(
                 "mean_DeltaH": ms_info["mean_DeltaH"],
                 "n_helped": ms_info["n_helped"],
                 "n_hurt": ms_info["n_hurt"],
+                "net_help": ms_info["n_helped"] - ms_info["n_hurt"],
                 "correction_precision": ms_info["correction_precision"],
+                "blocked_by_h1_only": ms_info["blocked_by_h1_only"],
+                "blocked_by_r1": ms_info["blocked_by_r1"],
+                "blocked_by_r2": ms_info["blocked_by_r2"],
+                "blocked_by_delta": ms_info["blocked_by_delta"],
                 # per-hop quality
                 "helped_1hop": ms_info["helped_1hop"],
                 "hurt_1hop": ms_info["hurt_1hop"],
@@ -317,11 +346,12 @@ def run_evaluation(
                 "selected_delta_min": ms_info["selected_delta_min"],
                 "selected_profile_1hop": ms_info["selected_profile_1hop"],
                 "selected_profile_2hop": ms_info["selected_profile_2hop"],
+                "h1_max_override": h1_max_override if h1_max_override is not None else "",
                 "runtime_sec": ms_time,
             })
             records.append(ms_row)
             print(
-                f"    MS_HSGC:    {ms_test_acc:.4f}  (delta={ms_delta:+.4f})  "
+                f"    MS_HSGC:    {ms_test_acc:.4f}  (delta={ms_delta:+.4f}  v3={ms_delta_v3:+.4f})  "
                 f"[helped={ms_info['n_helped']} hurt={ms_info['n_hurt']} "
                 f"prec={ms_info['correction_precision']:.2f} "
                 f"1h={ms_info['frac_corrected_1hop']:.3f} "
@@ -333,6 +363,48 @@ def run_evaluation(
                 f"blk_delta={bd.get('blocked_by_delta_only', '?')}]"
             )
 
+            # ---- h1_max sensitivity sweep (reuses MLP/FINAL_V3 from above) ----
+            if sensitivity_h1max_values:
+                for h1v in sensitivity_h1max_values:
+                    t_s = time.perf_counter()
+                    _, ms_acc_s, ms_info_s = ms_hsgc(
+                        data, train_np, val_np, test_np,
+                        mlp_probs=mlp_probs, seed=seed, mod=mod,
+                        light_grid_override=LIGHT_GRID if light else None,
+                        h1_max_override=h1v,
+                    )
+                    _ = time.perf_counter() - t_s
+                    sensitivity_records.append({
+                        "dataset": ds,
+                        "split_id": sid,
+                        "h1_max_value": h1v,
+                        "ms_hsgc_test_acc": ms_acc_s,
+                        "delta_vs_mlp": ms_acc_s - mlp_test_acc,
+                        "delta_vs_final_v3": ms_acc_s - v3_test_acc,
+                        "n_helped": ms_info_s["n_helped"],
+                        "n_hurt": ms_info_s["n_hurt"],
+                        "net_help": ms_info_s["n_helped"] - ms_info_s["n_hurt"],
+                        "frac_corrected_1hop": ms_info_s["frac_corrected_1hop"],
+                        "frac_corrected_2hop": ms_info_s["frac_corrected_2hop"],
+                        "frac_mlp_only_uncertain": ms_info_s["frac_mlp_only_uncertain"],
+                        "blocked_by_h1_only": ms_info_s["blocked_by_h1_only"],
+                        "blocked_by_r1": ms_info_s["blocked_by_r1"],
+                        "blocked_by_r2": ms_info_s["blocked_by_r2"],
+                        "blocked_by_delta": ms_info_s["blocked_by_delta"],
+                        "selected_tau": ms_info_s["selected_tau"],
+                        "selected_rho1": ms_info_s["selected_rho1"],
+                        "selected_rho2": ms_info_s["selected_rho2"],
+                        "selected_delta_min": ms_info_s["selected_delta_min"],
+                        "selected_profile_1hop": ms_info_s["selected_profile_1hop"],
+                        "selected_profile_2hop": ms_info_s["selected_profile_2hop"],
+                    })
+                    print(
+                        f"      [h1_max={h1v:.2f}] "
+                        f"MS_HSGC={ms_acc_s:.4f} "
+                        f"Δv3={ms_acc_s - v3_test_acc:+.4f} "
+                        f"blk_h1={ms_info_s['blocked_by_h1_only']:.3f}"
+                    )
+
             # ---- Delta record ----
             delta_records.append({
                 "dataset": ds,
@@ -343,15 +415,18 @@ def run_evaluation(
                 "delta_ms_hsgc_vs_final_v3": ms_test_acc - v3_test_acc,
             })
 
-    return records, delta_records
+    return records, delta_records, sensitivity_records
 
 
 def _base_row(ds, sid, method, test_acc, val_acc, delta):
     return {
         "dataset": ds, "split_id": sid, "method": method,
         "test_acc": test_acc, "val_acc": val_acc, "delta_vs_mlp": delta,
+        "delta_vs_final_v3": "",
         "frac_confident": "", "frac_corrected_1hop": "", "frac_corrected_2hop": "",
         "frac_mlp_only_uncertain": "", "mean_H1": "", "mean_H2": "", "mean_DeltaH": "",
+        "n_helped": "", "n_hurt": "", "net_help": "", "correction_precision": "",
+        "blocked_by_h1_only": "", "blocked_by_r1": "", "blocked_by_r2": "", "blocked_by_delta": "",
         "n_helped": "", "n_hurt": "", "correction_precision": "",
         "helped_1hop": "", "hurt_1hop": "", "net_gain_1hop": "", "avg_margin_before_1hop": "",
         "helped_2hop": "", "hurt_2hop": "", "net_gain_2hop": "", "avg_margin_before_2hop": "",
@@ -364,6 +439,7 @@ def _base_row(ds, sid, method, test_acc, val_acc, delta):
         "selected_tau": "", "selected_rho1": "", "selected_rho2": "",
         "selected_h1_max": "", "selected_delta_min": "",
         "selected_profile_1hop": "", "selected_profile_2hop": "",
+        "h1_max_override": "",
         "runtime_sec": "",
     }
 
@@ -390,6 +466,18 @@ def write_delta_csv(delta_records: List[Dict], path: str):
         for r in delta_records:
             w.writerow({k: r.get(k, "") for k in DELTA_FIELDS})
     print(f"Delta CSV written: {path}")
+
+
+def write_sensitivity_csv(sensitivity_records: List[Dict], path: str):
+    if not sensitivity_records:
+        return
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=SENSITIVITY_RESULT_FIELDS, extrasaction="ignore")
+        w.writeheader()
+        for r in sensitivity_records:
+            w.writerow({k: r.get(k, "") for k in SENSITIVITY_RESULT_FIELDS})
+    print(f"Sensitivity CSV written: {path}")
 
 
 # ---------------------------------------------------------------------------
@@ -496,8 +584,29 @@ def main():
         "--medium", action="store_true",
         help="Medium mode: 200-epoch MLP + 24-config grid. Less conservative. Non-canonical.",
     )
+    parser.add_argument(
+        "--h1-max-override", type=float, default=None,
+        help=(
+            "Override the h1_max threshold selected by validation (after grid search). "
+            "Keeps all other hyperparams. Used for sensitivity analysis. Non-canonical."
+        ),
+    )
+    parser.add_argument(
+        "--h1max-sensitivity", nargs="+", type=float, default=None,
+        metavar="H1_MAX",
+        help=(
+            "Run an h1_max sensitivity sweep in the same pass, reusing MLP/FINAL_V3 "
+            "computations. Example: --h1max-sensitivity 0.60 0.70 0.80. "
+            "Results saved to a separate sensitivity CSV. Non-canonical."
+        ),
+    )
     args = parser.parse_args()
 
+    records, delta_records, sensitivity_records = run_evaluation(
+        args.datasets, args.splits, args.split_dir, args.output_tag,
+        light=args.light,
+        h1_max_override=args.h1_max_override,
+        sensitivity_h1max_values=args.h1max_sensitivity,
     if args.light and args.medium:
         parser.error("--light and --medium are mutually exclusive.")
 
@@ -518,9 +627,11 @@ def main():
         suffix = f"_{tag}"
     results_path = f"reports/ms_hsgc_results{suffix}.csv"
     delta_path = f"reports/ms_hsgc_vs_final_v3{suffix}.csv"
+    sensitivity_path = f"reports/ms_hsgc_h1max_sensitivity{suffix}.csv"
 
     write_results_csv(records, results_path)
     write_delta_csv(delta_records, delta_path)
+    write_sensitivity_csv(sensitivity_records, sensitivity_path)
     print_summary(records, delta_records)
 
 

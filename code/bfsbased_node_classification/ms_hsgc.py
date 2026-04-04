@@ -478,6 +478,7 @@ def ms_hsgc(
     seed: int = 1337,
     mod=None,
     light_grid_override: Optional[Dict[str, List]] = None,
+    h1_max_override: Optional[float] = None,
     include_node_arrays: bool = False,
 ) -> Tuple[float, float, Dict[str, Any]]:
     """MS_HSGC: Multi-Scale Heterophily-aware Selective Graph Correction.
@@ -501,6 +502,11 @@ def ms_hsgc(
         If provided, overrides the candidate lists used in the validation grid
         search. Keys: 'tau', 'rho1', 'rho2', 'h1_max', 'delta_min', 'pi1',
         'pi2'. Useful for lightweight/debug runs. Non-canonical.
+    h1_max_override : float or None
+        If provided, replaces the h1_max value selected by the validation grid
+        search, while keeping all other hyperparameters (tau, rho1, rho2,
+        delta_min, profiles) as selected. Used for h1_max sensitivity sweeps.
+        Non-canonical.
 
     Returns
     -------
@@ -593,6 +599,10 @@ def ms_hsgc(
     pi1 = best_cfg["pi1"]
     pi2 = best_cfg["pi2"]
     val_acc = float(best_cfg["val_acc"])
+
+    # Apply h1_max override (for sensitivity sweeps) — keeps all other hyperparams.
+    if h1_max_override is not None:
+        h1_max = float(h1_max_override)
 
     # ------------------------------------------------------------------
     # 7. Apply best config to test set
@@ -738,6 +748,11 @@ def ms_hsgc(
         "n_helped": n_helped,
         "n_hurt": n_hurt,
         "correction_precision": correction_precision,
+        # Routing bottleneck diagnostics (fractions of uncertain test nodes)
+        "blocked_by_h1_only": frac_blocked_h1_only,
+        "blocked_by_r1": frac_blocked_r1,
+        "blocked_by_r2": frac_blocked_r2,
+        "blocked_by_delta": frac_blocked_delta,
         # Per-hop route quality (test set)
         "avg_margin_before_1hop": avg_margin_before_1hop,
         "helped_1hop": helped_1hop,
