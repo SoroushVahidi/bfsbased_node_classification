@@ -240,6 +240,59 @@ def _route_nodes(
     return route
 
 
+def _compute_routing_block_diagnostics(
+    uncertain_mask: np.ndarray,
+    R1: np.ndarray,
+    R2: np.ndarray,
+    H1: np.ndarray,
+    DeltaH: np.ndarray,
+    route: np.ndarray,
+    rho1: float,
+    rho2: float,
+    h1_max: float,
+    delta_min: float,
+) -> Dict[str, int]:
+    """Compute detailed per-node blocking diagnostics for uncertain nodes.
+
+    All array parameters (uncertain_mask, R1, R2, H1, DeltaH, route) must be
+    aligned to the same node subset — the caller is responsible for slicing to
+    the desired subset (e.g. all nodes or test-only nodes) before calling.
+    Returns counts for each routing/blocking reason within that subset.
+    """
+    unc = uncertain_mask
+
+    # --- 1-hop blocking analysis ---
+    # A node would go 1-hop if R1 >= rho1 AND H1 <= h1_max
+    # Blocked reasons (mutually exclusive buckets for unc nodes that failed 1-hop):
+    unc_failed_1hop = unc & (route != 1)
+    blocked_both_r1_h1 = unc_failed_1hop & (R1 < rho1) & (H1 > h1_max)
+    blocked_only_h1 = unc_failed_1hop & (R1 >= rho1) & (H1 > h1_max)
+    blocked_only_r1 = unc_failed_1hop & (R1 < rho1) & (H1 <= h1_max)
+
+    # --- 2-hop blocking analysis (among nodes that failed 1-hop) ---
+    # They go 2-hop if R2 >= rho2 AND DeltaH >= delta_min
+    unc_failed_2hop = unc_failed_1hop & (route != 2)
+    blocked_only_r2 = unc_failed_2hop & (R2 < rho2) & (DeltaH >= delta_min)
+    blocked_only_delta = unc_failed_2hop & (R2 >= rho2) & (DeltaH < delta_min)
+    blocked_both_r2_delta = unc_failed_2hop & (R2 < rho2) & (DeltaH < delta_min)
+
+    return {
+        "confident_kept": int((~uncertain_mask).sum()),
+        "uncertain_total": int(uncertain_mask.sum()),
+        "routed_1hop": int((route == 1).sum()),
+        "routed_2hop": int((route == 2).sum()),
+        "uncertain_fallback_mlp": int((route == 3).sum()),
+        # 1-hop blocking (among unc that did not go 1-hop)
+        "blocked_by_h1_only": int(blocked_only_h1.sum()),
+        "blocked_by_r1_only": int(blocked_only_r1.sum()),
+        "blocked_by_h1_and_r1": int(blocked_both_r1_h1.sum()),
+        # 2-hop blocking (among unc that did not go 1-hop and did not go 2-hop)
+        "blocked_by_r2_only": int(blocked_only_r2.sum()),
+        "blocked_by_delta_only": int(blocked_only_delta.sum()),
+        "blocked_by_r2_and_delta": int(blocked_both_r2_delta.sum()),
+    }
+
+
 # ---------------------------------------------------------------------------
 # Score computation
 # ---------------------------------------------------------------------------
@@ -569,10 +622,11 @@ def ms_hsgc(
     n_corrected_1hop = int((route_test == 1).sum())
     n_corrected_2hop = int((route_test == 2).sum())
 
-    # Correction quality on test
+    # Correction quality on test (combined)
     mlp_pred_test = mlp_pred_all[test_np]
     preds_test = preds[test_np]
     y_test = y_true[test_np]
+    mlp_margin_test = mlp_margin_all[test_np]
 
     corrected_mask = (route_test == 1) | (route_test == 2)
     helped_mask_arr = np.zeros(n_test, dtype=bool)
@@ -623,19 +677,53 @@ def ms_hsgc(
             (not_1hop_not_2hop & (R2_test >= rho2) & (DeltaH_test < delta_min)).sum()
         ),
     }
+    # Per-hop route quality diagnostics
+    mask_1hop_test = route_test == 1
+    if mask_1hop_test.any():
+        avg_margin_before_1hop = float(mlp_margin_test[mask_1hop_test].mean())
+        helped_1hop = int((mask_1hop_test & (preds_test == y_test) & (mlp_pred_test != y_test)).sum())
+        hurt_1hop = int((mask_1hop_test & (preds_test != y_test) & (mlp_pred_test == y_test)).sum())
+    else:
+        avg_margin_before_1hop = float("nan")
+        helped_1hop = hurt_1hop = 0
+
+    mask_2hop_test = route_test == 2
+    if mask_2hop_test.any():
+        avg_margin_before_2hop = float(mlp_margin_test[mask_2hop_test].mean())
+        helped_2hop = int((mask_2hop_test & (preds_test == y_test) & (mlp_pred_test != y_test)).sum())
+        hurt_2hop = int((mask_2hop_test & (preds_test != y_test) & (mlp_pred_test == y_test)).sum())
+    else:
+        avg_margin_before_2hop = float("nan")
+        helped_2hop = hurt_2hop = 0
+
+    # Routing-block diagnostics (over all nodes for full picture, then test-restricted)
+    uncertain_mask_all = mlp_margin_all < tau
+    block_diag_all = _compute_routing_block_diagnostics(
+        uncertain_mask_all, R1, R2, H1, DeltaH, route,
+        rho1, rho2, h1_max, delta_min,
+    )
+    uncertain_mask_test = mlp_margin_test < tau
+    block_diag_test = _compute_routing_block_diagnostics(
+        uncertain_mask_test,
+        R1[test_np], R2[test_np], H1[test_np], DeltaH[test_np],
+        route_test, rho1, rho2, h1_max, delta_min,
+    )
 
     runtime_sec = time.perf_counter() - t_start
 
     info_dict: Dict[str, Any] = {
         "val_acc": val_acc,
         "test_acc": test_acc,
+        # Routing fractions (test set)
         "frac_confident": frac_confident,
         "frac_mlp_only_uncertain": frac_mlp_unc,
         "frac_corrected_1hop": frac_1hop,
         "frac_corrected_2hop": frac_2hop,
+        # Heterophily measures (all nodes)
         "mean_H1": float(H1.mean()),
         "mean_H2": float(H2.mean()),
         "mean_DeltaH": float(DeltaH.mean()),
+        # Selected hyperparameters
         "selected_tau": tau,
         "selected_rho1": rho1,
         "selected_rho2": rho2,
@@ -643,13 +731,26 @@ def ms_hsgc(
         "selected_delta_min": delta_min,
         "selected_profile_1hop": pi1,
         "selected_profile_2hop": pi2,
+        # Correction counts (test set)
         "n_uncertain": n_uncertain_test,
         "n_corrected_1hop": n_corrected_1hop,
         "n_corrected_2hop": n_corrected_2hop,
         "n_helped": n_helped,
         "n_hurt": n_hurt,
         "correction_precision": correction_precision,
-        "routing_blocks": routing_blocks,
+        # Per-hop route quality (test set)
+        "avg_margin_before_1hop": avg_margin_before_1hop,
+        "helped_1hop": helped_1hop,
+        "hurt_1hop": hurt_1hop,
+        "net_gain_1hop": helped_1hop - hurt_1hop,
+        "avg_margin_before_2hop": avg_margin_before_2hop,
+        "helped_2hop": helped_2hop,
+        "hurt_2hop": hurt_2hop,
+        "net_gain_2hop": helped_2hop - hurt_2hop,
+        # Routing-block diagnostics (test set)
+        "block_diag_test": block_diag_test,
+        # Routing-block diagnostics (all nodes, for inspection)
+        "block_diag_all": block_diag_all,
         "runtime_sec": runtime_sec,
     }
 
