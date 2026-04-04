@@ -425,6 +425,7 @@ def ms_hsgc(
     seed: int = 1337,
     mod=None,
     light_grid_override: Optional[Dict[str, List]] = None,
+    h1_max_override: Optional[float] = None,
 ) -> Tuple[float, float, Dict[str, Any]]:
     """MS_HSGC: Multi-Scale Heterophily-aware Selective Graph Correction.
 
@@ -444,6 +445,11 @@ def ms_hsgc(
         If provided, overrides the candidate lists used in the validation grid
         search. Keys: 'tau', 'rho1', 'rho2', 'h1_max', 'delta_min', 'pi1',
         'pi2'. Useful for lightweight/debug runs. Non-canonical.
+    h1_max_override : float or None
+        If provided, replaces the h1_max value selected by the validation grid
+        search, while keeping all other hyperparameters (tau, rho1, rho2,
+        delta_min, profiles) as selected. Used for h1_max sensitivity sweeps.
+        Non-canonical.
 
     Returns
     -------
@@ -537,6 +543,10 @@ def ms_hsgc(
     pi2 = best_cfg["pi2"]
     val_acc = float(best_cfg["val_acc"])
 
+    # Apply h1_max override (for sensitivity sweeps) — keeps all other hyperparams.
+    if h1_max_override is not None:
+        h1_max = float(h1_max_override)
+
     # ------------------------------------------------------------------
     # 7. Apply best config to test set
     # ------------------------------------------------------------------
@@ -583,6 +593,35 @@ def ms_hsgc(
         n_helped = n_hurt = 0
         correction_precision = 1.0
 
+    # ------------------------------------------------------------------
+    # 9. Routing bottleneck diagnostics (fractions of uncertain test nodes)
+    # ------------------------------------------------------------------
+    # These measure what fraction of uncertain test nodes are blocked by each
+    # gate criterion: h1_max (key bottleneck), low R1, low R2, low DeltaH.
+    R1_test = R1[test_np]
+    R2_test = R2[test_np]
+    H1_test = H1[test_np]
+    DeltaH_test = DeltaH[test_np]
+
+    unc_test = route_test != 0          # uncertain test nodes (all 3 non-confident buckets)
+    n_unc_t = int(unc_test.sum())
+    if n_unc_t > 0:
+        pass_r1_t = unc_test & (R1_test >= rho1)
+        pass_h1_t = unc_test & (H1_test <= h1_max)
+        can_1hop_t = pass_r1_t & pass_h1_t
+        # Passes R1 gate but fails H1 gate — would route to 1-hop if h1_max relaxed
+        frac_blocked_h1_only = float((pass_r1_t & ~pass_h1_t).sum()) / n_unc_t
+        # Fails R1 gate (low 1-hop reliability), regardless of H1
+        frac_blocked_r1 = float((unc_test & ~pass_r1_t).sum()) / n_unc_t
+        # Among non-1hop uncertain nodes: failures at 2-hop reliability
+        not_1hop_t = unc_test & ~can_1hop_t
+        frac_blocked_r2 = float((not_1hop_t & (R2_test < rho2)).sum()) / n_unc_t
+        frac_blocked_delta = float(
+            (not_1hop_t & (R2_test >= rho2) & (DeltaH_test < delta_min)).sum()
+        ) / n_unc_t
+    else:
+        frac_blocked_h1_only = frac_blocked_r1 = frac_blocked_r2 = frac_blocked_delta = 0.0
+
     runtime_sec = time.perf_counter() - t_start
 
     info_dict: Dict[str, Any] = {
@@ -608,6 +647,11 @@ def ms_hsgc(
         "n_helped": n_helped,
         "n_hurt": n_hurt,
         "correction_precision": correction_precision,
+        # Routing bottleneck diagnostics (fractions of uncertain test nodes)
+        "blocked_by_h1_only": frac_blocked_h1_only,
+        "blocked_by_r1": frac_blocked_r1,
+        "blocked_by_r2": frac_blocked_r2,
+        "blocked_by_delta": frac_blocked_delta,
         "runtime_sec": runtime_sec,
     }
 
