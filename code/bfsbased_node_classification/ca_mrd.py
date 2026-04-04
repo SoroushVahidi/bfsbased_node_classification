@@ -19,8 +19,8 @@ Design constraints:
   - Non-canonical: does NOT touch canonical FINAL_V3 outputs.
 
 Mathematical summary:
-  R_i = Y_i - P_base_i   for training nodes (one-hot label minus MLP prob)
-  R_i = 0                for non-training nodes (residual is unknown)
+  R_i = Y_i - 1/K   for training nodes (one-hot minus uniform prior)
+  R_i = 0            for non-training nodes (residual unknown at inference)
 
   P = row-normalised adjacency (transition matrix)
   K(R) = a1*(P@R) + a2*(P²@R) + a3*(P³@R) + a4*(P⁴@R)
@@ -176,18 +176,30 @@ def build_residual(
 ) -> np.ndarray:
     """Build per-node residual R.
 
-    For training nodes:  R_i = one_hot(y_i) - mlp_probs_i
-    For other nodes:     R_i = 0  (residual unknown at inference time)
+    For training nodes:
+        R_i = Y_i - 1/K
+        i.e. the one-hot label minus the uniform prior.
+        This gives a robust, non-zero signal (+[K-1]/K on true class,
+        -1/K on all others) that does not collapse to zero when the MLP
+        memorises its training data.
+
+    For non-training nodes:  R_i = 0  (residual is unknown at inference time)
+
+    Note: using (Y_i - P_base_i) instead would produce near-zero residuals
+    on training nodes when the MLP is well-trained, which makes diffusion
+    uninformative.  The uniform-prior deviation is the standard choice in
+    label-diffusion / Correct-and-Smooth style methods.
 
     Shape: (N, K)
     """
     N = mlp_probs_np.shape[0]
     R = np.zeros((N, num_classes), dtype=np.float32)
+    uniform_prior = np.full(num_classes, 1.0 / num_classes, dtype=np.float32)
     for idx in train_indices:
         i = int(idx)
         one_hot = np.zeros(num_classes, dtype=np.float32)
         one_hot[int(y_true[i])] = 1.0
-        R[i] = one_hot - mlp_probs_np[i]
+        R[i] = one_hot - uniform_prior
     return R
 
 
