@@ -105,6 +105,15 @@ MS_HSGC_RESULT_FIELDS = [
     "frac_mlp_only_uncertain",
     "mean_H1", "mean_H2", "mean_DeltaH",
     "n_helped", "n_hurt", "correction_precision",
+    # per-hop quality
+    "helped_1hop", "hurt_1hop", "net_gain_1hop", "avg_margin_before_1hop",
+    "helped_2hop", "hurt_2hop", "net_gain_2hop", "avg_margin_before_2hop",
+    # routing-block diagnostics (test set)
+    "test_confident_kept", "test_uncertain_total",
+    "test_routed_1hop", "test_routed_2hop", "test_fallback_mlp",
+    "test_blocked_by_h1_only", "test_blocked_by_r1_only", "test_blocked_by_h1_and_r1",
+    "test_blocked_by_r2_only", "test_blocked_by_delta_only", "test_blocked_by_r2_and_delta",
+    # selected hyperparameters
     "selected_tau", "selected_rho1", "selected_rho2",
     "selected_h1_max", "selected_delta_min",
     "selected_profile_1hop", "selected_profile_2hop",
@@ -128,8 +137,30 @@ LIGHT_GRID = {
     "pi2":       [0],
 }
 
+# Medium grid: ~24 configs — less conservative, more tau/h1_max coverage.
+# tau:  [0.15, 0.25, 0.35]  (larger values push more nodes into uncertainty)
+# rho1: [0.3, 0.4]           (slightly permissive 1-hop reliability gate)
+# rho2: [0.3, 0.35]          (more permissive 2-hop reliability gate)
+# h1_max: [0.55, 0.70]       (allow 1-hop even with moderate heterophily)
+# delta_min: [0.0]            (allow 2-hop regardless of DeltaH sign)
+# pi1: [0], pi2: [0]          (single balanced profile — reduces combinatorial)
+# Total: 3 × 2 × 2 × 2 × 1 × 1 × 1 = 24 configs
+MEDIUM_GRID = {
+    "tau":       [0.15, 0.25, 0.35],
+    "rho1":      [0.3, 0.4],
+    "rho2":      [0.3, 0.35],
+    "h1_max":    [0.55, 0.70],
+    "delta_min": [0.0],
+    "pi1":       [0],
+    "pi2":       [0],
+}
+
 LIGHT_MLP_KWARGS = {
     "hidden": 64, "layers": 2, "dropout": 0.5, "lr": 0.01, "epochs": 100,
+}
+
+MEDIUM_MLP_KWARGS = {
+    "hidden": 64, "layers": 2, "dropout": 0.5, "lr": 0.01, "epochs": 200,
 }
 
 
@@ -139,13 +170,32 @@ def run_evaluation(
     split_dir: str,
     output_tag: str,
     light: bool = False,
+    medium: bool = False,
 ) -> tuple:
     if light:
         print("\n*** LIGHT MODE ACTIVE — non-canonical, lightweight run ***")
         print(f"    MLP epochs: {LIGHT_MLP_KWARGS['epochs']}  "
               f"(canonical: {300})  "
               f"MS_HSGC grid size: {len(LIGHT_GRID['tau'])} configs\n")
-    mlp_kwargs = LIGHT_MLP_KWARGS if light else None  # None → use DEFAULT inside loop
+    elif medium:
+        n_medium = (len(MEDIUM_GRID["tau"]) * len(MEDIUM_GRID["rho1"])
+                    * len(MEDIUM_GRID["rho2"]) * len(MEDIUM_GRID["h1_max"])
+                    * len(MEDIUM_GRID["delta_min"]) * len(MEDIUM_GRID["pi1"])
+                    * len(MEDIUM_GRID["pi2"]))
+        print("\n*** MEDIUM MODE ACTIVE — non-canonical, medium-cost run ***")
+        print(f"    MLP epochs: {MEDIUM_MLP_KWARGS['epochs']}  "
+              f"(canonical: {300})  "
+              f"MS_HSGC grid size: {n_medium} configs\n")
+
+    if light:
+        mlp_kwargs = LIGHT_MLP_KWARGS
+        grid_override = LIGHT_GRID
+    elif medium:
+        mlp_kwargs = MEDIUM_MLP_KWARGS
+        grid_override = MEDIUM_GRID
+    else:
+        mlp_kwargs = None   # → use DEFAULT_MANUSCRIPT_MLP_KWARGS inside loop
+        grid_override = None
 
     mod = _load_module()
     records: List[Dict] = []
@@ -220,11 +270,12 @@ def run_evaluation(
             ms_val, ms_test_acc, ms_info = ms_hsgc(
                 data, train_np, val_np, test_np,
                 mlp_probs=mlp_probs, seed=seed, mod=mod,
-                light_grid_override=LIGHT_GRID if light else None,
+                light_grid_override=grid_override,
             )
             ms_time = time.perf_counter() - t0
             ms_delta = ms_test_acc - mlp_test_acc
 
+            bd = ms_info.get("block_diag_test", {})
             ms_row = _base_row(ds, sid, "MS_HSGC", ms_test_acc, ms_val, ms_delta)
             ms_row.update({
                 "frac_confident": ms_info["frac_confident"],
@@ -237,6 +288,28 @@ def run_evaluation(
                 "n_helped": ms_info["n_helped"],
                 "n_hurt": ms_info["n_hurt"],
                 "correction_precision": ms_info["correction_precision"],
+                # per-hop quality
+                "helped_1hop": ms_info["helped_1hop"],
+                "hurt_1hop": ms_info["hurt_1hop"],
+                "net_gain_1hop": ms_info["net_gain_1hop"],
+                "avg_margin_before_1hop": ms_info["avg_margin_before_1hop"],
+                "helped_2hop": ms_info["helped_2hop"],
+                "hurt_2hop": ms_info["hurt_2hop"],
+                "net_gain_2hop": ms_info["net_gain_2hop"],
+                "avg_margin_before_2hop": ms_info["avg_margin_before_2hop"],
+                # routing-block diagnostics
+                "test_confident_kept": bd.get("confident_kept", ""),
+                "test_uncertain_total": bd.get("uncertain_total", ""),
+                "test_routed_1hop": bd.get("routed_1hop", ""),
+                "test_routed_2hop": bd.get("routed_2hop", ""),
+                "test_fallback_mlp": bd.get("uncertain_fallback_mlp", ""),
+                "test_blocked_by_h1_only": bd.get("blocked_by_h1_only", ""),
+                "test_blocked_by_r1_only": bd.get("blocked_by_r1_only", ""),
+                "test_blocked_by_h1_and_r1": bd.get("blocked_by_h1_and_r1", ""),
+                "test_blocked_by_r2_only": bd.get("blocked_by_r2_only", ""),
+                "test_blocked_by_delta_only": bd.get("blocked_by_delta_only", ""),
+                "test_blocked_by_r2_and_delta": bd.get("blocked_by_r2_and_delta", ""),
+                # hyperparameters
                 "selected_tau": ms_info["selected_tau"],
                 "selected_rho1": ms_info["selected_rho1"],
                 "selected_rho2": ms_info["selected_rho2"],
@@ -251,8 +324,13 @@ def run_evaluation(
                 f"    MS_HSGC:    {ms_test_acc:.4f}  (delta={ms_delta:+.4f})  "
                 f"[helped={ms_info['n_helped']} hurt={ms_info['n_hurt']} "
                 f"prec={ms_info['correction_precision']:.2f} "
-                f"1h={ms_info['frac_corrected_1hop']:.2f} "
-                f"2h={ms_info['frac_corrected_2hop']:.2f}]"
+                f"1h={ms_info['frac_corrected_1hop']:.3f} "
+                f"2h={ms_info['frac_corrected_2hop']:.3f} "
+                f"unc_total={bd.get('uncertain_total', '?')} "
+                f"blk_h1={bd.get('blocked_by_h1_only', '?')} "
+                f"blk_r1={bd.get('blocked_by_r1_only', '?')} "
+                f"blk_r2={bd.get('blocked_by_r2_only', '?')} "
+                f"blk_delta={bd.get('blocked_by_delta_only', '?')}]"
             )
 
             # ---- Delta record ----
@@ -275,6 +353,14 @@ def _base_row(ds, sid, method, test_acc, val_acc, delta):
         "frac_confident": "", "frac_corrected_1hop": "", "frac_corrected_2hop": "",
         "frac_mlp_only_uncertain": "", "mean_H1": "", "mean_H2": "", "mean_DeltaH": "",
         "n_helped": "", "n_hurt": "", "correction_precision": "",
+        "helped_1hop": "", "hurt_1hop": "", "net_gain_1hop": "", "avg_margin_before_1hop": "",
+        "helped_2hop": "", "hurt_2hop": "", "net_gain_2hop": "", "avg_margin_before_2hop": "",
+        "test_confident_kept": "", "test_uncertain_total": "",
+        "test_routed_1hop": "", "test_routed_2hop": "", "test_fallback_mlp": "",
+        "test_blocked_by_h1_only": "", "test_blocked_by_r1_only": "",
+        "test_blocked_by_h1_and_r1": "",
+        "test_blocked_by_r2_only": "", "test_blocked_by_delta_only": "",
+        "test_blocked_by_r2_and_delta": "",
         "selected_tau": "", "selected_rho1": "", "selected_rho2": "",
         "selected_h1_max": "", "selected_delta_min": "",
         "selected_profile_1hop": "", "selected_profile_2hop": "",
@@ -404,18 +490,30 @@ def main():
     parser.add_argument("--output-tag", default="ms_hsgc")
     parser.add_argument(
         "--light", action="store_true",
-        help="Lightweight mode: reduced MLP epochs + minimal grid. Non-canonical.",
+        help="Lightweight mode: reduced MLP epochs + 3-config grid. Non-canonical.",
+    )
+    parser.add_argument(
+        "--medium", action="store_true",
+        help="Medium mode: 200-epoch MLP + 24-config grid. Less conservative. Non-canonical.",
     )
     args = parser.parse_args()
 
+    if args.light and args.medium:
+        parser.error("--light and --medium are mutually exclusive.")
+
     records, delta_records = run_evaluation(
         args.datasets, args.splits, args.split_dir, args.output_tag,
-        light=args.light,
+        light=args.light, medium=args.medium,
     )
 
     tag = args.output_tag
     if tag == "ms_hsgc":
-        suffix = "_light" if args.light else ""
+        if args.light:
+            suffix = "_light"
+        elif args.medium:
+            suffix = "_medium"
+        else:
+            suffix = ""
     else:
         suffix = f"_{tag}"
     results_path = f"reports/ms_hsgc_results{suffix}.csv"
