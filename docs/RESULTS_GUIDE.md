@@ -41,3 +41,32 @@ It is explicitly non-canonical unless otherwise noted in a local README.
 
 These files are intentionally separate from frozen canonical artifacts and are the recommended evidence when citing a current-code ablation rerun.
 
+## Expert Systems lightweight strengthening bundle (non-canonical, manuscript-supporting)
+
+These artifacts are a reduced-scope diagnostic package (tagged `20260404_reduced`) that
+adds correction-behavior, bounded-intervention safety, and local gate-sensitivity evidence.
+They are **not** replacements for frozen canonical files.
+
+- Audit memo: `reports/expert_systems_canonical_audit_20260404_reduced.md`
+- Lightweight ablation source: `reports/final_v3_expert_systems_lightweight_ablation_20260404_reduced.csv`
+- Correction diagnostics source: `reports/final_v3_correction_diagnostics_20260404_reduced.csv`
+- Gate sensitivity source: `reports/final_v3_expert_systems_gate_sensitivity_20260404_reduced.csv`
+- Correction diagnostics table: `tables/final_v3_correction_diagnostics_20260404_reduced.md`
+- Bounded intervention table: `tables/safety_bounded_intervention_expert_systems_lightweight_20260404_reduced.md`
+- Gate sensitivity table: `tables/sensitivity_selective_correction_expert_systems_lightweight_20260404_reduced.md`
+
+## Full-scope appendix support bundle (canonical-candidate)
+
+This full-scope package extends the same diagnostics to the canonical six datasets and
+all ten fixed splits. It is intended for appendix/supplementary support and remains
+separate from frozen canonical files.
+
+- Gate sensitivity narrative: `reports/gate_sensitivity_fullscope_20260404.md`
+- Gate sensitivity table (CSV): `tables/gate_sensitivity_fullscope_20260404.csv`
+- Gate sensitivity table (Markdown): `tables/gate_sensitivity_fullscope_20260404.md`
+- Bounded-intervention narrative: `reports/bounded_intervention_fullscope_20260404.md`
+- Bounded-intervention table (CSV): `tables/bounded_intervention_fullscope_20260404.csv`
+- Bounded-intervention table (Markdown): `tables/bounded_intervention_fullscope_20260404.md`
+
+For historical continuity, keep the reduced `20260404_reduced` bundle, but cite this
+full-scope bundle when addressing the prior scope caveat.
