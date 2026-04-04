@@ -1,0 +1,21 @@
+level,rule,description,n_changed_total,n_harmful_total,n_beneficial_total,n_blocked_total,harmful_prevented,beneficial_lost,harmful_prevention_rate,beneficial_retention_rate,changed_precision_baseline,changed_precision_after,changed_precision_delta_pp,dataset
+overall,R4_graph_dominant_low_rel,Block if dominant_reason is neighbor_support and reliability < 0.45.,321,84,237,249,70,179,0.8333333333333334,0.24472573839662448,0.7383177570093458,0.8055555555555556,6.7237798546209815,
+overall,R5_require_rel_and_gap,Block unless reliability >= 0.40 and score_gap >= 0.20.,321,84,237,209,61,148,0.7261904761904762,0.3755274261603376,0.7383177570093458,0.7946428571428571,5.632510013351133,
+overall,R1_reliability_lt_0p40,Block correction if reliability < 0.40.,321,84,237,181,52,129,0.6190476190476191,0.45569620253164556,0.7383177570093458,0.7714285714285715,3.31108144192257,
+overall,R3_no_proto_graph_agreement,Block correction if prototype_gap <= 0 or neighbor_support_gap <= 0.,321,84,237,131,44,87,0.5238095238095238,0.6329113924050633,0.7383177570093458,0.7894736842105263,5.115592720118056,
+overall,R2_score_gap_lt_0p30,Block correction if score_gap < 0.30.,321,84,237,84,30,54,0.35714285714285715,0.7721518987341772,0.7383177570093458,0.7721518987341772,3.3834141724831457,
+dataset,R1_reliability_lt_0p40,Block correction if reliability < 0.40.,49,11,38,28,7,21,0.6363636363636364,0.4473684210526316,0.7755102040816326,0.8095238095238095,3.401360544217691,citeseer
+dataset,R1_reliability_lt_0p40,Block correction if reliability < 0.40.,40,5,35,16,2,14,0.4,0.6,0.875,0.875,0.0,cora
+dataset,R1_reliability_lt_0p40,Block correction if reliability < 0.40.,232,68,164,137,43,94,0.6323529411764706,0.4268292682926829,0.7068965517241379,0.7368421052631579,2.9945553539019953,pubmed
+dataset,R2_score_gap_lt_0p30,Block correction if score_gap < 0.30.,49,11,38,11,2,9,0.18181818181818182,0.7631578947368421,0.7755102040816326,0.7631578947368421,-1.235230934479048,citeseer
+dataset,R2_score_gap_lt_0p30,Block correction if score_gap < 0.30.,40,5,35,11,3,8,0.6,0.7714285714285715,0.875,0.9310344827586207,5.603448275862066,cora
+dataset,R2_score_gap_lt_0p30,Block correction if score_gap < 0.30.,232,68,164,62,25,37,0.36764705882352944,0.774390243902439,0.7068965517241379,0.7470588235294118,4.0162271805273875,pubmed
+dataset,R3_no_proto_graph_agreement,Block correction if prototype_gap <= 0 or neighbor_support_gap <= 0.,49,11,38,15,6,9,0.5454545454545454,0.7631578947368421,0.7755102040816326,0.8529411764705882,7.743097238895558,citeseer
+dataset,R3_no_proto_graph_agreement,Block correction if prototype_gap <= 0 or neighbor_support_gap <= 0.,40,5,35,14,4,10,0.8,0.7142857142857143,0.875,0.9615384615384616,8.653846153846157,cora
+dataset,R3_no_proto_graph_agreement,Block correction if prototype_gap <= 0 or neighbor_support_gap <= 0.,232,68,164,102,34,68,0.5,0.5853658536585366,0.7068965517241379,0.7384615384615385,3.15649867374006,pubmed
+dataset,R4_graph_dominant_low_rel,Block if dominant_reason is neighbor_support and reliability < 0.45.,49,11,38,42,11,31,1.0,0.18421052631578946,0.7755102040816326,1.0,22.44897959183674,citeseer
+dataset,R4_graph_dominant_low_rel,Block if dominant_reason is neighbor_support and reliability < 0.45.,40,5,35,30,4,26,0.8,0.2571428571428571,0.875,0.9,2.500000000000002,cora
+dataset,R4_graph_dominant_low_rel,Block if dominant_reason is neighbor_support and reliability < 0.45.,232,68,164,177,55,122,0.8088235294117647,0.25609756097560976,0.7068965517241379,0.7636363636363637,5.673981191222577,pubmed
+dataset,R5_require_rel_and_gap,Block unless reliability >= 0.40 and score_gap >= 0.20.,49,11,38,30,8,22,0.7272727272727273,0.42105263157894735,0.7755102040816326,0.8421052631578947,6.659505907626206,citeseer
+dataset,R5_require_rel_and_gap,Block unless reliability >= 0.40 and score_gap >= 0.20.,40,5,35,23,4,19,0.8,0.45714285714285713,0.875,0.9411764705882353,6.617647058823528,cora
+dataset,R5_require_rel_and_gap,Block unless reliability >= 0.40 and score_gap >= 0.20.,232,68,164,156,49,107,0.7205882352941176,0.3475609756097561,0.7068965517241379,0.75,4.31034482758621,pubmed

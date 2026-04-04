@@ -90,3 +90,22 @@ Lightweight post hoc analysis of harmful changed-node corrections using the expl
 - Summary table (CSV): `tables/harmful_correction_failure_summary_20260404.csv`
 - Summary table (Markdown): `tables/harmful_correction_failure_summary_20260404.md`
 
+
+## Post hoc safeguard simulation for harmful corrections (non-canonical, manuscript-supporting)
+
+Lightweight post hoc simulation on existing changed-node explanation exports to evaluate simple safeguards that may reduce harmful corrections while preserving beneficial ones.
+
+- Simulation script: `scripts/posthoc_safeguard_simulation.py`
+- Narrative report: `reports/posthoc_safeguard_simulation_20260404.md`
+- Case studies: `reports/posthoc_safeguard_case_studies_20260404.md`
+- Summary table (CSV): `tables/posthoc_safeguard_simulation_20260404.csv`
+- Summary table (Markdown): `tables/posthoc_safeguard_simulation_20260404.md`
+
+## FINAL_V3 regime-mapping analysis (non-canonical, manuscript-supporting)
+
+Lightweight descriptive regime map that reuses existing full-scope outputs to characterize when FINAL_V3 helps more vs less.
+
+- Analysis script: `scripts/final_v3_regime_mapping.py`
+- Narrative report: `reports/final_v3_regime_mapping_20260404.md`
+- Regime table (CSV): `tables/final_v3_regime_mapping_20260404.csv`
+- Regime table (Markdown): `tables/final_v3_regime_mapping_20260404.md`
