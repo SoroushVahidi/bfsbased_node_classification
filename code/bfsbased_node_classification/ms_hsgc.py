@@ -254,9 +254,10 @@ def _compute_routing_block_diagnostics(
 ) -> Dict[str, int]:
     """Compute detailed per-node blocking diagnostics for uncertain nodes.
 
-    Returns counts (over all nodes, not just test set) for each blocking reason.
-    Call after _route_nodes with the same parameters to interpret why nodes were
-    not corrected.
+    All array parameters (uncertain_mask, R1, R2, H1, DeltaH, route) must be
+    aligned to the same node subset — the caller is responsible for slicing to
+    the desired subset (e.g. all nodes or test-only nodes) before calling.
+    Returns counts for each routing/blocking reason within that subset.
     """
     unc = uncertain_mask
 
