@@ -491,7 +491,7 @@ def ms_hsgc(
     # ------------------------------------------------------------------
     evidence = mod._build_selective_correction_evidence(
         data, _to_np_to_tensor(train_np, data.x.device),
-        mlp_probs_np=mlp_probs_np, log_file=None,
+        mlp_probs_np=mlp_probs_np,
     )
     feature_sim = evidence["feature_similarity"].astype(np.float32)   # (N, C)
     compat = evidence["compatibility_support"].astype(np.float32)      # (N, C)
