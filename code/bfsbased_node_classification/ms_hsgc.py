@@ -595,6 +595,7 @@ def ms_hsgc(
     R1_test = R1[test_np]
     R2_test = R2[test_np]
     H1_test = H1[test_np]
+    H2_test = H2[test_np]
     DeltaH_test = DeltaH[test_np]
     unc_test = route_test != 0
     can_1hop_test = route_test == 1
@@ -607,11 +608,17 @@ def ms_hsgc(
         "routed_1hop": int(can_1hop_test.sum()),
         "routed_2hop": int(can_2hop_test.sum()),
         "fallback_mlp_only": int((route_test == 3).sum()),
-        # Among uncertain & not routed to 1-hop:
+        # blocked_by_h1: uncertain, R1 passes the reliability gate, but H1 > h1_max
+        # (neighbourhood is too heterophilic for 1-hop correction to be trusted)
         "blocked_by_h1": int((not_1hop & (R1_test >= rho1) & (H1_test > h1_max)).sum()),
+        # blocked_by_r1: uncertain, but R1 falls below the reliability threshold
+        # (graph evidence is too noisy regardless of H1)
         "blocked_by_r1": int((not_1hop & (R1_test < rho1)).sum()),
-        # Among uncertain & not routed to 1-hop or 2-hop:
+        # blocked_by_r2: uncertain, 1-hop not eligible, but R2 < rho2
+        # (2-hop evidence is too noisy to trust for correction)
         "blocked_by_r2": int((not_1hop_not_2hop & (R2_test < rho2)).sum()),
+        # blocked_by_delta: uncertain, 1-hop not eligible, R2 passes, but DeltaH < delta_min
+        # (2-hop neighbourhood is not more homophilic than 1-hop, so 2-hop offers no advantage)
         "blocked_by_delta": int(
             (not_1hop_not_2hop & (R2_test >= rho2) & (DeltaH_test < delta_min)).sum()
         ),

@@ -376,6 +376,8 @@ def run_recon_sweep(
                 data, train_np, val_np, test_np,
                 mlp_probs=mlp_probs, seed=seed, mod=mod,
                 gate="heuristic", split_id=sid,
+                # include_node_arrays=True: required for per-node binned diagnostics
+                # (margin bins, degree bins).  Non-canonical; not used in canonical runs.
                 include_node_arrays=True,
             )
             v3_rt = time.perf_counter() - t0
@@ -425,6 +427,8 @@ def run_recon_sweep(
                 data, train_np, val_np, test_np,
                 mlp_probs=mlp_probs, seed=seed, mod=mod,
                 light_grid_override=LIGHT_GRID if light else None,
+                # include_node_arrays=True: required for per-node binned diagnostics
+                # and heterophily-profile bins.  Non-canonical; not used in canonical runs.
                 include_node_arrays=True,
             )
             ms_rt = time.perf_counter() - t0
@@ -456,6 +460,7 @@ def run_recon_sweep(
                 "blocked_by_r2": rb.get("blocked_by_r2"),
                 "routed_1hop": rb.get("routed_1hop"),
                 "routed_2hop": rb.get("routed_2hop"),
+                "_fallback_mlp_only": rb.get("fallback_mlp_only"),
             })
             result_rows.append(ms_row)
             print(f"    MS_HSGC:  {ms_acc:.4f}  (delta={ms_delta:+.4f}  "
@@ -681,7 +686,7 @@ def _build_summary(
             f"| {ds} | {r.get('uncertain_total', 'N/A')} "
             f"| {r.get('routed_1hop', 'N/A')} "
             f"| {r.get('routed_2hop', 'N/A')} "
-            f"| {r.get('frac_mlp_only_uncertain', 'N/A')} "
+            f"| {r.get('_fallback_mlp_only', 'N/A')} "
             f"| {r.get('blocked_by_h1', 'N/A')} "
             f"| {r.get('blocked_by_r1', 'N/A')} "
             f"| {r.get('blocked_by_r2', 'N/A')} "
