@@ -1,0 +1,7 @@
+dataset,split_id,mlp_test_acc,final_v3_test_acc,ca_mrd_test_acc,delta_v3_vs_mlp,delta_ca_mrd_vs_mlp,delta_ca_mrd_vs_v3,ca_mrd_hop_profile,ca_mrd_rho_H
+chameleon,0,0.4496,0.4496,0.4496,0.0,0.0,0.0,profile_C,0.5
+chameleon,1,0.4408,0.4408,0.4386,0.0,-0.0022,-0.0022,profile_C,0.0
+citeseer,0,0.6757,0.6922,0.6832,0.0165,0.0075,-0.009,profile_A,0.0
+citeseer,1,0.6967,0.7192,0.7192,0.0225,0.0225,0.0,profile_C,0.0
+texas,0,0.7568,0.7568,0.7568,0.0,0.0,0.0,profile_A,0.0
+texas,1,0.9189,0.8919,0.9189,-0.027,0.0,0.027,profile_A,0.0

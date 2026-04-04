@@ -1,0 +1,9 @@
+dataset,split_id,mlp_test_acc,final_v3_test_acc,ms_hsgc_test_acc,delta_final_v3_vs_mlp,delta_ms_hsgc_vs_mlp,delta_ms_hsgc_vs_final_v3
+chameleon,0,0.4496,0.4496,0.4496,0.0,0.0,0.0
+squirrel,0,0.3189,0.318,0.3189,-0.001,0.0,0.001
+texas,0,0.7568,0.7568,0.7568,0.0,0.0,0.0
+wisconsin,0,0.7843,0.7843,0.7843,0.0,0.0,0.0
+cornell,0,0.7838,0.7838,0.7838,0.0,0.0,0.0
+citeseer,0,0.6757,0.6922,0.6757,0.0165,0.0,-0.0165
+cora,0,0.6982,0.7304,0.7002,0.0322,0.002,-0.0302
+pubmed,0,0.8656,0.8846,0.8674,0.019,0.0018,-0.0172
