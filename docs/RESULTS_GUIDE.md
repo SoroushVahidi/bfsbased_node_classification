@@ -31,3 +31,13 @@ This document helps reviewers quickly map files to claims.
 
 Anything under `archive/` is preserved for provenance and historical context.
 It is explicitly non-canonical unless otherwise noted in a local README.
+
+## Fresh ablation rerun (canonical-candidate)
+
+- Full rerun output (6 datasets × 10 splits): `reports/final_v3_ablation_rerun_results.csv`
+- Summary table: `tables/ablation_selective_correction_rerun.md`
+- Machine-readable summary: `tables/ablation_selective_correction_rerun.csv`
+- Comparison note vs historical mixed ablation table: `reports/final_v3_ablation_rerun_analysis.md`
+
+These files are intentionally separate from frozen canonical artifacts and are the recommended evidence when citing a current-code ablation rerun.
+
