@@ -109,3 +109,13 @@ Lightweight descriptive regime map that reuses existing full-scope outputs to ch
 - Narrative report: `reports/final_v3_regime_mapping_20260404.md`
 - Regime table (CSV): `tables/final_v3_regime_mapping_20260404.csv`
 - Regime table (Markdown): `tables/final_v3_regime_mapping_20260404.md`
+
+## FINAL_V3 targeted-benefit decomposition (non-canonical, manuscript-supporting)
+
+Lightweight subgroup decomposition showing where FINAL_V3 gains arise (routed, changed, unchanged).
+This bundle reuses latest full-scope artifacts and performs a minimal FINAL_V3-only rerun for node-level subgroup accuracy attribution.
+
+- Analysis script: `code/bfsbased_node_classification/run_final_v3_targeted_benefit_decomposition.py`
+- Narrative report: `reports/final_v3_targeted_benefit_decomposition_20260404.md`
+- Subgroup table (CSV): `tables/final_v3_targeted_benefit_decomposition_20260404.csv`
+- Subgroup table (Markdown): `tables/final_v3_targeted_benefit_decomposition_20260404.md`
