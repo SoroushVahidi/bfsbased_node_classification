@@ -225,7 +225,8 @@ def _route_nodes(
       0 = confident, 1 = correct_1hop, 2 = correct_2hop, 3 = mlp_only
     """
     N = len(uncertain_mask)
-    route = np.zeros(N, dtype=np.int8)  # default: confident (0)
+    # Nodes where uncertain_mask=False stay at 0 (confident); uncertain nodes are routed below.
+    route = np.zeros(N, dtype=np.int8)
 
     unc = uncertain_mask
 
@@ -332,7 +333,12 @@ H1_MAX_CANDIDATES = [0.4, 0.6]
 DELTA_MIN_CANDIDATES = [0.0, 0.15]
 PROFILE_1HOP_CANDIDATES = [0, 1]
 PROFILE_2HOP_CANDIDATES = [0, 1]
-# Total: 3(tau) × 2(rho1) × 2(rho2) × 2(h1_max) × 2(delta_min) × 2(profile_1hop) × 2(profile_2hop) = 96 configs
+# Grid size: product of candidate list lengths (verified at import time below).
+_EXPECTED_GRID_SIZE = (
+    len(TAU_CANDIDATES) * len(RHO1_CANDIDATES) * len(RHO2_CANDIDATES)
+    * len(H1_MAX_CANDIDATES) * len(DELTA_MIN_CANDIDATES)
+    * len(PROFILE_1HOP_CANDIDATES) * len(PROFILE_2HOP_CANDIDATES)
+)  # = 96
 
 
 def _grid_search_val(
