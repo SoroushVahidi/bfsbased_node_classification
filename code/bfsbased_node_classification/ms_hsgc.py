@@ -425,6 +425,7 @@ def ms_hsgc(
     seed: int = 1337,
     mod=None,
     light_grid_override: Optional[Dict[str, List]] = None,
+    include_node_arrays: bool = False,
 ) -> Tuple[float, float, Dict[str, Any]]:
     """MS_HSGC: Multi-Scale Heterophily-aware Selective Graph Correction.
 
@@ -438,6 +439,9 @@ def ms_hsgc(
         Pre-computed MLP output probabilities (N, C). If None, MLP is trained.
     seed : int
         Random seed used for MLP training.
+    include_node_arrays : bool
+        If True, include per-node arrays for the test split in info["node_arrays"].
+        Default False (canonical behaviour unchanged).
     mod : module or None
         Pre-loaded legacy module (avoids reloading on every call).
     light_grid_override : dict or None
@@ -571,17 +575,47 @@ def ms_hsgc(
     y_test = y_true[test_np]
 
     corrected_mask = (route_test == 1) | (route_test == 2)
+    helped_mask_arr = np.zeros(n_test, dtype=bool)
+    hurt_mask_arr = np.zeros(n_test, dtype=bool)
     if corrected_mask.any():
+        helped_mask_arr = corrected_mask & (preds_test == y_test) & (mlp_pred_test != y_test)
+        hurt_mask_arr = corrected_mask & (preds_test != y_test) & (mlp_pred_test == y_test)
         changed = preds_test[corrected_mask] != mlp_pred_test[corrected_mask]
-        helped_mask = corrected_mask & (preds_test == y_test) & (mlp_pred_test != y_test)
-        hurt_mask = corrected_mask & (preds_test != y_test) & (mlp_pred_test == y_test)
-        n_helped = int(helped_mask.sum())
-        n_hurt = int(hurt_mask.sum())
+        n_helped = int(helped_mask_arr.sum())
+        n_hurt = int(hurt_mask_arr.sum())
         n_changed = int(changed.sum())
         correction_precision = float(n_helped) / max(n_changed, 1)
     else:
         n_helped = n_hurt = 0
         correction_precision = 1.0
+
+    # ------------------------------------------------------------------
+    # 8b. Routing block diagnostics (per-test-set, using best config)
+    # ------------------------------------------------------------------
+    R1_test = R1[test_np]
+    R2_test = R2[test_np]
+    H1_test = H1[test_np]
+    DeltaH_test = DeltaH[test_np]
+    unc_test = route_test != 0
+    can_1hop_test = route_test == 1
+    not_1hop = unc_test & ~can_1hop_test
+    can_2hop_test = route_test == 2
+    not_1hop_not_2hop = not_1hop & ~can_2hop_test
+
+    routing_blocks: Dict[str, int] = {
+        "uncertain_total": int(unc_test.sum()),
+        "routed_1hop": int(can_1hop_test.sum()),
+        "routed_2hop": int(can_2hop_test.sum()),
+        "fallback_mlp_only": int((route_test == 3).sum()),
+        # Among uncertain & not routed to 1-hop:
+        "blocked_by_h1": int((not_1hop & (R1_test >= rho1) & (H1_test > h1_max)).sum()),
+        "blocked_by_r1": int((not_1hop & (R1_test < rho1)).sum()),
+        # Among uncertain & not routed to 1-hop or 2-hop:
+        "blocked_by_r2": int((not_1hop_not_2hop & (R2_test < rho2)).sum()),
+        "blocked_by_delta": int(
+            (not_1hop_not_2hop & (R2_test >= rho2) & (DeltaH_test < delta_min)).sum()
+        ),
+    }
 
     runtime_sec = time.perf_counter() - t_start
 
@@ -608,7 +642,28 @@ def ms_hsgc(
         "n_helped": n_helped,
         "n_hurt": n_hurt,
         "correction_precision": correction_precision,
+        "routing_blocks": routing_blocks,
         "runtime_sec": runtime_sec,
     }
+
+    if include_node_arrays:
+        edge_index_np = data.edge_index.detach().cpu().numpy()
+        deg_all = np.bincount(edge_index_np[0].astype(np.int64), minlength=N).astype(np.int64)
+        info_dict["node_arrays"] = {
+            "test_indices": test_np.copy(),
+            "mlp_predictions": mlp_pred_test.copy(),
+            "final_predictions": preds_test.copy(),
+            "mlp_margins": mlp_margin_all[test_np].copy(),
+            "true_labels": y_test.copy(),
+            "route": route_test.copy(),
+            "H1": H1_test.copy(),
+            "H2": H2_test.copy(),
+            "DeltaH": DeltaH_test.copy(),
+            "R1": R1_test.copy(),
+            "R2": R2_test.copy(),
+            "degree": deg_all[test_np].copy(),
+            "is_changed_helpful": helped_mask_arr.copy(),
+            "is_changed_harmful": hurt_mask_arr.copy(),
+        }
 
     return val_acc, test_acc, info_dict
