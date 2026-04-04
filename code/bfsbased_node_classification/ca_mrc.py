@@ -474,8 +474,10 @@ def ca_mrc(
         for alpha2 in _grid.get("alpha2", [0.5]):
             r_hat_raw = _diffuse_residual(P, r, C, alpha1, alpha2, use_compat=use_compat)
             # Per-node L-inf normalisation so lambda_corr is scale-invariant.
-            # After normalisation the max absolute correction per node is 1.0;
-            # lambda_corr directly controls the logit-space correction magnitude.
+            # After normalisation the maximum absolute class-correction per node is 1.0.
+            # lambda_corr directly controls logit-space correction magnitude (nats).
+            # NOTE: corr_mag (L1 of normalised r_hat) lies in [0, K] where K = num_classes;
+            # tau_R should be interpreted as a fraction-of-K threshold, not raw logit nats.
             scale = np.abs(r_hat_raw).max(axis=1, keepdims=True)
             scale = np.where(scale < _EPS, 1.0, scale)
             r_hat = (r_hat_raw / scale).astype(np.float32)

@@ -34,6 +34,8 @@ import torch
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
+    # Add the package directory so sibling modules (final_method_v3, ca_mrc,
+    # split_paths) can be imported without package installation.
     sys.path.insert(0, HERE)
 
 from final_method_v3 import final_method_v3, _simple_accuracy  # noqa: E402
