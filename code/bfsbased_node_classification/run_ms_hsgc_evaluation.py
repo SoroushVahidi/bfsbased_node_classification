@@ -117,12 +117,36 @@ DELTA_FIELDS = [
 ]
 
 
+# Light-mode grid: 3 tau × 1 rho1 × 1 rho2 × 1 h1_max × 1 delta_min × 1×1 profiles = 3 configs
+LIGHT_GRID = {
+    "tau":       [0.05, 0.10, 0.20],
+    "rho1":      [0.4],
+    "rho2":      [0.4],
+    "h1_max":    [0.5],
+    "delta_min": [0.0],
+    "pi1":       [0],
+    "pi2":       [0],
+}
+
+LIGHT_MLP_KWARGS = {
+    "hidden": 64, "layers": 2, "dropout": 0.5, "lr": 0.01, "epochs": 100,
+}
+
+
 def run_evaluation(
     datasets: List[str],
     splits: List[int],
     split_dir: str,
     output_tag: str,
+    light: bool = False,
 ) -> tuple:
+    if light:
+        print("\n*** LIGHT MODE ACTIVE — non-canonical, lightweight run ***")
+        print(f"    MLP epochs: {LIGHT_MLP_KWARGS['epochs']}  "
+              f"(canonical: {300})  "
+              f"MS_HSGC grid size: {len(LIGHT_GRID['tau'])} configs\n")
+    mlp_kwargs = LIGHT_MLP_KWARGS if light else None  # None → use DEFAULT inside loop
+
     mod = _load_module()
     records: List[Dict] = []
     delta_records: List[Dict] = []
@@ -155,9 +179,10 @@ def run_evaluation(
             print(f"  split={sid} seed={seed}")
 
             # ---- MLP baseline ----
+            effective_mlp_kwargs = mlp_kwargs if mlp_kwargs else mod.DEFAULT_MANUSCRIPT_MLP_KWARGS
             mlp_probs, _ = mod.train_mlp_and_predict(
                 data, train_idx,
-                **mod.DEFAULT_MANUSCRIPT_MLP_KWARGS, log_file=None,
+                **effective_mlp_kwargs, log_file=None,
             )
             mlp_info = mod.compute_mlp_margin(mlp_probs)
             mlp_pred = mlp_info["mlp_pred_all"]
@@ -195,6 +220,7 @@ def run_evaluation(
             ms_val, ms_test_acc, ms_info = ms_hsgc(
                 data, train_np, val_np, test_np,
                 mlp_probs=mlp_probs, seed=seed, mod=mod,
+                light_grid_override=LIGHT_GRID if light else None,
             )
             ms_time = time.perf_counter() - t0
             ms_delta = ms_test_acc - mlp_test_acc
@@ -376,14 +402,22 @@ def main():
     )
     parser.add_argument("--splits", nargs="+", type=int, default=list(range(10)))
     parser.add_argument("--output-tag", default="ms_hsgc")
+    parser.add_argument(
+        "--light", action="store_true",
+        help="Lightweight mode: reduced MLP epochs + minimal grid. Non-canonical.",
+    )
     args = parser.parse_args()
 
     records, delta_records = run_evaluation(
-        args.datasets, args.splits, args.split_dir, args.output_tag
+        args.datasets, args.splits, args.split_dir, args.output_tag,
+        light=args.light,
     )
 
     tag = args.output_tag
-    suffix = f"_{tag}" if tag != "ms_hsgc" else ""
+    if tag == "ms_hsgc":
+        suffix = "_light" if args.light else ""
+    else:
+        suffix = f"_{tag}"
     results_path = f"reports/ms_hsgc_results{suffix}.csv"
     delta_path = f"reports/ms_hsgc_vs_final_v3{suffix}.csv"
 

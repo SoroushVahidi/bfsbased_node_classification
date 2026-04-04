@@ -355,18 +355,40 @@ def _grid_search_val(
     support_2hop: np.ndarray,
     feature_sim: np.ndarray,
     compat: np.ndarray,
+    light_grid_override: Optional[Dict[str, List]] = None,
 ) -> Dict[str, Any]:
-    """Search over ~96 configs and return the best val-accuracy config."""
+    """Search over configs and return the best val-accuracy config.
+
+    If ``light_grid_override`` is provided, its lists replace the default
+    candidate lists for a cheaper search (useful for debugging / light runs).
+    """
+    if light_grid_override is not None:
+        tau_list = light_grid_override.get("tau", TAU_CANDIDATES)
+        rho1_list = light_grid_override.get("rho1", RHO1_CANDIDATES)
+        rho2_list = light_grid_override.get("rho2", RHO2_CANDIDATES)
+        h1_max_list = light_grid_override.get("h1_max", H1_MAX_CANDIDATES)
+        delta_min_list = light_grid_override.get("delta_min", DELTA_MIN_CANDIDATES)
+        pi1_list = light_grid_override.get("pi1", PROFILE_1HOP_CANDIDATES)
+        pi2_list = light_grid_override.get("pi2", PROFILE_2HOP_CANDIDATES)
+    else:
+        tau_list = TAU_CANDIDATES
+        rho1_list = RHO1_CANDIDATES
+        rho2_list = RHO2_CANDIDATES
+        h1_max_list = H1_MAX_CANDIDATES
+        delta_min_list = DELTA_MIN_CANDIDATES
+        pi1_list = PROFILE_1HOP_CANDIDATES
+        pi2_list = PROFILE_2HOP_CANDIDATES
+
     best_val_acc = -1.0
     best_cfg: Dict[str, Any] = {}
 
-    for tau in TAU_CANDIDATES:
-        for rho1 in RHO1_CANDIDATES:
-            for rho2 in RHO2_CANDIDATES:
-                for h1_max in H1_MAX_CANDIDATES:
-                    for delta_min in DELTA_MIN_CANDIDATES:
-                        for pi1 in PROFILE_1HOP_CANDIDATES:
-                            for pi2 in PROFILE_2HOP_CANDIDATES:
+    for tau in tau_list:
+        for rho1 in rho1_list:
+            for rho2 in rho2_list:
+                for h1_max in h1_max_list:
+                    for delta_min in delta_min_list:
+                        for pi1 in pi1_list:
+                            for pi2 in pi2_list:
                                 preds, route = _predict_with_config(
                                     mlp_pred_all, mlp_margin_all, mlp_probs_np,
                                     R1, R2, H1, DeltaH,
@@ -402,6 +424,7 @@ def ms_hsgc(
     mlp_probs=None,
     seed: int = 1337,
     mod=None,
+    light_grid_override: Optional[Dict[str, List]] = None,
 ) -> Tuple[float, float, Dict[str, Any]]:
     """MS_HSGC: Multi-Scale Heterophily-aware Selective Graph Correction.
 
@@ -417,6 +440,10 @@ def ms_hsgc(
         Random seed used for MLP training.
     mod : module or None
         Pre-loaded legacy module (avoids reloading on every call).
+    light_grid_override : dict or None
+        If provided, overrides the candidate lists used in the validation grid
+        search. Keys: 'tau', 'rho1', 'rho2', 'h1_max', 'delta_min', 'pi1',
+        'pi2'. Useful for lightweight/debug runs. Non-canonical.
 
     Returns
     -------
@@ -498,6 +525,7 @@ def ms_hsgc(
         mlp_pred_all, mlp_margin_all, mlp_probs_np,
         R1, R2, H1, DeltaH,
         support_1hop, support_2hop, feature_sim, compat,
+        light_grid_override=light_grid_override,
     )
 
     tau = best_cfg["tau"]
