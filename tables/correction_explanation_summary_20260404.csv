@@ -1,0 +1,4 @@
+group,n_nodes,most_common_dominant_driver,mean_reliability,mean_score_gap,mean_gap_concentration,prototype_graph_agreement_rate,driver_share_prototype,driver_share_neighbor_support,driver_share_compatibility,driver_share_mlp_anchor,driver_share_feature_knn,driver_share_structural_far
+beneficial,237,neighbor_support,0.43254830732681165,0.6158144024100883,0.5103260312861062,0.6329113924050633,0.0,1.0,0.0,0.0,0.0,0.0
+harmful,84,neighbor_support,0.41787015672112654,0.4949958809497674,0.48983247627191207,0.47619047619047616,0.0,1.0,0.0,0.0,0.0,0.0
+all_changed,341,neighbor_support,0.4261587783983065,0.5742144054169158,0.5045443858149489,0.5865102639296188,0.0,1.0,0.0,0.0,0.0,0.0

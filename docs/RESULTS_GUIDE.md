@@ -70,3 +70,23 @@ separate from frozen canonical files.
 
 For historical continuity, keep the reduced `20260404_reduced` bundle, but cite this
 full-scope bundle when addressing the prior scope caveat.
+
+## Correction explanation audit (non-canonical, manuscript-supporting)
+
+Lightweight node-level interpretability bundle for FINAL_V3 correction decisions (changed nodes only).
+
+- Node-level export: `reports/correction_explanation_nodes_20260404.csv`
+- Audit narrative: `reports/correction_explanation_audit_20260404.md`
+- Case studies: `reports/correction_case_studies_20260404.md`
+- Summary table (CSV): `tables/correction_explanation_summary_20260404.csv`
+- Summary table (Markdown): `tables/correction_explanation_summary_20260404.md`
+
+## Harmful-correction failure audit (non-canonical, manuscript-supporting)
+
+Lightweight post hoc analysis of harmful changed-node corrections using the explanation export.
+
+- Audit narrative: `reports/harmful_correction_failure_audit_20260404.md`
+- Case studies: `reports/harmful_correction_case_studies_20260404.md`
+- Summary table (CSV): `tables/harmful_correction_failure_summary_20260404.csv`
+- Summary table (Markdown): `tables/harmful_correction_failure_summary_20260404.md`
+
