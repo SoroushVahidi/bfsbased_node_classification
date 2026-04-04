@@ -1,0 +1,5 @@
+dataset,mean_fraction_routed_to_correction,mean_fraction_changed_vs_mlp,mean_changed_precision,mean_reliability_corrected,mean_margin_corrected,mean_delta_vs_mlp_pp
+citeseer,0.210042,0.049031,0.807177,0.559630,0.325183,2.5288
+cora,0.227968,0.039437,0.914842,0.563466,0.357907,2.9980
+pubmed,0.239427,0.029462,0.727351,0.642711,0.592541,1.2956
+texas,0.021622,0.018919,0.700000,0.401480,0.016912,0.5405
