@@ -290,15 +290,15 @@ def run_evaluation(
                 "selected_tau_r": mrd_info["selected_tau_r"],
                 "selected_tau_e": mrd_info["selected_tau_e"],
                 "mean_uncertainty_corrected": round(mrd_info["mean_uncertainty_corrected"], 4)
-                    if not isinstance(mrd_info["mean_uncertainty_corrected"], float)
-                    or not np.isnan(mrd_info["mean_uncertainty_corrected"]) else "",
+                    if isinstance(mrd_info["mean_uncertainty_corrected"], float)
+                    and not np.isnan(mrd_info["mean_uncertainty_corrected"]) else "",
                 "mean_corr_mag": round(mrd_info["mean_corr_mag"], 4)
-                    if not isinstance(mrd_info["mean_corr_mag"], float)
-                    or not np.isnan(mrd_info["mean_corr_mag"]) else "",
+                    if isinstance(mrd_info["mean_corr_mag"], float)
+                    and not np.isnan(mrd_info["mean_corr_mag"]) else "",
                 "mean_delta_entropy_corrected": round(
                     mrd_info["mean_delta_entropy_corrected"], 4)
-                    if not isinstance(mrd_info["mean_delta_entropy_corrected"], float)
-                    or not np.isnan(mrd_info["mean_delta_entropy_corrected"]) else "",
+                    if isinstance(mrd_info["mean_delta_entropy_corrected"], float)
+                    and not np.isnan(mrd_info["mean_delta_entropy_corrected"]) else "",
                 "v3_frac_corrected": "", "v3_tau": "", "v3_rho": "",
             })
 

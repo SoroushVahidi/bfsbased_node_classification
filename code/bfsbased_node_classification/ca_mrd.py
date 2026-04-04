@@ -96,10 +96,10 @@ def _simple_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float((y_true == y_pred).mean())
 
 
-def _entropy(probs: np.ndarray) -> np.ndarray:
-    """Per-node Shannon entropy, shape (N,)."""
+def _entropy(probs: np.ndarray) -> float:
+    """Mean Shannon entropy across all nodes (scalar)."""
     p = np.clip(probs, _EPS, 1.0)
-    return -float(np.sum(p * np.log(p), axis=1).mean())   # scalar for logging
+    return float(-np.sum(p * np.log(p), axis=1).mean())
 
 def _per_node_entropy(probs: np.ndarray) -> np.ndarray:
     p = np.clip(probs, _EPS, 1.0)
