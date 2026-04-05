@@ -34,7 +34,8 @@ These are preserved in `archive/` for provenance and reproducibility.
 
 ## Recommended reading order
 
-1. `README.md`
+1. `README.md` (including the paper evidence map)
 2. `docs/METHOD_STATUS.md`
 3. `docs/REPRODUCIBILITY.md`
 4. `docs/RESULTS_GUIDE.md`
+5. `reports/SUPPORTING_BUNDLES_INDEX.md` (for a complete map of non-canonical bundles)

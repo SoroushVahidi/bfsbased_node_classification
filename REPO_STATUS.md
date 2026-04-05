@@ -27,13 +27,23 @@ Archived material is preserved for provenance and should not be used as primary 
 
 Exploratory material is informative but not claim-bearing for the canonical method.
 
+## Supporting / appendix bundles
+
+Several non-canonical bundles in `reports/` and `tables/` provide appendix-support or
+manuscript-supporting diagnostics (bucket safety, correction explanation, safeguard simulation,
+regime mapping, etc.). These are **not** a new status class — they fall under Exploratory or are
+appendix-support material. See the complete inventory:
+
+- [`reports/SUPPORTING_BUNDLES_INDEX.md`](reports/SUPPORTING_BUNDLES_INDEX.md)
+
 ## Reader path
 
-1. `README.md`
+1. `README.md` (paper evidence map near top)
 2. `docs/OVERVIEW.md`
 3. `docs/METHOD_STATUS.md`
 4. `docs/REPRODUCIBILITY.md`
 5. `docs/RESULTS_GUIDE.md`
+6. `reports/SUPPORTING_BUNDLES_INDEX.md` (for non-canonical bundles)
 
 For a link hub (baselines, Slurm, agents): [`docs/INDEX.md`](docs/INDEX.md).
 

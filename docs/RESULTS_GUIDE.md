@@ -1,6 +1,8 @@
 # Results Guide
 
 This document helps reviewers quickly map files to claims.
+For a complete inventory of all non-canonical supporting bundles, see
+[`reports/SUPPORTING_BUNDLES_INDEX.md`](../reports/SUPPORTING_BUNDLES_INDEX.md).
 
 ## Canonical main results
 
@@ -119,3 +121,57 @@ This bundle reuses latest full-scope artifacts and performs a minimal FINAL_V3-o
 - Narrative report: `reports/final_v3_targeted_benefit_decomposition_20260404.md`
 - Subgroup table (CSV): `tables/final_v3_targeted_benefit_decomposition_20260404.csv`
 - Subgroup table (Markdown): `tables/final_v3_targeted_benefit_decomposition_20260404.md`
+
+## Bucket safety analysis (non-canonical, manuscript-supporting)
+
+Bucketed safety analysis by MLP test-margin tercile (low / medium / high confidence).
+Supports the feature-first conservatism argument.
+
+- Full-scope bucket safety summary: `reports/final_v3_bucket_safety_summary.md`
+- Full-scope bucket safety conclusions: `reports/final_v3_bucket_safety_conclusions.md`
+- Structural variant bucket safety summary: `reports/final_v3_bucket_safety_struct_summary.md`
+- Bucket safety main table (MD): `tables/final_v3_bucket_safety_main.md`
+- Bucket safety main table (CSV): `tables/final_v3_bucket_safety_main.csv`
+- Structural bucket safety table (MD): `tables/final_v3_bucket_safety_struct_main.md`
+- Structural bucket safety table (CSV): `tables/final_v3_bucket_safety_struct_main.csv`
+
+Note: `reports/margin_bucket_safety_summary.md` is an earlier partial run (3 datasets, splits 0–2) kept for provenance only.
+
+## Correction behavior reports (non-canonical, manuscript-supporting)
+
+Lightweight per-dataset summary of FINAL_V3 correction behavior (routed fraction, changed fraction, mean reliability on corrected nodes).
+
+- Correction behavior report (fullscope): `reports/final_v3_correction_behavior_report_20260404_fullscope.md`
+- Correction behavior report (reduced): `reports/final_v3_correction_behavior_report_20260404_reduced.md`
+
+## Exploratory variant experiments (non-canonical, exploratory)
+
+Non-canonical runs of experimental variant methods. Not part of main or appendix claims.
+
+### MS-HSGC (multi-scale homophily-sensitive graph correction)
+
+- Light run summary: `reports/ms_hsgc_light_summary.md`
+- Medium-tuning run summary: `reports/ms_hsgc_medium_summary.md`
+- Light comparison table: `tables/ms_hsgc_light_comparison.md`
+- Medium comparison table: `tables/ms_hsgc_medium_comparison.md`
+
+### CA-MRC (Compatibility-Aware Multi-hop Residual Correction)
+
+- Light run summary: `reports/ca_mrc_light_summary.md`
+- Light comparison table: `tables/ca_mrc_light_comparison.md`
+
+### CA-MRD (alternate compatibility-aware variant, separate run tag)
+
+- Light run summary: `reports/ca_mrd_light_summary_ca_mrd_light.md`
+- Light comparison table: `tables/ca_mrd_light_comparison_ca_mrd_light.md`
+
+### Recon-behavior sweep
+
+- Summary report: `reports/recon_behavior_summary_recon_sweep.md`
+- Comparison table: `tables/recon_behavior_comparison_recon_sweep.md`
+
+## Provenance-only materials (not for citation)
+
+- `reports/parallel_tracks_analysis_2026-04-03.md` — exploratory branching analysis notes (2026-04-03); not a claim-bearing result.
+- `reports/triple_trust_sgc.md` — experimental TRIPLE_TRUST_SGC variant design notes; not evaluated at scale.
+- `reports/djgnn/`, `tables/djgnn/` — DJGNN integration material; provenance only.

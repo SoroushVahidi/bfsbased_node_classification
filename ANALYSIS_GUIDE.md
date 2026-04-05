@@ -1,10 +1,15 @@
-# Analysis Guide (moved)
+# Analysis Guide
 
-This guide has been moved to:
-- `docs/ANALYSIS_GUIDE.md`
+> **Best single entry point** for an external reader or reviewer.
+> The full guide lives at [`docs/ANALYSIS_GUIDE.md`](docs/ANALYSIS_GUIDE.md).
 
-For a cleaner entry path, start with:
-1. `README.md`
-2. `docs/OVERVIEW.md`
-3. `docs/REPRODUCIBILITY.md`
-4. `docs/RESULTS_GUIDE.md`
+Quick navigation:
+
+| Task | Go to |
+|------|-------|
+| Understand the canonical method | [`docs/OVERVIEW.md`](docs/OVERVIEW.md) |
+| Find canonical result files | [`docs/RESULTS_GUIDE.md`](docs/RESULTS_GUIDE.md) |
+| Verify canonical/archived/exploratory status | [`docs/METHOD_STATUS.md`](docs/METHOD_STATUS.md) |
+| Reproduce all tables and figures | `bash scripts/run_all_selective_correction_results.sh` |
+| Navigate supporting bundles | [`reports/SUPPORTING_BUNDLES_INDEX.md`](reports/SUPPORTING_BUNDLES_INDEX.md) |
+| Understand common reviewer mistakes | [`docs/ANALYSIS_GUIDE.md`](docs/ANALYSIS_GUIDE.md#common-mistakes-a-reviewer-might-make) |

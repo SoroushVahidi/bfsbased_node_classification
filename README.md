@@ -9,10 +9,29 @@
 
 This repository contains code and reproducible artifacts for a node-classification method that combines a strong feature-first MLP with **selective graph correction**.
 
+---
+
+## Paper evidence map
+
+| Layer | Files | Status |
+|-------|-------|--------|
+| **Frozen canonical evidence** | `reports/final_method_v3_results.csv` | Do not overwrite |
+| **Canonical main tables** | `tables/main_results_selective_correction.*`, `tables/experimental_setup_selective_correction.*`, `tables/ablation_selective_correction.*`, `tables/sensitivity_selective_correction.*` | Regenerated from frozen CSV |
+| **Canonical analyses** | `reports/final_method_v3_analysis.md`, `reports/safety_analysis.md`, `reports/final_v3_regime_analysis.md` | Paper narrative support |
+| **Canonical figures** | `figures/graphical_abstract_selective_correction_v3.*`, `figures/correction_rate_vs_homophily.png`, `figures/safety_comparison.png`, `figures/reliability_vs_accuracy.png` | Regenerated from frozen CSV |
+| **Appendix / supplementary support** | Fresh ablation rerun (`tables/ablation_selective_correction_rerun.*`), full-scope diagnostics (`tables/final_v3_correction_diagnostics_20260404_fullscope.*`), gate sensitivity (`tables/gate_sensitivity_fullscope_20260404.*`), bounded intervention (`tables/bounded_intervention_fullscope_20260404.*`) | Non-canonical; current-code |
+| **Manuscript-supporting bundles** | Bucket safety, correction explanation audit, harmful-correction audit, safeguard simulation, regime mapping, targeted-benefit decomposition | Non-canonical; see [`reports/SUPPORTING_BUNDLES_INDEX.md`](reports/SUPPORTING_BUNDLES_INDEX.md) |
+| **Exploratory experiments** | MS-HSGC, CA-MRC, CA-MRD, recon-behavior | Non-canonical; informative context |
+| **Archived / provenance** | `archive/`, `reports/archive/`, `reports/parallel_tracks_analysis_*.md` | Not for paper claims |
+
+For a full artifact inventory, see [`docs/RESULTS_GUIDE.md`](docs/RESULTS_GUIDE.md) and [`reports/SUPPORTING_BUNDLES_INDEX.md`](reports/SUPPORTING_BUNDLES_INDEX.md).
+
+---
+
 ## Start here
 
-1. Read this README.
-2. Read [`docs/OVERVIEW.md`](docs/OVERVIEW.md).
+1. Read this README (especially the evidence map above).
+2. Read [`docs/ANALYSIS_GUIDE.md`](docs/ANALYSIS_GUIDE.md) for a reviewer-oriented reading path.
 3. Run the canonical reproduction command:
    ```bash
    bash scripts/run_all_selective_correction_results.sh

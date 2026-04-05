@@ -8,7 +8,8 @@ Use this page to find the right doc quickly. **Start here if you are an AI agent
 | [`../README.md`](../README.md) | Project summary, quick start, repository map |
 | [`../REPO_STATUS.md`](../REPO_STATUS.md) | Canonical vs legacy vs exploratory; what not to edit |
 | [`../CANONICAL_CLAIMS.md`](../CANONICAL_CLAIMS.md) | What the paper claims and which artifacts support each claim |
-| [`../ANALYSIS_GUIDE.md`](../ANALYSIS_GUIDE.md) | Reviewer-oriented reading order for results |
+| [`../ANALYSIS_GUIDE.md`](../ANALYSIS_GUIDE.md) | Quick navigation guide for reviewers (links to full guide in `docs/`) |
+| [`../reports/SUPPORTING_BUNDLES_INDEX.md`](../reports/SUPPORTING_BUNDLES_INDEX.md) | **Complete index of all supporting bundle artifacts** (appendix-support, exploratory, provenance) |
 | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | Ground rules for changes (frozen outputs, output tags) |
 | [`../scripts/README.md`](../scripts/README.md) | Index of `scripts/` (drivers, checks, cluster helpers) |
 | [`../scripts/README_REPRODUCE.md`](../scripts/README_REPRODUCE.md) | Full reproduction and benchmark re-run instructions |
