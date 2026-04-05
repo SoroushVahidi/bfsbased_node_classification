@@ -1,0 +1,2 @@
+dataset,method,n_splits,mean_test_acc,std_test_acc,output_tag
+cora,djgnn,10,0.8774647887323942,0.011574226976474568,djgnn_all_20260403_154645__cora

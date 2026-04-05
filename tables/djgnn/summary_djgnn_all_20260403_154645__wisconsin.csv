@@ -1,0 +1,2 @@
+dataset,method,n_splits,mean_test_acc,std_test_acc,output_tag
+wisconsin,djgnn,10,0.9313725490196079,0.028074158947600698,djgnn_all_20260403_154645__wisconsin

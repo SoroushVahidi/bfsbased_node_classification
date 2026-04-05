@@ -1,0 +1,19 @@
+{
+  "hostname": "n0055",
+  "slurm_job_id": "903035",
+  "slurm_array_task_id": "1",
+  "dataset": "citeseer",
+  "output_tag": "wulver_feature_posthoc_applied_intel_20260403_174551",
+  "batch": "feature_posthoc_applied_intel",
+  "external_baselines": [
+    "sgc",
+    "correct_and_smooth",
+    "clp",
+    "graphsage",
+    "appnp"
+  ],
+  "external_baselines_only": true,
+  "repo_root": "/home/sv96/bfsbased_node_classification_git",
+  "python": "/home/sv96/.conda/envs/feedback-weighted-maximization/bin/python3",
+  "git_rev": "6ea1ccfa8cb413ca1ebcba383257cbb8e43fd11d"
+}

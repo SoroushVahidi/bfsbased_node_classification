@@ -1,0 +1,26 @@
+{
+  "method": "djgnn",
+  "output_tag": "djgnn_all_20260403_154645__wisconsin",
+  "device": "cpu",
+  "datasets": [
+    "wisconsin"
+  ],
+  "splits": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "split_dir": "/mmfs1/home/sv96/bfsbased_node_classification_git/data/splits",
+  "data_root": "/mmfs1/home/sv96/bfsbased_node_classification_git/data/",
+  "git_rev": "647d0d0ce32ff7b46dda93393452580095885df3",
+  "upstream_repo": "https://github.com/AhmedBegggaUA/Diffusion-Jump-GNNs",
+  "max_nodes": 20000,
+  "max_dense_adj_bytes": 8000000000
+}

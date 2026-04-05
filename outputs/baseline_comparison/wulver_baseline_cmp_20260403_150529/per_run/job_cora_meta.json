@@ -1,0 +1,10 @@
+{
+  "hostname": "n0081",
+  "slurm_job_id": "902967",
+  "slurm_array_task_id": "0",
+  "dataset": "cora",
+  "output_tag": "wulver_baseline_cmp_20260403_150529",
+  "repo_root": "/home/sv96/bfsbased_node_classification_git",
+  "python": "/home/sv96/.conda/envs/feedback-weighted-maximization/bin/python3",
+  "git_rev": "647d0d0ce32ff7b46dda93393452580095885df3"
+}

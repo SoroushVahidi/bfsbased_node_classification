@@ -1,0 +1,2 @@
+dataset,method,n_splits,mean_test_acc,std_test_acc,output_tag
+citeseer,djgnn,10,0.7668571873760553,0.013489407040144058,djgnn_all_20260403_154645__citeseer

@@ -1,0 +1,2 @@
+dataset,method,n_splits,mean_test_acc,std_test_acc,output_tag
+cornell,djgnn,10,0.8486486486486488,0.021621621621621626,djgnn_all_20260403_154645__cornell
