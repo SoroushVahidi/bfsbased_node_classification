@@ -124,7 +124,7 @@ This bundle reuses latest full-scope artifacts and performs a minimal FINAL_V3-o
 
 ## Bucket safety analysis (non-canonical, manuscript-supporting)
 
-Bucketed safety analysis by MLP test-margin tercile (low / medium / high confidence).
+Bucketed safety analysis by MLP test-margin tertile (low / medium / high confidence).
 Supports the feature-first conservatism argument.
 
 - Full-scope bucket safety summary: `reports/final_v3_bucket_safety_summary.md`
