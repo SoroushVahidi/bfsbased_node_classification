@@ -1,0 +1,12 @@
+{
+  "hostname": "n0086",
+  "slurm_job_id": "903060",
+  "slurm_array_task_id": "17",
+  "dataset": "texas",
+  "train_fraction": 0.2,
+  "output_tag": "wulver_label_budget_applied_intel_20260403_180036",
+  "jsonl": "/home/sv96/bfsbased_node_classification_git/outputs/label_budget/wulver_label_budget_applied_intel_20260403_180036/per_run/runs_texas_p20.jsonl",
+  "repo_root": "/home/sv96/bfsbased_node_classification_git",
+  "python": "/home/sv96/.conda/envs/feedback-weighted-maximization/bin/python3",
+  "git_rev": "6ea1ccfa8cb413ca1ebcba383257cbb8e43fd11d"
+}

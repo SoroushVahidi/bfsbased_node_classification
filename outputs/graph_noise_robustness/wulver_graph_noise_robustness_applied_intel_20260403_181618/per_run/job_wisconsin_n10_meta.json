@@ -1,0 +1,12 @@
+{
+  "hostname": "n0018",
+  "slurm_job_id": "903085",
+  "slurm_array_task_id": "21",
+  "dataset": "wisconsin",
+  "noise_fraction": 0.1,
+  "output_tag": "wulver_graph_noise_robustness_applied_intel_20260403_181618",
+  "jsonl": "/home/sv96/bfsbased_node_classification_git/outputs/graph_noise_robustness/wulver_graph_noise_robustness_applied_intel_20260403_181618/per_run/runs_wisconsin_n10.jsonl",
+  "repo_root": "/home/sv96/bfsbased_node_classification_git",
+  "python": "/home/sv96/.conda/envs/feedback-weighted-maximization/bin/python3",
+  "git_rev": "8a9ba2a2f322620d44cfc91d7b4728ab5dcd8998"
+}
