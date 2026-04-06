@@ -275,64 +275,95 @@ def plot_correction_vs_homophily(rows: list[dict], homophily: dict[str, float], 
     mean_v1 = [float(np.mean(by_ds[d]["BASELINE_SGC_V1"])) for d in datasets]
     std_v1 = [float(np.std(by_ds[d]["BASELINE_SGC_V1"])) for d in datasets]
 
-    fig, ax = plt.subplots(figsize=(4.6, 3.2), dpi=150)
+    fig, ax = plt.subplots(figsize=(7.4, 5.2), dpi=180)
     ax.errorbar(
         H,
         mean_v3,
         yerr=std_v3,
         fmt="o-",
-        color="0.15",
-        ecolor="0.45",
-        capsize=3,
-        markersize=6,
-        linewidth=1.2,
+        color="#1f2937",
+        ecolor="#6b7280",
+        capsize=4,
+        markersize=7.5,
+        linewidth=1.6,
+        elinewidth=1.1,
         label="FINAL_V3",
+        zorder=3,
     )
     ax.errorbar(
         H,
         mean_v1,
         yerr=std_v1,
         fmt="s--",
-        color="0.55",
-        ecolor="0.65",
-        capsize=3,
-        markersize=5,
-        linewidth=1.0,
+        color="#6b7280",
+        ecolor="#9ca3af",
+        capsize=4,
+        markersize=6.5,
+        linewidth=1.3,
+        elinewidth=1.0,
         label="SGC v1",
+        zorder=2,
     )
-    short = {
+    names = {
         "cora": "Cora",
-        "citeseer": "Cite",
-        "pubmed": "Pubm",
-        "chameleon": "Cham",
-        "texas": "Tex",
-        "wisconsin": "Wisc",
+        "citeseer": "CiteSeer",
+        "pubmed": "PubMed",
+        "chameleon": "Chameleon",
+        "texas": "Texas",
+        "wisconsin": "Wisconsin",
+    }
+    # Hand-tuned offsets for readability (points) with leader lines.
+    offsets = {
+        "cora": (16, 10),
+        "citeseer": (12, 18),
+        "pubmed": (18, -2),
+        "chameleon": (-30, -8),
+        "texas": (-22, 14),
+        "wisconsin": (-40, 6),
     }
     for i, d in enumerate(datasets):
         ax.annotate(
-            short.get(d, d[:4]),
+            names.get(d, d),
             (H[i], mean_v3[i]),
             textcoords="offset points",
-            xytext=(4, 3),
-            fontsize=7,
-            color="0.35",
+            xytext=offsets.get(d, (8, 8)),
+            fontsize=10,
+            color="#374151",
+            ha="left",
+            va="center",
+            arrowprops={
+                "arrowstyle": "-",
+                "lw": 0.8,
+                "color": "#9ca3af",
+                "shrinkA": 2,
+                "shrinkB": 4,
+            },
+            zorder=4,
         )
-    ax.set_xlabel("Edge homophily H")
-    ax.set_ylabel("Fraction of nodes corrected")
-    ax.set_title("Selective correction vs. homophily")
-    ax.legend(frameon=False, loc="upper left")
+    ax.set_xlabel("Edge homophily (H)", fontsize=12, labelpad=8)
+    ax.set_ylabel("Fraction of nodes corrected", fontsize=12, labelpad=8)
+    ax.set_title("Selective correction rate vs. homophily", fontsize=13, pad=12)
+    ax.tick_params(axis="both", labelsize=10.5)
+    ax.legend(frameon=False, loc="upper left", fontsize=10.5)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    ax.set_ylim(bottom=-0.02)
-    ax.grid(axis="y", linestyle=":", linewidth=0.6, color="0.75")
-    fig.tight_layout()
-    fig.savefig(out, dpi=300, bbox_inches="tight")
+    y_max = max(max(mean_v3[i] + std_v3[i] for i in range(len(datasets))), max(mean_v1[i] + std_v1[i] for i in range(len(datasets))))
+    ax.set_ylim(-0.015, min(1.0, y_max + 0.08))
+    x_pad = 0.03
+    ax.set_xlim(min(H) - x_pad, max(H) + x_pad)
+    ax.grid(axis="y", linestyle=":", linewidth=0.8, color="#d1d5db")
+    fig.subplots_adjust(left=0.12, right=0.97, top=0.90, bottom=0.15)
+    fig.savefig(out, dpi=400, bbox_inches="tight", pad_inches=0.08)
+    fig.savefig(out.with_suffix(".pdf"), bbox_inches="tight", pad_inches=0.08)
     plt.close(fig)
 
 
 def plot_safety(rows: list[dict], out: Path) -> None:
     """Count splits with delta_vs_mlp < 0 per dataset for v1 vs FINAL_V3."""
     by_ds = defaultdict(lambda: {"BASELINE_SGC_V1": 0, "FINAL_V3": 0})
+    all_datasets = sorted({r["dataset"] for r in rows if r["method"] in ("BASELINE_SGC_V1", "FINAL_V3")})
+    for ds in all_datasets:
+        _ = by_ds[ds]
     for r in rows:
         if r["method"] not in ("BASELINE_SGC_V1", "FINAL_V3"):
             continue
@@ -342,55 +373,216 @@ def plot_safety(rows: list[dict], out: Path) -> None:
 
     datasets = sorted(by_ds.keys())
     x = np.arange(len(datasets))
-    w = 0.35
+    w = 0.38
     c1 = [by_ds[d]["BASELINE_SGC_V1"] for d in datasets]
     c2 = [by_ds[d]["FINAL_V3"] for d in datasets]
 
-    fig, ax = plt.subplots(figsize=(5.2, 3.0), dpi=150)
-    ax.bar(x - w / 2, c1, width=w, label="SGC v1", color="0.55", edgecolor="0.2", linewidth=0.6)
-    ax.bar(x + w / 2, c2, width=w, label="FINAL_V3", color="0.25", edgecolor="0.2", linewidth=0.6)
+    fig, ax = plt.subplots(figsize=(7.4, 4.8), dpi=180)
+    bars1 = ax.bar(
+        x - w / 2,
+        c1,
+        width=w,
+        label="SGC v1",
+        color="#9ca3af",
+        edgecolor="#374151",
+        linewidth=1.0,
+        zorder=3,
+    )
+    bars2 = ax.bar(
+        x + w / 2,
+        c2,
+        width=w,
+        label="FINAL_V3",
+        color="#374151",
+        edgecolor="#111827",
+        linewidth=1.0,
+        zorder=3,
+    )
     ax.set_xticks(x)
-    ax.set_xticklabels([d.capitalize() for d in datasets], rotation=25, ha="right")
-    ax.set_ylabel("Harmful splits (Δ test < 0)")
-    ax.set_title("Safety: splits worse than MLP")
-    ax.legend(frameon=False)
+    display_name = {
+        "chameleon": "Chameleon",
+        "citeseer": "CiteSeer",
+        "cora": "Cora",
+        "pubmed": "PubMed",
+        "texas": "Texas",
+        "wisconsin": "Wisconsin",
+    }
+    ax.set_xticklabels([display_name.get(d, d.capitalize()) for d in datasets], rotation=20, ha="right", fontsize=10.5)
+    ax.set_ylabel("Harmful splits (Δ test < 0)", fontsize=12)
+    ax.set_title("Safety comparison vs MLP across canonical datasets", fontsize=13, pad=10)
+    ax.tick_params(axis="y", labelsize=10.5)
+    ax.legend(frameon=False, fontsize=10.5, loc="upper right")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    ax.set_ylim(0, max(1, max(c1 + c2) + 0.5))
-    fig.tight_layout()
-    fig.savefig(out, dpi=300, bbox_inches="tight")
+    ymax = max(1, max(c1 + c2))
+    ax.set_ylim(0, ymax + 0.9)
+    ax.set_yticks(np.arange(0, ymax + 1, 1))
+    ax.grid(axis="y", linestyle=":", linewidth=0.8, color="#d1d5db", zorder=0)
+
+    # Explicitly annotate every bar, including zeros.
+    for bars in (bars1, bars2):
+        for b in bars:
+            h = b.get_height()
+            xmid = b.get_x() + b.get_width() / 2
+            ytxt = h + 0.05 if h > 0 else 0.08
+            ax.text(xmid, ytxt, f"{int(h)}", ha="center", va="bottom", fontsize=9.5, color="#111827")
+
+    fig.subplots_adjust(left=0.11, right=0.98, top=0.88, bottom=0.22)
+    fig.savefig(out, dpi=400, bbox_inches="tight", pad_inches=0.08)
+    fig.savefig(out.with_suffix(".pdf"), bbox_inches="tight", pad_inches=0.08)
     plt.close(fig)
 
 
 def plot_reliability_vs_accuracy(rows: list[dict], out: Path) -> None:
-    """Per-split: unreliable fraction vs correction precision (FINAL_V3)."""
-    xs, ys, sizes = [], [], []
+    """Per-split scatter: unreliable fraction vs correction precision (FINAL_V3 only).
+
+    **Data source (canonical):** ``reports/final_method_v3_results.csv`` only — rows with
+    ``method == FINAL_V3``. No mixing with ``logs/final_v3_regime_analysis_per_split.csv``:
+    that file can differ from the frozen log for the same (dataset, split) (see
+    cross-checks in the repo).
+
+    **Completeness:** the frozen CSV has `frac_unreliable` populated for **30 of 60** splits;
+    the remaining 30 rows have an empty `frac_unreliable` field, so they cannot be plotted
+    on the x-axis without extrapolating. The figure annotates this; for a full 60-split
+    panel, the canonical log would need to be regenerated with complete branch fields.
+
+    Definitions (match ``code/bfsbased_node_classification/final_method_v3.py`` logging):
+    - **x** — ``frac_unreliable`` = fraction of **test** nodes that are uncertain *and*
+      unreliable (``margin < tau`` and ``R(v) < rho``), i.e. keep-MLP branch
+      ``uncertain_unreliable_keep_mlp`` on the test mask.
+    - **y** — ``correction_precision`` = ``n_helped / max(n_helped + n_hurt, 1)`` among
+      nodes whose prediction **changed** vs MLP on test; if no change, implementation logs
+      precision ``1.0`` (vacuous).
+    - **Point size** — proportional to ``frac_corrected`` (fraction of test nodes in the
+      correction mask), with a fixed scale ``s = 45 + 220 * frac_corrected`` (clamped) so
+      comparable across splits.
+
+    **Edge cases:** splits with ``n_helped + n_hurt == 0`` are plotted with open markers
+    (precision may be vacuously 1.0 in the CSV). They are **not** dropped (the previous
+    version omitted 9 such splits).
+
+    **Trend:** no OLS line — the cloud is heterogeneous across datasets; Pearson *r* is
+    shown as a small annotation only (exploratory, not a causal claim).
+    """
+    palette = {
+        "cora": "#1f77b4",
+        "citeseer": "#ff7f0e",
+        "pubmed": "#2ca02c",
+        "chameleon": "#d62728",
+        "texas": "#9467bd",
+        "wisconsin": "#8c564b",
+    }
+    display_name = {
+        "cora": "Cora",
+        "citeseer": "CiteSeer",
+        "pubmed": "PubMed",
+        "chameleon": "Chameleon",
+        "texas": "Texas",
+        "wisconsin": "Wisconsin",
+    }
+
+    n_final = sum(1 for r in rows if r["method"] == "FINAL_V3")
+    pts: list[tuple[float, float, float, str, bool]] = []
     for r in rows:
         if r["method"] != "FINAL_V3":
             continue
         if not np.isfinite(r["frac_unreliable"]) or not np.isfinite(r["correction_precision"]):
             continue
-        if r["frac_corrected"] < 1e-6 and r["n_helped"] + r["n_hurt"] == 0:
-            continue
-        xs.append(r["frac_unreliable"])
-        ys.append(r["correction_precision"])
-        sizes.append(20 + 200 * r["frac_corrected"])
+        fu = float(r["frac_unreliable"])
+        cp = float(r["correction_precision"])
+        fc = float(r["frac_corrected"])
+        nh = int(r["n_helped"])
+        nj = int(r["n_hurt"])
+        vacuous = nh + nj == 0
+        pts.append((fu, cp, fc, r["dataset"], vacuous))
 
-    fig, ax = plt.subplots(figsize=(4.5, 3.2), dpi=150)
-    ax.scatter(xs, ys, s=sizes, c="0.35", edgecolors="0.15", linewidths=0.5, alpha=0.85)
-    if len(xs) >= 3:
-        z = np.polyfit(xs, ys, 1)
-        xp = np.linspace(min(xs), max(xs), 50)
-        ax.plot(xp, np.poly1d(z)(xp), "--", color="0.5", linewidth=1.0, label="Linear fit")
-        ax.legend(frameon=False, loc="best")
-    ax.set_xlabel("Fraction of nodes unreliable (low R)")
-    ax.set_ylabel("Correction precision")
-    ax.set_title("Reliability signal vs. correction quality")
+    fig, ax = plt.subplots(figsize=(7.2, 5.2), dpi=180)
+    for ds in sorted({p[3] for p in pts}):
+        sub = [p for p in pts if p[3] == ds]
+        xs = [p[0] for p in sub]
+        ys = [p[1] for p in sub]
+        sizes = [min(240, max(45, 45 + 220 * p[2])) for p in sub]
+        vac = [p[4] for p in sub]
+        # Filled markers for splits with help/hurt; open for vacuous precision
+        for x, y, s, v in zip(xs, ys, sizes, vac):
+            if v:
+                ax.scatter(
+                    [x],
+                    [y],
+                    s=s,
+                    facecolors="none",
+                    edgecolors=palette.get(ds, "#333333"),
+                    linewidths=1.6,
+                    alpha=0.95,
+                    zorder=3,
+                )
+            else:
+                ax.scatter(
+                    [x],
+                    [y],
+                    s=s,
+                    c=palette.get(ds, "#333333"),
+                    edgecolors="white",
+                    linewidths=0.6,
+                    alpha=0.88,
+                    zorder=3,
+                )
+        ax.scatter([], [], c=palette.get(ds, "#333333"), s=55, edgecolors="white", linewidths=0.6, label=display_name.get(ds, ds))
+
+    if any(p[4] for p in pts):
+        ax.scatter(
+            [],
+            [],
+            s=55,
+            facecolors="none",
+            edgecolors="#333333",
+            linewidths=1.6,
+            label="vacuous precision (n_helped+n_hurt=0)",
+        )
+
+    if len(pts) >= 2:
+        xa = np.array([p[0] for p in pts], dtype=float)
+        ya = np.array([p[1] for p in pts], dtype=float)
+        if np.std(xa) > 1e-12 and np.std(ya) > 1e-12:
+            r_pear = float(np.corrcoef(xa, ya)[0, 1])
+            ax.text(
+                0.02,
+                0.98,
+                f"Pearson r = {r_pear:+.3f} (n={len(pts)} splits with x,y in log)",
+                transform=ax.transAxes,
+                ha="left",
+                va="top",
+                fontsize=9.5,
+                color="#374151",
+                bbox=dict(boxstyle="round,pad=0.35", facecolor="#f9fafb", edgecolor="#e5e7eb"),
+            )
+    ax.text(
+        0.02,
+        0.06,
+        f"Note: frozen CSV has `frac_unreliable` for {len(pts)}/{n_final} splits;\n"
+        "remaining splits omit this field (not plotted).",
+        transform=ax.transAxes,
+        ha="left",
+        va="bottom",
+        fontsize=8.5,
+        color="#4b5563",
+        linespacing=1.25,
+        bbox=dict(boxstyle="round,pad=0.35", facecolor="#fffbeb", edgecolor="#fcd34d"),
+    )
+
+    ax.set_xlabel("Fraction of test nodes uncertain and unreliable (low R)", fontsize=11.5, labelpad=8)
+    ax.set_ylabel("Correction precision (n_helped / (n_helped + n_hurt))", fontsize=11.5, labelpad=8)
+    ax.set_title("Reliability signal vs. correction precision (FINAL_V3, per split)", fontsize=12.5, pad=10)
+    ax.tick_params(axis="both", labelsize=10.5)
+    ax.set_xlim(-0.02, max(0.55, max(p[0] for p in pts) + 0.05) if pts else 1.0)
+    ax.set_ylim(-0.03, 1.05)
+    ax.legend(fontsize=9, frameon=False, loc="lower right", ncol=2)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    ax.grid(axis="both", linestyle=":", linewidth=0.6, color="0.8")
-    fig.tight_layout()
-    fig.savefig(out, dpi=300, bbox_inches="tight")
+    ax.grid(axis="both", linestyle=":", linewidth=0.75, color="#d1d5db", alpha=0.9, zorder=0)
+    fig.subplots_adjust(left=0.12, right=0.98, top=0.92, bottom=0.20)
+    fig.savefig(out, dpi=400, bbox_inches="tight", pad_inches=0.1)
+    fig.savefig(out.with_suffix(".pdf"), bbox_inches="tight", pad_inches=0.1)
     plt.close(fig)
 
 
