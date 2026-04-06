@@ -10,9 +10,11 @@ Use this page to find the right doc quickly. **Start here if you are an AI agent
 | [`../CANONICAL_CLAIMS.md`](../CANONICAL_CLAIMS.md) | What the paper claims and which artifacts support each claim |
 | [`../ANALYSIS_GUIDE.md`](../ANALYSIS_GUIDE.md) | Reviewer-oriented reading order for results |
 | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | Ground rules for changes (frozen outputs, output tags) |
+| [`ARTIFACT_RETENTION_POLICY.md`](ARTIFACT_RETENTION_POLICY.md) | What to commit vs archive/delete for generated artifacts |
 | [`../scripts/README.md`](../scripts/README.md) | Index of `scripts/` (drivers, checks, cluster helpers) |
 | [`../scripts/README_REPRODUCE.md`](../scripts/README_REPRODUCE.md) | Full reproduction and benchmark re-run instructions |
 | [`../slurm/README.md`](../slurm/README.md) | Slurm `.sbatch` templates and launch-script mapping |
+| [`../run_metadata/manifests/README.md`](../run_metadata/manifests/README.md) | Manifest convention for off-Git raw sweep archives |
 | [`BASELINES_SUITE.md`](BASELINES_SUITE.md) | Baseline method names, papers, CLI keys, fidelity vs official code |
 | [`DATASETS_EXTENDED.md`](DATASETS_EXTENDED.md) | `ogbn-arxiv`, `ogbn-products`, `hm-categories`, split conventions |
 | [`BEGGA_HETEROPHILY_BASELINES.md`](BEGGA_HETEROPHILY_BASELINES.md) | GCNII, Geom-GCN, LINKX, ACM-style baselines |

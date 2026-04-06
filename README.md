@@ -5,6 +5,7 @@
 **Full reproduction guide:** [`scripts/README_REPRODUCE.md`](scripts/README_REPRODUCE.md)  
 **Repository status and classification:** [`REPO_STATUS.md`](REPO_STATUS.md)  
 **Scripts index:** [`scripts/README.md`](scripts/README.md) · **Slurm templates:** [`slurm/README.md`](slurm/README.md)  
+**Artifact retention policy:** [`docs/ARTIFACT_RETENTION_POLICY.md`](docs/ARTIFACT_RETENTION_POLICY.md) · **Manifest convention:** [`run_metadata/manifests/README.md`](run_metadata/manifests/README.md)  
 **AI / agent onboarding:** [`AGENTS.md`](AGENTS.md) · [Documentation index](docs/INDEX.md)
 
 This repository contains code and reproducible artifacts for a node-classification method that combines a strong feature-first MLP with **selective graph correction**.

@@ -1,0 +1,68 @@
+{
+  "sweep_name": "wulver_sweeps_20260404_draft",
+  "created_at": "2026-04-04T22:00:00Z",
+  "git_commit": "4b288c3",
+  "runner_script": "scripts/baseline_comparison_wulver/launch_wulver.sh (+ related launchers)",
+  "datasets": [
+    "cora",
+    "citeseer",
+    "pubmed",
+    "chameleon",
+    "texas",
+    "wisconsin",
+    "actor",
+    "cornell",
+    "squirrel"
+  ],
+  "methods": [
+    "FINAL_V3",
+    "MLP_ONLY",
+    "BASELINE_SGC_V1",
+    "V2_MULTIBRANCH",
+    "H2GCN",
+    "GCNII",
+    "GeomGCN",
+    "LINKX",
+    "ACMII_GCN_PLUSPLUS",
+    "SGC",
+    "CORRECT_AND_SMOOTH",
+    "CLP",
+    "GRAPHSAGE",
+    "APPNP"
+  ],
+  "split_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "job_ids": [
+    "902966",
+    "902972",
+    "903033",
+    "903042",
+    "903063",
+    "902987"
+  ],
+  "raw_output_dir": "outputs/",
+  "raw_output_dirs": [
+    "outputs/baseline_comparison/wulver_baseline_cmp_20260403_150529",
+    "outputs/baseline_comparison/wulver_feature_posthoc_applied_intel_20260403_174551",
+    "outputs/label_budget/wulver_label_budget_applied_intel_20260403_180036",
+    "outputs/graph_noise_robustness/wulver_graph_noise_robustness_applied_intel_20260403_181618",
+    "slurm/"
+  ],
+  "raw_file_count": null,
+  "raw_total_bytes": null,
+  "archive_filename": "TBD",
+  "archive_sha256": "TBD",
+  "archive_size_bytes": null,
+  "storage_location": "TBD",
+  "notes": "DRAFT manifest for retention planning. Fill archive filename/checksum/size/location after packaging off-Git archives. See reports/wulver_artifact_retention_plan_20260404.md and reports/wulver_experiments_status_20260404.md."
+}

@@ -34,13 +34,8 @@ slurm/*.err
 
 # Large / reproducible benchmark outputs (regenerate via suite scripts and Slurm)
 outputs/baseline_comparison/
-# Wulver sweep trees: ignore by default; whitelist finished tags we version on GitHub
-outputs/label_budget/*
-!outputs/label_budget/wulver_label_budget_applied_intel_20260403_180036/
-!outputs/label_budget/wulver_label_budget_applied_intel_20260403_180036/**
-outputs/graph_noise_robustness/*
-!outputs/graph_noise_robustness/wulver_graph_noise_robustness_applied_intel_20260403_181618/
-!outputs/graph_noise_robustness/wulver_graph_noise_robustness_applied_intel_20260403_181618/**
+outputs/label_budget/
+outputs/graph_noise_robustness/
 logs/djgnn/
 reports/djgnn/
 run_metadata/djgnn/

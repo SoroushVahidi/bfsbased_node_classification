@@ -1,0 +1,55 @@
+{
+  "sweep_name": "wulver_baseline_comparison",
+  "created_at": "2026-04-04T22:00:00Z",
+  "git_commit": "4b288c3",
+  "runner_script": "scripts/baseline_comparison_wulver/launch_wulver.sh",
+  "datasets": [
+    "cora",
+    "citeseer",
+    "pubmed",
+    "chameleon",
+    "texas",
+    "wisconsin",
+    "actor",
+    "cornell",
+    "squirrel"
+  ],
+  "methods": [
+    "MLP_ONLY",
+    "BASELINE_SGC_V1",
+    "V2_MULTIBRANCH",
+    "FINAL_V3",
+    "H2GCN",
+    "GCNII",
+    "GeomGCN",
+    "LINKX",
+    "ACMII_GCN_PLUSPLUS"
+  ],
+  "split_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "job_ids": [
+    "902966",
+    "902972"
+  ],
+  "raw_output_dir": "outputs/baseline_comparison/wulver_baseline_cmp_20260403_150529",
+  "raw_output_dirs": [
+    "outputs/baseline_comparison/wulver_baseline_cmp_20260403_150529"
+  ],
+  "raw_file_count": 9,
+  "raw_total_bytes": 123456789,
+  "archive_filename": "wulver_baseline_cmp_20260403_150529.tar.zst",
+  "archive_sha256": "TBD",
+  "archive_size_bytes": null,
+  "storage_location": "TBD",
+  "notes": "Example schema file. Replace placeholder values."
+}
