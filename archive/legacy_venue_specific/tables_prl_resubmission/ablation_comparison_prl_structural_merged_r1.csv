@@ -1,0 +1,31 @@
+dataset,method,display_name,mean_test_acc,std_test_acc,delta_vs_default_sgc,wins_vs_default_sgc,losses_vs_default_sgc,ties_vs_default_sgc,n_runs
+chameleon,selective_graph_correction,Selective correction,0.4671,0.0231,+0.0000,0,0,10,10
+chameleon,selective_graph_correction_structural,UG-SGC-S structural,0.4724,0.0224,+0.0053,9,0,1,10
+chameleon,sgcs_margin_gate_only,UG-SGC-S without structure-aware gate,0.4730,0.0232,+0.0059,10,0,0,10
+chameleon,sgcs_no_far,UG-SGC-S near only,0.4667,0.0232,-0.0004,2,2,6,10
+chameleon,sgcs_far_only,UG-SGC-S far only,0.4724,0.0222,+0.0053,8,1,1,10
+chameleon,sgcs_no_gate,UG-SGC-S without gate,0.4730,0.0237,+0.0059,9,0,1,10
+citeseer,selective_graph_correction,Selective correction,0.7063,0.0195,+0.0000,0,0,10,10
+citeseer,selective_graph_correction_structural,UG-SGC-S structural,0.7028,0.0195,-0.0035,2,7,1,10
+citeseer,sgcs_margin_gate_only,UG-SGC-S without structure-aware gate,0.7036,0.0194,-0.0027,3,7,0,10
+citeseer,sgcs_no_far,UG-SGC-S near only,0.6973,0.0204,-0.0090,1,9,0,10
+citeseer,sgcs_far_only,UG-SGC-S far only,0.6978,0.0207,-0.0086,1,9,0,10
+citeseer,sgcs_no_gate,UG-SGC-S without gate,0.7038,0.0192,-0.0026,3,7,0,10
+cora,selective_graph_correction,Selective correction,0.7421,0.0252,+0.0000,0,0,10,10
+cora,selective_graph_correction_structural,UG-SGC-S structural,0.7364,0.0233,-0.0056,1,9,0,10
+cora,sgcs_margin_gate_only,UG-SGC-S without structure-aware gate,0.7368,0.0224,-0.0052,1,8,1,10
+cora,sgcs_no_far,UG-SGC-S near only,0.7282,0.0252,-0.0139,0,10,0,10
+cora,sgcs_far_only,UG-SGC-S far only,0.7312,0.0251,-0.0109,0,9,1,10
+cora,sgcs_no_gate,UG-SGC-S without gate,0.7372,0.0234,-0.0048,1,8,1,10
+pubmed,selective_graph_correction,Selective correction,0.8851,0.0049,+0.0000,0,0,6,6
+pubmed,selective_graph_correction_structural,UG-SGC-S structural,0.8844,0.0044,-0.0007,1,3,2,6
+pubmed,sgcs_margin_gate_only,UG-SGC-S without structure-aware gate,0.8843,0.0045,-0.0008,1,3,2,6
+pubmed,sgcs_no_far,UG-SGC-S near only,0.8817,0.0044,-0.0034,0,6,0,6
+pubmed,sgcs_far_only,UG-SGC-S far only,0.8829,0.0044,-0.0022,0,6,0,6
+pubmed,sgcs_no_gate,UG-SGC-S without gate,0.8843,0.0045,-0.0008,1,3,2,6
+wisconsin,selective_graph_correction,Selective correction,0.8431,0.0402,+0.0000,0,0,10,10
+wisconsin,selective_graph_correction_structural,UG-SGC-S structural,0.8451,0.0425,+0.0020,1,0,9,10
+wisconsin,sgcs_margin_gate_only,UG-SGC-S without structure-aware gate,0.8431,0.0447,+0.0000,1,1,8,10
+wisconsin,sgcs_no_far,UG-SGC-S near only,0.8431,0.0402,+0.0000,0,0,10,10
+wisconsin,sgcs_far_only,UG-SGC-S far only,0.8451,0.0415,+0.0020,2,1,7,10
+wisconsin,sgcs_no_gate,UG-SGC-S without gate,0.8471,0.0445,+0.0039,4,2,4,10
